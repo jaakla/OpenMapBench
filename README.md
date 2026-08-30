@@ -16,12 +16,15 @@ The repository now contains a runnable MVP:
 - deterministic scalar/JSON, CSV/JSON-table, and vector evaluators;
 - immutable run directories with logs, checksums, environment metadata, and manifests;
 - aggregate JSON or Markdown reports with a headline strict success rate;
+- static side-by-side visual-review folders with PNG sheets, an HTML index, an editable review
+  CSV, and a machine-readable manifest;
 - a GABench importer that operates against an external checkout and never copies upstream
   datasets or reference artifacts;
 - automated tests and CI.
 
-Raster and cartographic-image evaluation are deliberately not included in the strict MVP score.
-Imported tasks with those outputs are classified explicitly instead of being treated as passes.
+Raster and cartographic-image outputs are deliberately not included in the strict automated MVP
+score. Image runs enter `needs_review` and can be inspected manually without being treated as
+passes. Fuzzy and semantic image judging is the next phase.
 
 ## Install
 
@@ -68,7 +71,8 @@ runs/<run-id>/
 ```
 
 The process exits nonzero for an agent error, missing artifact, evaluator error, or strict
-evaluation failure. The manifest is still written, so failed runs remain auditable.
+evaluation failure. An image artifact awaiting manual review exits successfully with status
+`needs_review`. The manifest is always written, so every run remains auditable.
 
 ## Generic task contract
 
@@ -127,8 +131,6 @@ placeholders:
 The same values are exposed as `OPENMAPBENCH_TASK_FILE`, `OPENMAPBENCH_TASK_DIR`,
 `OPENMAPBENCH_OUTPUT_DIR`, `OPENMAPBENCH_OUTPUT_PATH`, and `OPENMAPBENCH_RUN_DIR`. This keeps the
 core independent of model vendors: a Codex adapter, Claude Code adapter, container wrapper, MCP
-client, or local script can all satisfy the same interface.
-
 Useful metadata can be recorded with `--agent-name`, `--model`, repeated `--skill`, and repeated
 `--tool` flags. Use a script wrapper when an agent needs pipes, redirects, or other shell syntax.
 
@@ -158,16 +160,44 @@ union-based score. Available metrics are symmetric-difference ratio, IoU, and Ha
 Geographic data is reprojected to a deterministic projected comparison CRS before area or distance
 metrics are computed.
 
+## Manual visual review
+
+Image outputs are validated as decodable images and assigned `needs_review`; they are not given an
+automated success score. Build a review folder from normal OpenMapBench runs:
+
+```bash
+openmapbench visual-report runs/gabench \
+  --output visual-reviews/gabench-runs
+```
+
+The output is intentionally static and easy to inspect or archive:
+
+```text
+visual-reviews/gabench-runs/
+├── index.html             # scrollable visual review
+├── review.csv             # fill in pass/fail/uncertain and notes
+├── manifest.json          # paths, checksums, dimensions, provenance
+└── comparisons/
+    └── 001-gabench-001-<run>.png
+```
+
+Each comparison places the generated image on the left and the expected reference on the right,
+in equally sized panels without cropping. Images may be downscaled to the configured panel limit;
+the manifest retains original dimensions and checksums. This is a presentation artifact, not an
+image-similarity metric. Regenerating the same review folder preserves existing `manual_result`
+and `notes` values from `review.csv`.
+
 ## Strict success score
 
 The headline score is intentionally simple:
 
 ```text
-strict_success_rate = passed_runs / attempted_runs
+strict_success_rate = passed_runs / strictly_scored_runs
 ```
 
-Near-miss diagnostics never turn a failed task into a success. Reports also break results down by
-category, output kind, and terminal status.
+Runs awaiting manual visual review are excluded from the strict denominator and reported
+separately. Near-miss diagnostics never turn a failed task into a success. Reports also break
+results down by category, output kind, and terminal status.
 
 ```bash
 openmapbench report runs
@@ -201,9 +231,23 @@ The importer reads the actual upstream columns, discovers input files named in e
 description, records the upstream commit and checksums, generates local task contracts, and points
 the manifest at upstream reference files. Nothing from GABench is copied into this repository.
 
-Most upstream final artifacts are PNG maps, so they are classified as unsupported by the strict
-MVP evaluator. The upstream CSV also names analytical layers that are not shipped as reference
-files. If you have a trusted reference run, expose those layers without copying them:
+Most upstream final artifacts are PNG maps. They are now usable through manual visual review while
+remaining outside the strict automated score. If generated images are already collected in one
+directory, compare them directly with the bundled GABench expectations:
+
+```bash
+openmapbench gabench-visual-report \
+  .openmapbench/gabench/manifest.json \
+  --candidate-root ../generated-gabench-images \
+  --output visual-reviews/gabench
+```
+
+Open `visual-reviews/gabench/index.html` and record decisions in `review.csv`. The candidate lookup
+accepts images directly under `--candidate-root`, under a `<task-id>/` subdirectory, or at a unique
+recursive match. Ambiguous matches are listed as skipped instead of being guessed.
+
+The upstream CSV also names analytical layers that are not shipped as reference files. If you have
+a trusted reference run, expose those layers without copying them:
 
 ```bash
 openmapbench gabench-import \
@@ -213,7 +257,9 @@ openmapbench gabench-import \
 ```
 
 Existing scalar/JSON, table, and vector references are marked `deterministic_supported` in
-`.openmapbench/gabench/manifest.json`; raster and image outputs remain explicit future work. See
+`.openmapbench/gabench/manifest.json`; raster scoring remains future work. The next image phase is a
+fuzzy plus semantic judge that can inspect layout, place names, legends, and data labels while
+keeping deterministic artifact checks separate. See
 [adapters/gabench/README.md](adapters/gabench/README.md) for details.
 
 ## Development

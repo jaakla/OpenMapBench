@@ -18,6 +18,7 @@ class OutputKind(str, Enum):
 class RunStatus(str, Enum):
     PASSED = "passed"
     FAILED = "failed"
+    NEEDS_REVIEW = "needs_review"
     AGENT_ERROR = "agent_error"
     MISSING_OUTPUT = "missing_output"
     EVALUATOR_ERROR = "evaluator_error"

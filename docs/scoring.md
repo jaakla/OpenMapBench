@@ -5,10 +5,11 @@
 The main benchmark score is binary task success:
 
 ```text
-strict_success_rate = strict_successes / attempted_tasks
+strict_success_rate = strict_successes / strictly_scored_tasks
 ```
 
-A task is successful only when every required strict condition passes.
+A task is successful only when every required strict condition passes. Image runs awaiting manual
+review are reported separately and are not included in either side of this fraction.
 
 This number should be the headline score because it is interpretable and resistant to arbitrary weighting.
 
@@ -72,12 +73,18 @@ CSV and JSON row arrays are supported. Duplicate configured entity keys are stri
 ## Run aggregation
 
 Only manifests with terminal status `passed` count as strict successes. Agent errors, missing
-outputs, evaluator errors, and deterministic comparison failures all remain attempted tasks and
-therefore contribute zero to the numerator. Invalid manifests are reported separately and are not
-silently counted.
+outputs, evaluator errors, and deterministic comparison failures contribute zero to the numerator.
+`needs_review` remains an attempted task but is excluded from the strict denominator. Invalid
+manifests are reported separately and are not silently counted.
 
 ## Maps / cartography
 
 Analytical correctness and visual/cartographic quality should be two separate dimensions.
 
-An LLM/VLM judge may be useful for subjective map-quality diagnostics, but should not replace deterministic validation of the underlying spatial result.
+The visual-review MVP composes generated and expected images side by side, preserving aspect ratio
+and avoiding crop. It writes PNG sheets, an HTML index, a review CSV, and a checksummed manifest.
+This is manual evidence, not an image-similarity score.
+
+The next phase may add fuzzy pixel/structure metrics and an LLM/VLM judge for semantic content such
+as place names, legends, and data labels. Those diagnostics must remain distinguishable from
+deterministic validation of the underlying spatial result.

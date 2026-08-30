@@ -12,6 +12,7 @@ from .models import RunStatus
 from .reporting import aggregate_manifests, report_markdown
 from .runner import run_task
 from .taskio import load_task, validate_task_files
+from .visual import visual_report_from_gabench, visual_report_from_runs
 
 app = typer.Typer(no_args_is_help=True, help="OpenMapBench: artifact-first GIS agent benchmark")
 
@@ -85,13 +86,16 @@ def run(
     )
     typer.echo(str(manifest_path))
     typer.echo(f"status: {manifest.status.value}")
-    raise typer.Exit(code=0 if manifest.status == RunStatus.PASSED else 1)
+    completed = {RunStatus.PASSED, RunStatus.NEEDS_REVIEW}
+    raise typer.Exit(code=0 if manifest.status in completed else 1)
 
 
 @app.command()
 def report(
     run_root: Annotated[Path, typer.Argument(exists=True, file_okay=False)],
-    output: Annotated[Path | None, typer.Option(help="Optional JSON or Markdown report path.")] = None,
+    output: Annotated[
+        Path | None, typer.Option(help="Optional JSON or Markdown report path.")
+    ] = None,
 ) -> None:
     """Aggregate run manifests and calculate the strict success score."""
     aggregate = aggregate_manifests(run_root)
@@ -131,6 +135,54 @@ def gabench_import(
     typer.echo(f"source tasks: {manifest['source_task_count']}")
     typer.echo(f"generated tasks: {manifest['generated_task_count']}")
     typer.echo(f"deterministic MVP tasks: {manifest['deterministic_supported_count']}")
+
+
+@app.command("visual-report")
+def visual_report(
+    run_root: Annotated[Path, typer.Argument(exists=True, file_okay=False)],
+    output: Annotated[Path, typer.Option(help="Folder for HTML, CSV, manifest, and PNGs.")] = Path(
+        "visual-reviews"
+    ),
+    max_panel_width: Annotated[int, typer.Option(min=100)] = 1200,
+    max_panel_height: Annotated[int, typer.Option(min=100)] = 1000,
+) -> None:
+    """Create a manual side-by-side image review from OpenMapBench run manifests."""
+    result = visual_report_from_runs(
+        run_root,
+        output,
+        max_panel_width=max_panel_width,
+        max_panel_height=max_panel_height,
+    )
+    typer.echo(str((output / "index.html").resolve()))
+    typer.echo(f"comparisons: {result['comparison_count']}")
+    typer.echo(f"skipped: {result['skipped_count']}")
+    if result["comparison_count"] == 0:
+        raise typer.Exit(code=1)
+
+
+@app.command("gabench-visual-report")
+def gabench_visual_report(
+    manifest: Annotated[Path, typer.Argument(exists=True, dir_okay=False)],
+    candidate_root: Annotated[Path, typer.Option(exists=True, file_okay=False)],
+    output: Annotated[Path, typer.Option(help="Folder for HTML, CSV, manifest, and PNGs.")] = Path(
+        "visual-reviews/gabench"
+    ),
+    max_panel_width: Annotated[int, typer.Option(min=100)] = 1200,
+    max_panel_height: Annotated[int, typer.Option(min=100)] = 1000,
+) -> None:
+    """Create a manual visual report from a GABench import manifest and generated images."""
+    result = visual_report_from_gabench(
+        manifest,
+        candidate_root,
+        output,
+        max_panel_width=max_panel_width,
+        max_panel_height=max_panel_height,
+    )
+    typer.echo(str((output / "index.html").resolve()))
+    typer.echo(f"comparisons: {result['comparison_count']}")
+    typer.echo(f"skipped: {result['skipped_count']}")
+    if result["comparison_count"] == 0:
+        raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":

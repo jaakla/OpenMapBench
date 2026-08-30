@@ -14,8 +14,9 @@ from typing import Any
 
 from . import __version__
 from .evaluator import evaluate
-from .models import FileRecord, RunManifest, RunStatus
+from .models import FileRecord, OutputKind, RunManifest, RunStatus
 from .taskio import load_task, sha256_file
+from .visual import image_metadata, is_supported_image_path
 
 
 def _now() -> datetime:
@@ -122,6 +123,55 @@ def run_task(
         elif not candidate.is_file():
             status = RunStatus.MISSING_OUTPUT
             error = f"agent did not create expected output: {candidate}"
+        elif (
+            spec.output.kind == OutputKind.FILE
+            and is_supported_image_path(candidate)
+            and is_supported_image_path(reference)
+        ):
+            try:
+                candidate_metadata = image_metadata(candidate)
+            except OSError as exc:
+                evaluation_payload = {
+                    "success": False,
+                    "score": 0.0,
+                    "checks": [
+                        {
+                            "id": "image_decodable",
+                            "passed": False,
+                            "required": True,
+                            "details": {"candidate_error": f"{type(exc).__name__}: {exc}"},
+                        }
+                    ],
+                    "diagnostics": {"strictly_scored": True},
+                }
+                status = RunStatus.FAILED
+            else:
+                try:
+                    reference_metadata = image_metadata(reference)
+                except OSError as exc:
+                    status = RunStatus.EVALUATOR_ERROR
+                    error = f"invalid reference image: {type(exc).__name__}: {exc}"
+                else:
+                    evaluation_payload = {
+                        "success": None,
+                        "score": None,
+                        "checks": [
+                            {
+                                "id": "image_decodable",
+                                "passed": True,
+                                "required": True,
+                                "details": {
+                                    "candidate": candidate_metadata,
+                                    "reference": reference_metadata,
+                                },
+                            }
+                        ],
+                        "diagnostics": {
+                            "review_mode": "manual_side_by_side",
+                            "strictly_scored": False,
+                        },
+                    }
+                    status = RunStatus.NEEDS_REVIEW
         else:
             try:
                 result = evaluate(spec, candidate, reference)
@@ -154,14 +204,18 @@ def run_task(
         task_file=_file_record(task_file),
         inputs=input_records,
         candidate=_file_record(candidate) if candidate.is_file() else None,
-        reference=_file_record(reference) if reference.is_file() else FileRecord(path=str(reference)),
+        reference=_file_record(reference)
+        if reference.is_file()
+        else FileRecord(path=str(reference)),
         command=command,
         agent=agent or {},
         environment={
             "openmapbench": __version__,
             "python": sys.version.split()[0],
             "platform": platform.platform(),
-            "openmapbench_env": sorted(key for key in environment if key.startswith("OPENMAPBENCH_")),
+            "openmapbench_env": sorted(
+                key for key in environment if key.startswith("OPENMAPBENCH_")
+            ),
         },
         benchmark_commit=_git_commit(task_file.parent),
         started_at=started.isoformat(),

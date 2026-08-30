@@ -42,7 +42,8 @@ commit alone does not prove a local Git LFS worktree is clean.
 ## Current compatibility
 
 GABench's `Result` column predominantly names PNG maps. Those entries remain valid imported task
-contracts but are classified as `file`, outside the deterministic MVP score. CSV results are
+contracts but are classified as `file` and enter manual review rather than the deterministic MVP
+score. CSV results are
 treated as tables, JSON metric objects as scalar/JSON artifacts, and geospatial vector formats as
 vectors. Encoded `CHECK:JSON_VALUE` results become deterministic JSON field predicates. Raster
 results are identified but remain unsupported by the strict MVP evaluator.
@@ -61,6 +62,33 @@ openmapbench gabench-import \
 Every existing named layer becomes an additional local bridge task. Scalar/JSON, table, and vector
 layer references are marked `deterministic_supported: true`; missing and unsupported references
 carry an explicit reason.
+
+## Visual review of bundled maps
+
+If generated images are collected in a separate folder, create the full manual-review bundle in
+one command:
+
+```bash
+openmapbench gabench-visual-report \
+  .openmapbench/gabench/manifest.json \
+  --candidate-root ../generated-gabench-images \
+  --output visual-reviews/gabench
+```
+
+The result contains labeled side-by-side PNGs (generated left, bundled GABench expectation right),
+a scrollable `index.html`, an editable `review.csv`, and a checksummed `manifest.json`. Missing and
+ambiguous candidate filenames are surfaced in the report rather than guessed.
+
+For images produced through `openmapbench run`, the equivalent command is:
+
+```bash
+openmapbench visual-report runs/gabench --output visual-reviews/gabench-runs
+```
+
+These folders are ignored by git. They contain local derivatives of upstream expected images; do
+not redistribute them until GABench's licensing permits it. Side-by-side review is deliberately
+unscored. A later fuzzy/semantic judge can add automated visual diagnostics for map layout, place
+names, legends, and data text without conflating those judgments with deterministic GIS outputs.
 
 ## Run an imported task
 

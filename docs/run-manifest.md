@@ -13,12 +13,15 @@ The manifest records:
 - candidate and reference paths, sizes, and checksums;
 - subprocess exit code, deterministic evaluation checks, diagnostics, or explicit error.
 
-Terminal statuses are `passed`, `failed`, `agent_error`, `missing_output`, and `evaluator_error`.
-Only `passed` contributes to strict successes.
+Terminal statuses are `passed`, `failed`, `needs_review`, `agent_error`, `missing_output`, and
+`evaluator_error`. A decodable image with no deterministic evaluator becomes `needs_review`; this
+is neither an implicit pass nor an evaluator failure. Only `passed` contributes to strict
+successes, and `needs_review` is excluded from the strictly scored denominator.
 
 `openmapbench report <run-root>` validates every discovered run manifest and emits:
 
 - attempted task count;
+- strictly scored task count and pending manual-review count;
 - strict successes and strict success rate;
 - status counts;
 - category and output-kind breakdowns;

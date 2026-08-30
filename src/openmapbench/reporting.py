@@ -18,10 +18,14 @@ def _breakdown(manifests: list[RunManifest], field: str) -> dict[str, dict[str, 
     result: dict[str, dict[str, Any]] = {}
     for key, items in sorted(grouped.items()):
         passed = sum(item.status == RunStatus.PASSED for item in items)
+        needs_review = sum(item.status == RunStatus.NEEDS_REVIEW for item in items)
+        strictly_scored = len(items) - needs_review
         result[key] = {
             "attempted": len(items),
+            "strictly_scored": strictly_scored,
             "strict_successes": passed,
-            "strict_success_rate": passed / len(items),
+            "strict_success_rate": passed / strictly_scored if strictly_scored else None,
+            "needs_manual_review": needs_review,
         }
     return result
 
@@ -36,11 +40,15 @@ def aggregate_manifests(run_root: Path) -> dict[str, Any]:
             invalid.append({"path": str(path), "error": f"{type(exc).__name__}: {exc}"})
     passed = sum(manifest.status == RunStatus.PASSED for manifest in manifests)
     attempted = len(manifests)
+    needs_review = sum(manifest.status == RunStatus.NEEDS_REVIEW for manifest in manifests)
+    strictly_scored = attempted - needs_review
     return {
         "schema_version": "0.1",
         "attempted_tasks": attempted,
+        "strictly_scored_tasks": strictly_scored,
         "strict_successes": passed,
-        "strict_success_rate": passed / attempted if attempted else 0.0,
+        "strict_success_rate": passed / strictly_scored if strictly_scored else None,
+        "needs_manual_review": needs_review,
         "status_counts": dict(
             sorted(Counter(manifest.status.value for manifest in manifests).items())
         ),
@@ -51,6 +59,7 @@ def aggregate_manifests(run_root: Path) -> dict[str, Any]:
                 "run_id": manifest.run_id,
                 "task_id": manifest.task_id,
                 "status": manifest.status.value,
+                "strictly_scored": manifest.status != RunStatus.NEEDS_REVIEW,
                 "strict_success": manifest.status == RunStatus.PASSED,
                 "duration_seconds": manifest.duration_seconds,
             }
@@ -61,12 +70,16 @@ def aggregate_manifests(run_root: Path) -> dict[str, Any]:
 
 
 def report_markdown(report: dict[str, Any]) -> str:
+    rate = report["strict_success_rate"]
+    rate_text = f"{rate:.1%}" if rate is not None else "not available"
     lines = [
         "# OpenMapBench report",
         "",
         f"- Attempted tasks: {report['attempted_tasks']}",
+        f"- Strictly scored tasks: {report['strictly_scored_tasks']}",
         f"- Strict successes: {report['strict_successes']}",
-        f"- Strict success rate: {report['strict_success_rate']:.1%}",
+        f"- Strict success rate: {rate_text}",
+        f"- Needs manual review: {report['needs_manual_review']}",
         "",
         "| Task | Status | Strict success | Duration (s) |",
         "| --- | --- | ---: | ---: |",
