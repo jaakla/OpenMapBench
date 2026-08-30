@@ -1,0 +1,33 @@
+schema_version: "0.1"
+id: vector-buffer-001
+title: School proximity zones
+category: vector
+prompt: >
+  Create a 500 metre buffer around every school, dissolve overlapping
+  buffers, and save the final polygons to result.gpkg. Perform distance
+  calculations in an appropriate projected CRS.
+
+inputs:
+  - path: inputs/schools.gpkg
+    role: schools
+    source: synthetic-example
+
+output:
+  path: result.gpkg
+  kind: vector
+  geometry_type: MultiPolygon
+  crs: EPSG:3301
+
+evaluation:
+  strict:
+    crs: exact
+    geometry:
+      metric: symmetric_difference_ratio
+      tolerance: 0.001
+
+metadata:
+  difficulty: easy
+  skills:
+    - crs
+    - buffer
+    - dissolve

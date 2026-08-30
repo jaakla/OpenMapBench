@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "openmapbench"
+version = "0.1.0"
+description = "Tool-agnostic benchmark for autonomous GIS analysis agents"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "Apache-2.0"}
+authors = [
+  {name = "OpenMapBench contributors"}
+]
+dependencies = [
+  "pydantic>=2.8",
+  "PyYAML>=6.0",
+  "typer>=0.12",
+]
+
+[project.optional-dependencies]
+geo = [
+  "geopandas>=1.0",
+  "numpy>=2.0",
+  "pyproj>=3.6",
+  "rasterio>=1.4",
+  "shapely>=2.0",
+]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.6",
+]
+
+[project.scripts]
+openmapbench = "openmapbench.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/openmapbench"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
