@@ -1,0 +1,27 @@
+schema_version: "0.1"
+id: scalar-sum-001
+title: Sum supplied values
+category: table-analysis
+prompt: >
+  Read inputs/values.csv, sum the value column, and write only the numeric
+  answer to result.txt in the requested output directory.
+
+inputs:
+  - path: inputs/values.csv
+    role: values
+    source: OpenMapBench synthetic scalar example
+    checksum: sha256:a3947758c3401f531701137c205197b84ef5ecdc40700f5d346469d085af87fa
+    license: CC0-1.0
+
+output:
+  path: result.txt
+  kind: scalar
+
+evaluation:
+  strict:
+    absolute_tolerance: 0.0
+    relative_tolerance: 0.0
+
+metadata:
+  difficulty: easy
+  fixture_type: synthetic-nonspatial

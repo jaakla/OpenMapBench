@@ -2,39 +2,135 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Annotated
 
 import typer
 
+from .adapters.gabench import import_gabench
 from .evaluator import evaluate as evaluate_result
-from .taskio import load_task
+from .models import RunStatus
+from .reporting import aggregate_manifests, report_markdown
+from .runner import run_task
+from .taskio import load_task, validate_task_files
 
-app = typer.Typer(no_args_is_help=True, help="OpenMapBench CLI")
+app = typer.Typer(no_args_is_help=True, help="OpenMapBench: artifact-first GIS agent benchmark")
 
 
 @app.command()
 def validate(task: Path) -> None:
-    """Validate an OpenMapBench task specification."""
+    """Validate a task contract, input paths, and declared checksums."""
     spec = load_task(task)
-
-    missing = [str(p) for p in spec.resolve_input_paths(task) if not p.exists()]
-    typer.echo(f"valid: {spec.id}")
-    if missing:
-        typer.echo("warning: referenced input files are missing:")
-        for path in missing:
-            typer.echo(f"  - {path}")
+    findings = validate_task_files(spec, task.resolve())
+    typer.echo(f"valid contract: {spec.id}")
+    for finding in findings:
+        typer.echo(f"{finding['status']}: {finding['path']} ({finding['reason']})")
+    if any(finding["status"] == "failed" for finding in findings):
+        raise typer.Exit(code=1)
 
 
 @app.command("evaluate")
 def evaluate_command(
     task: Path,
-    candidate: Path = typer.Option(..., exists=True, dir_okay=False),
-    reference: Path = typer.Option(..., exists=True, dir_okay=False),
+    candidate: Annotated[Path, typer.Option(exists=True, dir_okay=False)],
+    reference: Annotated[Path, typer.Option(exists=True, dir_okay=False)],
 ) -> None:
     """Evaluate one candidate artifact against reference ground truth."""
     spec = load_task(task)
     result = evaluate_result(spec, candidate, reference)
     typer.echo(json.dumps(result.to_dict(), indent=2, sort_keys=True))
     raise typer.Exit(code=0 if result.success else 1)
+
+
+@app.command()
+def run(
+    task: Annotated[Path, typer.Argument(exists=True, dir_okay=False)],
+    reference: Annotated[Path, typer.Option(exists=True, dir_okay=False)],
+    agent_command: Annotated[
+        str,
+        typer.Option(
+            help=(
+                "Command to run without a shell. Supports {task_file}, {task_dir}, "
+                "{output_dir}, {output_path}, and {run_dir} placeholders."
+            )
+        ),
+    ],
+    run_root: Annotated[Path, typer.Option(help="Directory that receives immutable runs.")] = Path(
+        "runs"
+    ),
+    timeout_seconds: Annotated[float | None, typer.Option(min=0.001)] = None,
+    agent_name: Annotated[str | None, typer.Option()] = None,
+    model: Annotated[str | None, typer.Option()] = None,
+    skill: Annotated[list[str] | None, typer.Option()] = None,
+    tool: Annotated[list[str] | None, typer.Option()] = None,
+    agent_cwd: Annotated[Path | None, typer.Option(exists=True, file_okay=False)] = None,
+) -> None:
+    """Run one task end to end and write artifact, logs, and a run manifest."""
+    manifest, manifest_path = run_task(
+        task,
+        reference,
+        agent_command,
+        run_root,
+        timeout_seconds=timeout_seconds,
+        agent={
+            key: value
+            for key, value in {
+                "name": agent_name,
+                "model": model,
+                "skills": skill or [],
+                "tools": tool or [],
+            }.items()
+            if value not in (None, [])
+        },
+        agent_cwd=agent_cwd,
+    )
+    typer.echo(str(manifest_path))
+    typer.echo(f"status: {manifest.status.value}")
+    raise typer.Exit(code=0 if manifest.status == RunStatus.PASSED else 1)
+
+
+@app.command()
+def report(
+    run_root: Annotated[Path, typer.Argument(exists=True, file_okay=False)],
+    output: Annotated[Path | None, typer.Option(help="Optional JSON or Markdown report path.")] = None,
+) -> None:
+    """Aggregate run manifests and calculate the strict success score."""
+    aggregate = aggregate_manifests(run_root)
+    if output:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        if output.suffix.lower() in {".md", ".markdown"}:
+            output.write_text(report_markdown(aggregate), encoding="utf-8")
+        else:
+            output.write_text(json.dumps(aggregate, indent=2, sort_keys=True), encoding="utf-8")
+        typer.echo(str(output.resolve()))
+    else:
+        typer.echo(json.dumps(aggregate, indent=2, sort_keys=True))
+
+
+@app.command("gabench-import")
+def gabench_import(
+    source: Annotated[Path, typer.Option(exists=True, file_okay=False)],
+    output: Annotated[Path, typer.Option()] = Path(".openmapbench/gabench"),
+    reference_root: Annotated[
+        Path | None,
+        typer.Option(
+            exists=True,
+            file_okay=False,
+            help="Optional trusted-run directory containing GABench layer references.",
+        ),
+    ] = None,
+    hash_inputs: Annotated[bool, typer.Option(help="Hash referenced source inputs.")] = True,
+) -> None:
+    """Create local OpenMapBench bridge tasks from an external GABench checkout."""
+    manifest = import_gabench(
+        source,
+        output,
+        reference_root=reference_root,
+        hash_inputs=hash_inputs,
+    )
+    typer.echo(str((output / "manifest.json").resolve()))
+    typer.echo(f"source tasks: {manifest['source_task_count']}")
+    typer.echo(f"generated tasks: {manifest['generated_task_count']}")
+    typer.echo(f"deterministic MVP tasks: {manifest['deterministic_supported_count']}")
 
 
 if __name__ == "__main__":

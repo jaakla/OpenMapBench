@@ -59,13 +59,22 @@ Resampling tolerance must be specified by the task, not invented after seeing mo
 
 ## Tables
 
-Planned checks:
+Implemented checks:
 
 - required columns;
 - entity keys;
 - row set;
 - type-aware numeric tolerances;
 - ordering only when ordering is semantically meaningful.
+
+CSV and JSON row arrays are supported. Duplicate configured entity keys are strict failures.
+
+## Run aggregation
+
+Only manifests with terminal status `passed` count as strict successes. Agent errors, missing
+outputs, evaluator errors, and deterministic comparison failures all remain attempted tasks and
+therefore contribute zero to the numerator. Invalid manifests are reported separately and are not
+silently counted.
 
 ## Maps / cartography
 

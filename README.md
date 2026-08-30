@@ -1,69 +1,80 @@
 # OpenMapBench
 
-**Tool-agnostic benchmark for autonomous GIS analysis agents.**
+**Tool-agnostic, artifact-first evaluation for autonomous GIS agents.**
 
-OpenMapBench evaluates whether an AI agent can produce a **correct geospatial result**, regardless of whether it uses GeoPandas, DuckDB Spatial, PostGIS, QGIS, GDAL, custom code, MCP tools, or a GIS skill package.
+OpenMapBench scores whether an agent produced the correct analytical artifact. It does not
+require the agent to reproduce a canonical tool chain, library choice, or sequence of calls.
 
-The core principle is simple:
+> **Score the result, not the tool trajectory.**
 
-> **Score the analytical artifact, not the tool trajectory.**
+## MVP status
 
-This makes OpenMapBench suitable for comparisons such as:
+The repository now contains a runnable MVP:
 
-| Configuration | Strict success |
-| --- | ---: |
-| Model A, vanilla | TBD |
-| Model A + GIS skills | TBD |
-| Model B, vanilla | TBD |
-| Model B + GIS skills | TBD |
+- a versioned generic task contract;
+- an agent-neutral subprocess runner;
+- deterministic scalar/JSON, CSV/JSON-table, and vector evaluators;
+- immutable run directories with logs, checksums, environment metadata, and manifests;
+- aggregate JSON or Markdown reports with a headline strict success rate;
+- a GABench importer that operates against an external checkout and never copies upstream
+  datasets or reference artifacts;
+- automated tests and CI.
 
-## Why this exists
+Raster and cartographic-image evaluation are deliberately not included in the strict MVP score.
+Imported tasks with those outputs are classified explicitly instead of being treated as passes.
 
-Many GIS-agent benchmarks couple correctness to a predefined toolbox or expected sequence of tool calls. That is useful for measuring tool-use behavior, but it can penalize an agent that reaches the correct GIS answer through a different implementation.
+## Install
 
-OpenMapBench instead standardizes:
+Python 3.11+ and [uv](https://docs.astral.sh/uv/) are recommended.
 
-1. task input and instructions;
-2. expected output contract;
-3. frozen datasets / provenance;
-4. deterministic or tolerance-aware result evaluation;
-5. run metadata needed for reproducibility.
-
-The agent implementation remains open.
-
-## Status
-
-**v0 scaffold.** The first milestone is to run a useful subset of GeoAgentBench / GABench tasks through a tool-agnostic OpenMapBench adapter, then compare vanilla agents against the same agents with GIS skills enabled.
-
-OpenMapBench does **not** currently vendor GABench tasks or datasets. The upstream GABench repository does not currently declare a license, so the adapter is designed to operate against a local checkout of GABench.
-
-## Repository layout
-
-```text
-OpenMapBench/
-├── benchmark/
-│   └── examples/
-│       └── buffer-schools/
-│           └── task.yaml
-├── adapters/
-│   └── gabench/
-│       ├── README.md
-│       └── import_tasks.py
-├── src/openmapbench/
-│   ├── cli.py
-│   ├── evaluator.py
-│   ├── models.py
-│   └── taskio.py
-├── tests/
-├── docs/
-│   ├── design.md
-│   └── scoring.md
-└── pyproject.toml
+```bash
+git clone https://github.com/jaakla/OpenMapBench.git
+cd OpenMapBench
+uv sync --no-editable --extra geo --extra dev
 ```
 
-## Task contract
+The `geo` extra installs GeoPandas, Shapely, PyProj, and raster I/O dependencies needed by the
+vector evaluator. A conventional installation also works:
 
-Each task is a directory containing `task.yaml`, inputs, and optionally private/reference ground truth.
+```bash
+python -m pip install ".[geo,dev]"
+```
+
+## Run the included example
+
+The example command follows the same contract an agent adapter uses. The solver is only a tiny
+deterministic stand-in so the whole benchmark loop can be exercised locally.
+
+```bash
+openmapbench validate benchmark/examples/sum-values/task.yaml
+
+openmapbench run benchmark/examples/sum-values/task.yaml \
+  --reference benchmark/examples/sum-values/reference/result.txt \
+  --agent-command ".venv/bin/python benchmark/examples/sum-values/solve.py" \
+  --agent-cwd . \
+  --run-root runs
+
+openmapbench report runs --output report.json
+```
+
+A successful run writes:
+
+```text
+runs/<run-id>/
+├── artifacts/<task output>
+├── agent.stdout.log
+├── agent.stderr.log
+└── manifest.json
+```
+
+The process exits nonzero for an agent error, missing artifact, evaluator error, or strict
+evaluation failure. The manifest is still written, so failed runs remain auditable.
+
+## Generic task contract
+
+Every task is a YAML file. Inputs may be task-relative paths for native tasks or absolute local
+references produced by an external adapter. Outputs must be safe relative paths and are created
+inside the run directory.
 
 ```yaml
 schema_version: "0.1"
@@ -71,155 +82,147 @@ id: vector-buffer-001
 title: School proximity zones
 category: vector
 prompt: >
-  Create a 500 metre buffer around every school and dissolve overlapping
-  buffers. Save the result as result.gpkg.
+  Create and dissolve 500 metre school buffers. Write result.gpkg.
 
 inputs:
   - path: inputs/schools.gpkg
     role: schools
+    source: https://example.invalid/versioned-source
+    as_of: "2026-08-01"
+    checksum: sha256:<digest>
+    license: CC-BY-4.0
 
 output:
   path: result.gpkg
   kind: vector
+  layer: result
   geometry_type: MultiPolygon
   crs: EPSG:3301
+  required_fields: [school_count]
 
 evaluation:
   strict:
+    crs: exact
+    feature_count: ignore
     geometry:
       metric: symmetric_difference_ratio
       tolerance: 0.001
-    crs: exact
+      require_valid: true
+    attributes:
+      key: zone_id
+      columns: [zone_id, school_count]
 ```
 
-A benchmark runner gives the agent the task directory and a writable output directory. The runner itself is deliberately outside the benchmark semantics: Codex, Claude Code, custom agents, MCP clients, local scripts, or hosted systems should all be usable.
+See [docs/task-contract.md](docs/task-contract.md) for the evaluator options and validation rules.
 
-## Install
+## Agent runner contract
 
-Python 3.11+.
+`openmapbench run` launches a command directly, without an implicit shell. Commands can use these
+placeholders:
+
+- `{task_file}` and `{task_dir}`;
+- `{output_dir}` and `{output_path}`;
+- `{run_dir}`.
+
+The same values are exposed as `OPENMAPBENCH_TASK_FILE`, `OPENMAPBENCH_TASK_DIR`,
+`OPENMAPBENCH_OUTPUT_DIR`, `OPENMAPBENCH_OUTPUT_PATH`, and `OPENMAPBENCH_RUN_DIR`. This keeps the
+core independent of model vendors: a Codex adapter, Claude Code adapter, container wrapper, MCP
+client, or local script can all satisfy the same interface.
+
+Useful metadata can be recorded with `--agent-name`, `--model`, repeated `--skill`, and repeated
+`--tool` flags. Use a script wrapper when an agent needs pipes, redirects, or other shell syntax.
+
+## Deterministic evaluators
+
+### Scalar and JSON
+
+Numeric text and numeric values nested inside JSON use configured absolute and relative
+tolerances. Strings, booleans, keys, and list order compare exactly. JSON field predicates support
+threshold contracts such as `metrics.roc_auc >= 0.9` without relying on an LLM judge.
+
+### Tables
+
+CSV and JSON row arrays support:
+
+- order-independent comparison;
+- entity keys and duplicate-key rejection;
+- required or ignored columns;
+- per-column numeric tolerances;
+- bounded mismatch diagnostics.
+
+### Vectors
+
+The vector evaluator checks CRS, required fields, geometry family, validity, optional feature
+count, and semantic geometry equivalence. Polygon partitions and feature order do not affect a
+union-based score. Available metrics are symmetric-difference ratio, IoU, and Hausdorff distance.
+Geographic data is reprojected to a deterministic projected comparison CRS before area or distance
+metrics are computed.
+
+## Strict success score
+
+The headline score is intentionally simple:
+
+```text
+strict_success_rate = passed_runs / attempted_runs
+```
+
+Near-miss diagnostics never turn a failed task into a success. Reports also break results down by
+category, output kind, and terminal status.
 
 ```bash
-git clone https://github.com/jaakla/OpenMapBench.git
-cd OpenMapBench
-
-# Recommended
-uv sync --extra geo --extra dev
+openmapbench report runs
+openmapbench report runs --output report.md
 ```
 
-or:
+See [docs/run-manifest.md](docs/run-manifest.md) and [docs/scoring.md](docs/scoring.md).
 
-```bash
-pip install -e ".[geo,dev]"
-```
+## GABench interoperability without vendoring
 
-## Validate a task
+The upstream `GeoX-Lab/GABench` repository currently has no declared repository license.
+OpenMapBench therefore does not include its CSV, prompts, datasets, maps, or derived layers.
 
-```bash
-openmapbench validate benchmark/examples/buffer-schools/task.yaml
-```
-
-## Evaluate an output
-
-The current scaffold implements scalar/table evaluation and the first vector evaluator interface. More GIS-specific evaluators are intentionally explicit rather than hidden behind an LLM judge.
-
-```bash
-openmapbench evaluate \
-  benchmark/examples/buffer-schools/task.yaml \
-  --candidate ./runs/vector-buffer-001/result.gpkg \
-  --reference ./private/vector-buffer-001/reference.gpkg
-```
-
-## GABench adapter
-
-Clone GABench separately with Git LFS:
+Clone it separately and resolve Git LFS files:
 
 ```bash
 git lfs install
 git clone https://github.com/GeoX-Lab/GABench.git ../GABench
+git -C ../GABench lfs pull
 ```
 
-Inspect/import its benchmark metadata:
+Build a local bridge under the ignored `.openmapbench/` directory:
 
 ```bash
-python adapters/gabench/import_tasks.py \
+openmapbench gabench-import \
   --source ../GABench \
-  --output .openmapbench/gabench-manifest.json
+  --output .openmapbench/gabench
 ```
 
-The adapter intentionally stores **references to the upstream checkout**, not copies of upstream tasks or data.
+The importer reads the actual upstream columns, discovers input files named in each task's data
+description, records the upstream commit and checksums, generates local task contracts, and points
+the manifest at upstream reference files. Nothing from GABench is copied into this repository.
 
-See [`adapters/gabench/README.md`](adapters/gabench/README.md).
+Most upstream final artifacts are PNG maps, so they are classified as unsupported by the strict
+MVP evaluator. The upstream CSV also names analytical layers that are not shipped as reference
+files. If you have a trusted reference run, expose those layers without copying them:
 
-## Scoring philosophy
-
-The primary public number should remain understandable:
-
-```text
-strict_success_rate = successful_tasks / attempted_tasks
+```bash
+openmapbench gabench-import \
+  --source ../GABench \
+  --reference-root ../trusted-gabench-run \
+  --output .openmapbench/gabench
 ```
 
-Then report diagnostics separately:
+Existing scalar/JSON, table, and vector references are marked `deterministic_supported` in
+`.openmapbench/gabench/manifest.json`; raster and image outputs remain explicit future work. See
+[adapters/gabench/README.md](adapters/gabench/README.md) for details.
 
-- vector / raster / network / tabular;
-- CRS correctness;
-- geometry correctness;
-- attribute correctness;
-- numerical closeness;
-- data-quality / topology failures;
-- runtime and cost;
-- optional trajectory diagnostics.
+## Development
 
-See [`docs/scoring.md`](docs/scoring.md).
+```bash
+uv sync --no-editable --extra geo --extra dev
+uv run --no-sync ruff check .
+uv run --no-sync pytest -q
+```
 
-## Initial roadmap
-
-### M0 — runnable benchmark core
-- [x] task schema;
-- [x] CLI skeleton;
-- [x] scalar and tabular evaluator;
-- [x] vector evaluator skeleton;
-- [x] GABench adapter scaffold;
-- [ ] frozen reference-output store;
-- [ ] robust vector equivalence scorer;
-- [ ] raster scorer;
-- [ ] network-result scorer;
-- [ ] run manifest format.
-
-### M1 — GABench compatibility
-- [ ] map GABench benchmark fields into OpenMapBench tasks;
-- [ ] classify which GABench tasks can be scored deterministically;
-- [ ] reproduce a baseline run using the original GABench agent;
-- [ ] run the same tasks with arbitrary-tool agents;
-- [ ] publish vanilla-vs-GIS-skill comparison.
-
-### M2 — OpenMapBench native tasks
-Target 30–50 independently verified tasks focused on failure modes underrepresented by fixed-tool benchmarks:
-
-- data discovery and source choice;
-- CRS and unit traps;
-- stale / incomplete datasets;
-- topology and invalid geometry;
-- spatial aggregation grain;
-- boundary ambiguity;
-- raster NoData / resampling;
-- network distance vs Euclidean distance;
-- reproducibility and provenance.
-
-## Benchmark rules
-
-A benchmark task should:
-
-- have a concrete, checkable result;
-- avoid requiring one particular GIS library;
-- freeze or version all external data used for scoring;
-- record dataset source, timestamp, license, and checksum;
-- define tolerance before evaluating agents;
-- avoid LLM-as-judge for primary correctness where deterministic comparison is feasible;
-- keep hidden/reference outputs separate from agent-visible inputs;
-- preserve run metadata sufficiently to reproduce failures.
-
-## License
-
-OpenMapBench code and original benchmark specifications in this repository are licensed under Apache-2.0.
-
-Third-party benchmark tasks and datasets retain their own licenses. Adapters do not imply relicensing of upstream material.
+OpenMapBench code and original task specifications are Apache-2.0. Third-party tasks and datasets
+retain their own terms; an adapter never implies relicensing.

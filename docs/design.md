@@ -39,7 +39,7 @@ A benchmark result should remain valid if the agent implementation changes but p
 
 ## Reproducibility
 
-Each run should eventually record:
+Each run records:
 
 - benchmark commit SHA;
 - task ID and task schema version;
@@ -53,6 +53,10 @@ Each run should eventually record:
 - candidate artifact hashes;
 - evaluator version;
 - strict result and diagnostic scores.
+
+The subprocess contract is vendor-neutral. Agents receive a task path and a writable output path
+through documented placeholders and environment variables. The runner never injects a shell and
+always preserves stdout, stderr, terminal status, and an immutable manifest.
 
 ## Public vs hidden ground truth
 

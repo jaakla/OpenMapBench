@@ -1,0 +1,9 @@
+.openmapbench/
+.pytest_cache/
+.ruff_cache/
+.venv/
+__pycache__/
+*.py[cod]
+runs/
+report.json
+report.md

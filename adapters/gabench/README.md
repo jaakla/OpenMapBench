@@ -1,51 +1,78 @@
 # GABench adapter
 
-The goal of this adapter is to use GeoAgentBench / GABench as an initial source of realistic GIS tasks while changing the evaluation question from:
+This adapter turns an external GeoAgentBench / GABench checkout into local OpenMapBench bridge
+tasks. It changes the primary evaluation question from expected tool trajectory to correct output
+artifact.
 
-> Did the agent follow the expected GIS tool trajectory?
+## License boundary
 
-to:
+`GeoX-Lab/GABench` currently has no repository license. OpenMapBench therefore does not vendor its
+benchmark CSV, task text, data, reference maps, or generated layers. The importer writes only to a
+user-selected local directory; `.openmapbench/` is ignored by this repository.
 
-> Did the agent produce the correct geospatial result?
+Generated task files necessarily expose the upstream prompt to the local agent, but they are a
+local runtime cache, not redistributed benchmark content. Do not commit that directory unless the
+upstream licensing situation changes and redistribution is allowed.
 
-## Why no vendored GABench content?
-
-At the time this scaffold was created, the upstream GABench GitHub repository did not declare a repository license. OpenMapBench therefore does not copy its benchmark CSV, task text, datasets, or ground-truth files.
-
-Clone GABench separately:
+## Import
 
 ```bash
 git lfs install
 git clone https://github.com/GeoX-Lab/GABench.git ../GABench
+git -C ../GABench lfs pull
+
+openmapbench gabench-import \
+  --source ../GABench \
+  --output .openmapbench/gabench
 ```
 
-Then build a local manifest:
+The command:
+
+1. rejects unresolved Git LFS pointers in the CSV and any referenced input or ground truth;
+2. validates the real upstream CSV columns;
+3. discovers external dataset paths mentioned by each data description;
+4. records the upstream commit, CSV checksum, input checksums, and undeclared license status;
+5. generates local task YAML files containing absolute references to the external checkout;
+6. records external reference paths and deterministic-support classification in `manifest.json`;
+7. copies no upstream source or reference file.
+
+Use `--no-hash-inputs` only for a fast exploratory import. Hashing is enabled by default because a
+commit alone does not prove a local Git LFS worktree is clean.
+
+## Current compatibility
+
+GABench's `Result` column predominantly names PNG maps. Those entries remain valid imported task
+contracts but are classified as `file`, outside the deterministic MVP score. CSV results are
+treated as tables, JSON metric objects as scalar/JSON artifacts, and geospatial vector formats as
+vectors. Encoded `CHECK:JSON_VALUE` results become deterministic JSON field predicates. Raster
+results are identified but remain unsupported by the strict MVP evaluator.
+
+The `Layers` column often names more objective analytical artifacts, but those reference files are
+not part of the upstream checkout. If a trusted baseline run has materialized them, point the
+adapter to that directory:
 
 ```bash
-python adapters/gabench/import_tasks.py \
+openmapbench gabench-import \
   --source ../GABench \
-  --output .openmapbench/gabench-manifest.json
+  --reference-root ../trusted-gabench-run \
+  --output .openmapbench/gabench
 ```
 
-The generated manifest is ignored by git.
+Every existing named layer becomes an additional local bridge task. Scalar/JSON, table, and vector
+layer references are marked `deterministic_supported: true`; missing and unsupported references
+carry an explicit reason.
 
-## Adapter strategy
+## Run an imported task
 
-The importer is deliberately conservative. It:
+Each `manifest.json` task entry supplies both `task_path` and `reference_path`. Pass those values to
+the normal runner:
 
-1. verifies that `benchmark/benchmark.csv` exists and is not an unresolved Git LFS pointer;
-2. reads the actual upstream column names;
-3. emits a local manifest containing each row and source-relative references;
-4. does **not** copy upstream data.
+```bash
+openmapbench run /absolute/path/to/task.yaml \
+  --reference /absolute/path/to/reference.gpkg \
+  --agent-command "my-agent --task {task_file} --output {output_path}" \
+  --run-root runs/gabench
+```
 
-The next implementation step is to add an explicit field mapping once the downloaded GABench CSV is inspected locally.
-
-That mapping should classify each task into one of:
-
-- deterministic scalar/table;
-- deterministic vector;
-- deterministic raster;
-- map/cartographic output requiring a separate visual-quality metric;
-- unsupported / ambiguous.
-
-Tool-chain metrics such as TAO/TIO/TEM/PEA should remain optional diagnostics, not primary correctness metrics.
+Tool-chain fields remain metadata only. TAO, TIO, TEM, and PEA may be added later as optional
+diagnostics, but they do not determine strict artifact correctness.
