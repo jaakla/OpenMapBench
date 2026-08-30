@@ -43,6 +43,19 @@ vector evaluator. A conventional installation also works:
 python -m pip install ".[geo,dev]"
 ```
 
+After installation, the `openmapbench` CLI is available in the project environment. Use either:
+
+```bash
+source .venv/bin/activate
+openmapbench validate benchmark/examples/sum-values/task.yaml
+```
+
+or, without activating the virtualenv:
+
+```bash
+uv run openmapbench validate benchmark/examples/sum-values/task.yaml
+```
+
 ## Run the included example
 
 The example command follows the same contract an agent adapter uses. The solver is only a tiny
