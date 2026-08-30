@@ -154,6 +154,23 @@ def run_gabench_batch(
                 "task_id": task_id,
                 "status": run_manifest.status.value,
                 "duration_seconds": run_manifest.duration_seconds,
+                "model": (
+                    run_manifest.token_usage.model
+                    if run_manifest.token_usage and run_manifest.token_usage.model
+                    else run_manifest.agent.get("model")
+                ),
+                "total_tokens": run_manifest.token_usage.total_tokens
+                if run_manifest.token_usage
+                else None,
+                "estimated_cost_usd": run_manifest.cost_estimate.estimated_cost_usd
+                if run_manifest.cost_estimate
+                else None,
+                "minimum_cost_usd": run_manifest.cost_estimate.minimum_cost_usd
+                if run_manifest.cost_estimate
+                else None,
+                "maximum_cost_usd": run_manifest.cost_estimate.maximum_cost_usd
+                if run_manifest.cost_estimate
+                else None,
                 "run_id": run_manifest.run_id,
                 "manifest_path": str(run_manifest_path),
             }
@@ -172,7 +189,7 @@ def run_gabench_batch(
     completed_without_failures = not skipped and not failed_results and len(results) == total
     finished = _now()
     batch = {
-        "schema_version": "0.1",
+        "schema_version": "0.2",
         "batch_id": batch_id,
         "source_manifest": str(manifest_path),
         "source_manifest_sha256": sha256_file(manifest_path),
@@ -189,6 +206,7 @@ def run_gabench_batch(
         "skipped_count": len(skipped),
         "completed_without_failures": completed_without_failures,
         "status_counts": dict(sorted(Counter(item["status"] for item in results).items())),
+        "usage": aggregate["usage"],
         "results": results,
         "skipped": skipped,
         "aggregate_report": {
@@ -211,6 +229,14 @@ def run_gabench_batch(
     print("Batch complete")
     print(f"Executed: {len(results)}/{total}; skipped: {len(skipped)}")
     print(f"Statuses: {batch['status_counts']}")
+    if aggregate["usage"]["runs_with_usage"]:
+        token_stats = aggregate["usage"]["tokens_per_task"]
+        print(
+            "Tokens: "
+            f"{aggregate['usage']['total_tokens']:,} total; "
+            f"{token_stats['minimum']:,}/{token_stats['average']:,.1f}/"
+            f"{token_stats['maximum']:,} min/avg/max per task"
+        )
     print(f"Report: {report_markdown_path}")
     if visual["comparison_count"]:
         print(f"Visual review: {visual_dir / 'index.html'}")

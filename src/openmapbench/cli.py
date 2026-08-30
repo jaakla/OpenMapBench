@@ -12,6 +12,7 @@ from .models import RunStatus
 from .reporting import aggregate_manifests, report_markdown
 from .runner import run_task
 from .taskio import load_task, validate_task_files
+from .usage import backfill_usage
 from .visual import visual_report_from_gabench, visual_report_from_runs
 
 app = typer.Typer(no_args_is_help=True, help="OpenMapBench: artifact-first GIS agent benchmark")
@@ -108,6 +109,17 @@ def report(
         typer.echo(str(output.resolve()))
     else:
         typer.echo(json.dumps(aggregate, indent=2, sort_keys=True))
+
+
+@app.command("usage-backfill")
+def usage_backfill(
+    run_root: Annotated[Path, typer.Argument(exists=True, file_okay=False)],
+) -> None:
+    """Recover token usage and cost estimates in existing manifests from agent logs."""
+    summary = backfill_usage(run_root)
+    typer.echo(json.dumps(summary, indent=2, sort_keys=True))
+    if summary["invalid_manifests"]:
+        raise typer.Exit(code=1)
 
 
 @app.command("gabench-import")

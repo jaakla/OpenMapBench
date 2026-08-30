@@ -91,8 +91,33 @@ class FileRecord(BaseModel):
     size_bytes: int | None = None
 
 
+class TokenUsage(BaseModel):
+    source: str
+    model: str | None = None
+    reasoning_effort: str | None = None
+    input_tokens: int | None = Field(default=None, ge=0)
+    cached_input_tokens: int | None = Field(default=None, ge=0)
+    cache_write_input_tokens: int | None = Field(default=None, ge=0)
+    output_tokens: int | None = Field(default=None, ge=0)
+    reasoning_output_tokens: int | None = Field(default=None, ge=0)
+    total_tokens: int = Field(ge=0)
+
+
+class CostEstimate(BaseModel):
+    currency: Literal["USD"] = "USD"
+    model: str
+    basis: Literal["token_breakdown", "total_tokens_range"]
+    estimated_cost_usd: float | None = Field(default=None, ge=0)
+    minimum_cost_usd: float = Field(ge=0)
+    maximum_cost_usd: float = Field(ge=0)
+    pricing_as_of: str
+    pricing_source: str
+    rates_per_million_usd: dict[str, float]
+    note: str
+
+
 class RunManifest(BaseModel):
-    schema_version: Literal["0.1"] = "0.1"
+    schema_version: Literal["0.1", "0.2"] = "0.2"
     run_id: str
     status: RunStatus
     task_id: str
@@ -111,5 +136,7 @@ class RunManifest(BaseModel):
     finished_at: str
     duration_seconds: float
     exit_code: int | None = None
+    token_usage: TokenUsage | None = None
+    cost_estimate: CostEstimate | None = None
     evaluation: dict[str, Any] | None = None
     error: str | None = None

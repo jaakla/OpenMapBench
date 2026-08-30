@@ -77,6 +77,17 @@ outputs, evaluator errors, and deterministic comparison failures contribute zero
 `needs_review` remains an attempted task but is excluded from the strict denominator. Invalid
 manifests are reported separately and are not silently counted.
 
+## Token and cost reporting
+
+Token use and estimated cost are efficiency diagnostics; they never affect strict task success.
+Reports include total usage plus minimum, average, and maximum tokens per task, split by detected
+model. Detailed token categories support a point cost estimate. Total-only logs support only a
+lower-to-upper range across that model's token rates.
+
+Pricing metadata is dated and source-linked. All reported dollar values are API-equivalent list
+price estimates, not actual ChatGPT subscription charges. Runs using unknown models remain in token
+statistics and are counted as unpriced rather than silently assigned another model's rates.
+
 ## Maps / cartography
 
 Analytical correctness and visual/cartographic quality should be two separate dimensions.

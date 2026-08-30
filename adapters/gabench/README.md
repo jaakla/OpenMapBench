@@ -46,7 +46,9 @@ contract:
 
 ```bash
 uv run --no-sync python scripts/run_gabench_all.py \
-  --agent-command "my-agent --task {task_file} --output {output_path}" \
+  --agent-command 'codex exec --json --ephemeral --sandbox workspace-write --approve-for-me -m gpt-5.6-luna -c model_reasoning_effort=low "Read the OpenMapBench task at {task_file}, complete it using the declared inputs, and write the required artifact exactly to {output_path}. Create the file rather than only explaining the result."' \
+  --agent-name codex \
+  --model gpt-5.6-luna \
   --timeout-seconds 1800
 ```
 
@@ -59,6 +61,23 @@ name in automation, and `--agent-cwd PATH` if the agent must run from another pr
 
 The same command can be provided through `OPENMAPBENCH_AGENT_COMMAND`. Agent commands are parsed
 without a shell; wrap shell pipelines in a dedicated executable script.
+
+Codex `--json` output lets OpenMapBench retain input, cached-input, cache-write, and output token
+categories for a point API-equivalent cost estimate. Without it, the final `tokens used` value in
+stderr is still captured but can yield only a cost range. For a batch created by an older
+OpenMapBench version, recover usage from its retained logs and regenerate both reports:
+
+```bash
+openmapbench usage-backfill runs/gabench/<batch-id>/task-runs
+openmapbench report runs/gabench/<batch-id>/task-runs \
+  --output runs/gabench/<batch-id>/report.json
+openmapbench report runs/gabench/<batch-id>/task-runs \
+  --output runs/gabench/<batch-id>/report.md
+```
+
+The reports show min/average/max tokens per task overall and per model. Dollar values use a dated,
+source-linked model price catalog and are estimates for API-equivalent comparison, not actual
+ChatGPT subscription billing.
 
 ## Current compatibility
 

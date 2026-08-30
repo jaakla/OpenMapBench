@@ -15,7 +15,9 @@ from typing import Any
 from . import __version__
 from .evaluator import evaluate
 from .models import FileRecord, OutputKind, RunManifest, RunStatus
+from .pricing import estimate_cost
 from .taskio import load_task, sha256_file
+from .usage import parse_agent_usage
 from .visual import image_metadata, is_supported_image_path
 
 
@@ -190,6 +192,13 @@ def run_task(
     stdout_path.write_text(stdout, encoding="utf-8")
     stderr_path.write_text(stderr, encoding="utf-8")
     finished = _now()
+    agent_metadata = agent or {}
+    token_usage = parse_agent_usage(
+        stdout,
+        stderr,
+        declared_model=agent_metadata.get("model"),
+    )
+    cost_estimate = estimate_cost(token_usage) if token_usage is not None else None
     input_records = [
         _file_record(path) if path.is_file() else FileRecord(path=str(path))
         for path in spec.resolve_input_paths(task_file)
@@ -208,7 +217,7 @@ def run_task(
         if reference.is_file()
         else FileRecord(path=str(reference)),
         command=command,
-        agent=agent or {},
+        agent=agent_metadata,
         environment={
             "openmapbench": __version__,
             "python": sys.version.split()[0],
@@ -222,6 +231,8 @@ def run_task(
         finished_at=finished.isoformat(),
         duration_seconds=round(time.monotonic() - start_clock, 6),
         exit_code=exit_code,
+        token_usage=token_usage,
+        cost_estimate=cost_estimate,
         evaluation=evaluation_payload,
         error=error,
     )

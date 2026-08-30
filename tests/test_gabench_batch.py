@@ -80,6 +80,7 @@ def test_gabench_batch_runs_all_tasks_and_builds_reports(tmp_path: Path) -> None
         """
 import os
 from pathlib import Path
+import sys
 from PIL import Image
 
 output = Path(os.environ["OPENMAPBENCH_OUTPUT_PATH"])
@@ -87,6 +88,7 @@ if output.suffix == ".png":
     Image.new("RGB", (100, 70), "#0ea5e9").save(output)
 else:
     output.write_text("42\\n", encoding="utf-8")
+sys.stderr.write("model: gpt-5.6-luna\\nreasoning effort: low\\ntokens used\\n1,000\\n")
 """.strip(),
         encoding="utf-8",
     )
@@ -114,6 +116,13 @@ else:
     report = json.loads((batch_dir / "report.json").read_text(encoding="utf-8"))
     assert report["strict_success_rate"] == 1.0
     assert report["needs_manual_review"] == 1
+    assert report["usage"]["total_tokens"] == 2_000
+    assert report["usage"]["by_model"]["gpt-5.6-luna"]["tokens_per_task"] == {
+        "minimum": 1_000,
+        "average": 1_000.0,
+        "maximum": 1_000,
+    }
+    assert batch["usage"] == report["usage"]
 
 
 def test_gabench_batch_reports_missing_references_and_continues(tmp_path: Path) -> None:

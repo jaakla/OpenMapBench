@@ -30,6 +30,93 @@ def _breakdown(manifests: list[RunManifest], field: str) -> dict[str, dict[str, 
     return result
 
 
+def _token_statistics(values: list[int]) -> dict[str, int | float | None]:
+    if not values:
+        return {"minimum": None, "average": None, "maximum": None}
+    return {
+        "minimum": min(values),
+        "average": round(sum(values) / len(values), 3),
+        "maximum": max(values),
+    }
+
+
+def _cost_summary(manifests: list[RunManifest]) -> dict[str, Any]:
+    priced = [manifest.cost_estimate for manifest in manifests if manifest.cost_estimate]
+    exact = [cost for cost in priced if cost.estimated_cost_usd is not None]
+    range_only = [cost for cost in priced if cost.basis == "total_tokens_range"]
+    all_exact = bool(manifests) and len(exact) == len(manifests)
+    return {
+        "currency": "USD",
+        "description": "API-equivalent list-price estimate; not actual ChatGPT billing",
+        "priced_runs": len(priced),
+        "unpriced_runs": len(manifests) - len(priced),
+        "exact_cost_runs": len(exact),
+        "range_only_cost_runs": len(range_only),
+        "estimated_cost_usd": round(sum(cost.estimated_cost_usd or 0 for cost in exact), 9)
+        if all_exact
+        else None,
+        "exact_components_cost_usd": round(
+            sum(cost.estimated_cost_usd or 0 for cost in exact), 9
+        ),
+        "minimum_cost_usd": round(sum(cost.minimum_cost_usd for cost in priced), 9)
+        if priced
+        else None,
+        "maximum_cost_usd": round(sum(cost.maximum_cost_usd for cost in priced), 9)
+        if priced
+        else None,
+        "pricing_as_of": sorted({cost.pricing_as_of for cost in priced}),
+        "pricing_sources": sorted({cost.pricing_source for cost in priced}),
+    }
+
+
+def _usage_summary(manifests: list[RunManifest]) -> dict[str, Any]:
+    with_usage = [manifest for manifest in manifests if manifest.token_usage]
+    grouped: dict[str, list[RunManifest]] = defaultdict(list)
+    for manifest in with_usage:
+        assert manifest.token_usage is not None
+        model = manifest.token_usage.model or str(manifest.agent.get("model") or "unknown")
+        grouped[model].append(manifest)
+
+    by_model: dict[str, Any] = {}
+    for model, items in sorted(grouped.items()):
+        totals = [item.token_usage.total_tokens for item in items if item.token_usage]
+        by_model[model] = {
+            "runs": len(items),
+            "total_tokens": sum(totals),
+            "tokens_per_task": _token_statistics(totals),
+            "cost": _cost_summary(items),
+        }
+
+    total_values = [manifest.token_usage.total_tokens for manifest in with_usage if manifest.token_usage]
+    detailed = [
+        manifest.token_usage
+        for manifest in with_usage
+        if manifest.token_usage
+        and manifest.token_usage.input_tokens is not None
+        and manifest.token_usage.output_tokens is not None
+    ]
+    return {
+        "runs_with_usage": len(with_usage),
+        "runs_without_usage": len(manifests) - len(with_usage),
+        "runs_with_token_breakdown": len(detailed),
+        "total_tokens": sum(total_values),
+        "tokens_per_task": _token_statistics(total_values),
+        "known_token_categories": {
+            "input_tokens": sum(item.input_tokens or 0 for item in detailed),
+            "cached_input_tokens": sum(item.cached_input_tokens or 0 for item in detailed),
+            "cache_write_input_tokens": sum(
+                item.cache_write_input_tokens or 0 for item in detailed
+            ),
+            "output_tokens": sum(item.output_tokens or 0 for item in detailed),
+            "reasoning_output_tokens": sum(
+                item.reasoning_output_tokens or 0 for item in detailed
+            ),
+        },
+        "cost": _cost_summary(with_usage),
+        "by_model": by_model,
+    }
+
+
 def aggregate_manifests(run_root: Path) -> dict[str, Any]:
     manifests: list[RunManifest] = []
     invalid: list[dict[str, str]] = []
@@ -43,7 +130,7 @@ def aggregate_manifests(run_root: Path) -> dict[str, Any]:
     needs_review = sum(manifest.status == RunStatus.NEEDS_REVIEW for manifest in manifests)
     strictly_scored = attempted - needs_review
     return {
-        "schema_version": "0.1",
+        "schema_version": "0.2",
         "attempted_tasks": attempted,
         "strictly_scored_tasks": strictly_scored,
         "strict_successes": passed,
@@ -54,6 +141,7 @@ def aggregate_manifests(run_root: Path) -> dict[str, Any]:
         ),
         "by_category": _breakdown(manifests, "category"),
         "by_output_kind": _breakdown(manifests, "output_kind"),
+        "usage": _usage_summary(manifests),
         "runs": [
             {
                 "run_id": manifest.run_id,
@@ -62,6 +150,23 @@ def aggregate_manifests(run_root: Path) -> dict[str, Any]:
                 "strictly_scored": manifest.status != RunStatus.NEEDS_REVIEW,
                 "strict_success": manifest.status == RunStatus.PASSED,
                 "duration_seconds": manifest.duration_seconds,
+                "model": (
+                    manifest.token_usage.model
+                    if manifest.token_usage and manifest.token_usage.model
+                    else manifest.agent.get("model")
+                ),
+                "total_tokens": manifest.token_usage.total_tokens
+                if manifest.token_usage
+                else None,
+                "estimated_cost_usd": manifest.cost_estimate.estimated_cost_usd
+                if manifest.cost_estimate
+                else None,
+                "minimum_cost_usd": manifest.cost_estimate.minimum_cost_usd
+                if manifest.cost_estimate
+                else None,
+                "maximum_cost_usd": manifest.cost_estimate.maximum_cost_usd
+                if manifest.cost_estimate
+                else None,
             }
             for manifest in manifests
         ],
@@ -69,9 +174,27 @@ def aggregate_manifests(run_root: Path) -> dict[str, Any]:
     }
 
 
+def _cost_text(cost: dict[str, Any]) -> str:
+    if cost["estimated_cost_usd"] is not None:
+        return f"${cost['estimated_cost_usd']:.6f}"
+    if cost["minimum_cost_usd"] is not None:
+        return f"${cost['minimum_cost_usd']:.6f}–${cost['maximum_cost_usd']:.6f}"
+    return "not available"
+
+
+def _run_cost_text(run: dict[str, Any]) -> str:
+    if run["estimated_cost_usd"] is not None:
+        return f"${run['estimated_cost_usd']:.6f}"
+    if run["minimum_cost_usd"] is not None:
+        return f"${run['minimum_cost_usd']:.6f}–${run['maximum_cost_usd']:.6f}"
+    return "—"
+
+
 def report_markdown(report: dict[str, Any]) -> str:
     rate = report["strict_success_rate"]
     rate_text = f"{rate:.1%}" if rate is not None else "not available"
+    usage = report["usage"]
+    stats = usage["tokens_per_task"]
     lines = [
         "# OpenMapBench report",
         "",
@@ -81,12 +204,51 @@ def report_markdown(report: dict[str, Any]) -> str:
         f"- Strict success rate: {rate_text}",
         f"- Needs manual review: {report['needs_manual_review']}",
         "",
-        "| Task | Status | Strict success | Duration (s) |",
-        "| --- | --- | ---: | ---: |",
+        "## Token usage and cost",
+        "",
+        f"- Runs with token usage: {usage['runs_with_usage']}/{report['attempted_tasks']}",
+        f"- Total tokens: {usage['total_tokens']:,}",
     ]
+    if stats["minimum"] is not None:
+        lines.extend(
+            [
+                (
+                    "- Tokens per task (min / average / max): "
+                    f"{stats['minimum']:,} / {stats['average']:,.1f} / {stats['maximum']:,}"
+                ),
+                f"- Estimated cost: {_cost_text(usage['cost'])}",
+                "- Cost basis: API-equivalent list prices, not actual ChatGPT billing",
+            ]
+        )
+    if usage["by_model"]:
+        lines.extend(
+            [
+                "",
+                "| Model | Runs | Total tokens | Min | Average | Max | Estimated cost |",
+                "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+            ]
+        )
+        for model, model_usage in usage["by_model"].items():
+            model_stats = model_usage["tokens_per_task"]
+            lines.append(
+                f"| {model} | {model_usage['runs']} | {model_usage['total_tokens']:,} | "
+                f"{model_stats['minimum']:,} | {model_stats['average']:,.1f} | "
+                f"{model_stats['maximum']:,} | {_cost_text(model_usage['cost'])} |"
+            )
     lines.extend(
-        f"| {run['task_id']} | {run['status']} | {'yes' if run['strict_success'] else 'no'} | "
-        f"{run['duration_seconds']:.3f} |"
-        for run in report["runs"]
+        [
+            "",
+            "## Per-task results",
+            "",
+            "| Task | Status | Model | Tokens | Estimated cost | Strict success | Duration (s) |",
+            "| --- | --- | --- | ---: | ---: | ---: | ---: |",
+        ]
     )
+    for run in report["runs"]:
+        token_text = f"{run['total_tokens']:,}" if run["total_tokens"] is not None else "—"
+        lines.append(
+            f"| {run['task_id']} | {run['status']} | {run['model'] or '—'} | "
+            f"{token_text} | {_run_cost_text(run)} | "
+            f"{'yes' if run['strict_success'] else 'no'} | {run['duration_seconds']:.3f} |"
+        )
     return "\n".join(lines) + "\n"

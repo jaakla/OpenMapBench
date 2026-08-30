@@ -15,7 +15,8 @@ The repository now contains a runnable MVP:
 - an agent-neutral subprocess runner;
 - deterministic scalar/JSON, CSV/JSON-table, and vector evaluators;
 - immutable run directories with logs, checksums, environment metadata, and manifests;
-- aggregate JSON or Markdown reports with a headline strict success rate;
+- automatic Codex token capture plus dated API-equivalent cost estimates;
+- aggregate JSON or Markdown reports with strict success and per-model usage statistics;
 - static side-by-side visual-review folders with PNG sheets, an HTML index, an editable review
   CSV, and a machine-readable manifest;
 - a GABench importer that operates against an external checkout and never copies upstream
@@ -144,8 +145,32 @@ placeholders:
 The same values are exposed as `OPENMAPBENCH_TASK_FILE`, `OPENMAPBENCH_TASK_DIR`,
 `OPENMAPBENCH_OUTPUT_DIR`, `OPENMAPBENCH_OUTPUT_PATH`, and `OPENMAPBENCH_RUN_DIR`. This keeps the
 core independent of model vendors: a Codex adapter, Claude Code adapter, container wrapper, MCP
-Useful metadata can be recorded with `--agent-name`, `--model`, repeated `--skill`, and repeated
+client, or local script can use the same interface. Useful metadata can be recorded with
+`--agent-name`, `--model`, repeated `--skill`, and repeated
 `--tool` flags. Use a script wrapper when an agent needs pipes, redirects, or other shell syntax.
+
+### Token usage and cost
+
+The runner recognizes Codex CLI usage in both JSON Lines output and the human-readable stderr
+summary. Each manifest records the detected model, reasoning effort, total tokens, and—in JSON
+mode—input, cached-input, cache-write, output, and reasoning-output categories when supplied.
+
+OpenMapBench includes a dated price catalog for `gpt-5.6-luna`, `gpt-5.6-terra`, and
+`gpt-5.6-sol`. Costs are **API-equivalent list-price estimates**, not actual ChatGPT subscription
+charges. Detailed token categories produce a point estimate. A plain `tokens used` total cannot
+distinguish cheap cached input from more expensive output, so it produces an explicit minimum to
+maximum range instead.
+
+For the most useful cost estimate, run Codex with `--json` and separately record the model with
+OpenMapBench's `--model` option. Existing runs can be enriched from their retained logs:
+
+```bash
+openmapbench usage-backfill runs/gabench/<batch-id>/task-runs
+openmapbench report runs/gabench/<batch-id>/task-runs \
+  --output runs/gabench/<batch-id>/report.json
+openmapbench report runs/gabench/<batch-id>/task-runs \
+  --output runs/gabench/<batch-id>/report.md
+```
 
 ## Deterministic evaluators
 
@@ -248,9 +273,9 @@ Run every imported task in one isolated batch:
 
 ```bash
 uv run --no-sync python scripts/run_gabench_all.py \
-  --agent-command "my-agent --task {task_file} --output {output_path}" \
-  --agent-name my-agent \
-  --model my-model \
+  --agent-command 'codex exec --json --ephemeral --sandbox workspace-write --approve-for-me -m gpt-5.6-luna -c model_reasoning_effort=low "Read the OpenMapBench task at {task_file}, complete it using the declared inputs, and write the required artifact exactly to {output_path}. Create the file rather than only explaining the result."' \
+  --agent-name codex \
+  --model gpt-5.6-luna \
   --timeout-seconds 1800
 ```
 
@@ -260,8 +285,8 @@ and creates a timestamped directory under `runs/gabench/`:
 ```text
 runs/gabench/<batch-id>/
 ├── batch.json             # batch provenance, outcomes, and skipped-task reasons
-├── report.json            # aggregate machine-readable score
-├── report.md              # readable score and per-task status table
+├── report.json            # aggregate score, token, model, and cost statistics
+├── report.md              # readable score, usage summary, and per-task table
 ├── task-runs/             # immutable artifact, log, and manifest folder for every task
 └── visual-review/         # HTML, CSV, manifest, and comparison PNGs for image tasks
 ```
