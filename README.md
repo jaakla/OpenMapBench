@@ -220,10 +220,11 @@ visual-reviews/gabench-runs/
 ```
 
 Each comparison places the generated image on the left and the expected reference on the right,
-in equally sized panels without cropping. Images may be downscaled to the configured panel limit;
-the manifest retains original dimensions and checksums. This is a presentation artifact, not an
-image-similarity metric. Regenerating the same review folder preserves existing `manual_result`
-and `notes` values from `review.csv`.
+in equally sized panels without cropping. Each HTML card also shows the full task prompt so the
+reviewer can judge the images against the requested result. Images may be downscaled to the
+configured panel limit; the manifest retains the prompt, original dimensions, and checksums. This
+is a presentation artifact, not an image-similarity metric. Regenerating the same review folder
+preserves existing `manual_result` and `notes` values from `review.csv`.
 
 ## Strict success score
 

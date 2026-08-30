@@ -116,8 +116,9 @@ openmapbench gabench-visual-report \
 ```
 
 The result contains labeled side-by-side PNGs (generated left, bundled GABench expectation right),
-a scrollable `index.html`, an editable `review.csv`, and a checksummed `manifest.json`. Missing and
-ambiguous candidate filenames are surfaced in the report rather than guessed.
+a scrollable `index.html` with the full task prompt on every card, an editable `review.csv`, and a
+checksummed `manifest.json`. Missing and ambiguous candidate filenames are surfaced in the report
+rather than guessed.
 
 For images produced through `openmapbench run`, the equivalent command is:
 

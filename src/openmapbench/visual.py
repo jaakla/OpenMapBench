@@ -22,6 +22,7 @@ IMAGE_SUFFIXES = {".bmp", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp"}
 class VisualPair:
     task_id: str
     title: str
+    prompt: str
     candidate: Path
     reference: Path
     run_id: str | None = None
@@ -155,6 +156,7 @@ def _write_html(report: dict[str, Any], output: Path) -> None:
     for item in report["comparisons"]:
         title = html.escape(item["title"])
         task_id = html.escape(item["task_id"])
+        prompt = html.escape(item["prompt"])
         comparison = html.escape(item["comparison_image"])
         candidate_url = html.escape(Path(item["candidate_path"]).resolve().as_uri(), quote=True)
         reference_url = html.escape(Path(item["reference_path"]).resolve().as_uri(), quote=True)
@@ -167,6 +169,10 @@ def _write_html(report: dict[str, Any], output: Path) -> None:
               <div class="card-head">
                 <div><code>{task_id}</code><h2>{title}</h2></div>
                 <span class="review {review_class}">manual review: {review_result}</span>
+              </div>
+              <div class="task-prompt">
+                <h3>Task prompt</h3>
+                <div class="prompt-text">{prompt}</div>
               </div>
               <a href="{comparison}"><img src="{comparison}" alt="{title} comparison"></a>
               <p class="meta">Source: {run_id} ·
@@ -195,6 +201,8 @@ def _write_html(report: dict[str, Any], output: Path) -> None:
     header {{ margin-bottom: 28px; }}
     h1 {{ margin: 0 0 8px; font-size: 2rem; }}
     h2 {{ margin: 7px 0 0; font-size: 1.15rem; }}
+    h3 {{ margin: 0 0 7px; font-size: .78rem; letter-spacing: .04em;
+          text-transform: uppercase; color: #475569; }}
     p {{ line-height: 1.55; }}
     .summary {{ color: #475569; }}
     .notice {{ background: #fff7ed; border: 1px solid #fed7aa; padding: 12px 16px;
@@ -203,6 +211,10 @@ def _write_html(report: dict[str, Any], output: Path) -> None:
              padding: 18px; margin: 0 0 24px; box-shadow: 0 8px 28px rgb(15 23 42 / 7%); }}
     .card-head {{ display: flex; justify-content: space-between; gap: 20px; align-items: start;
                   margin-bottom: 14px; }}
+    .task-prompt {{ background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 9px;
+                    padding: 12px 14px; margin: 0 0 16px; }}
+    .prompt-text {{ color: #334155; line-height: 1.5; white-space: pre-wrap;
+                    overflow-wrap: anywhere; }}
     .card img {{ display: block; width: 100%; height: auto; border: 1px solid #dbe2ea;
                  border-radius: 8px; }}
     .review {{ white-space: nowrap; color: #334155; background: #e2e8f0; padding: 6px 10px;
@@ -272,6 +284,7 @@ def build_visual_report(
             {
                 "task_id": pair.task_id,
                 "title": pair.title,
+                "prompt": pair.prompt,
                 "run_id": pair.run_id,
                 "source_status": pair.source_status,
                 "candidate_path": str(pair.candidate.resolve()),
@@ -287,7 +300,7 @@ def build_visual_report(
 
     output.mkdir(parents=True, exist_ok=True)
     report = {
-        "schema_version": "0.1",
+        "schema_version": "0.2",
         "review_mode": "manual_side_by_side",
         "created_at": datetime.now(UTC).isoformat(),
         "source_type": source_type,
@@ -331,6 +344,16 @@ def build_visual_report(
     return report
 
 
+def _task_prompt(task_path_value: str) -> str:
+    task_path = Path(task_path_value)
+    if not task_path.is_file():
+        return "Prompt unavailable because the original task contract no longer exists."
+    try:
+        return load_task(task_path).prompt
+    except Exception:  # noqa: BLE001 - a malformed old contract must not block visual review
+        return "Prompt unavailable because the original task contract could not be read."
+
+
 def visual_report_from_runs(
     run_root: Path,
     output: Path,
@@ -364,6 +387,7 @@ def visual_report_from_runs(
             VisualPair(
                 task_id=manifest.task_id,
                 title=manifest.task_title,
+                prompt=_task_prompt(manifest.task_file.path),
                 candidate=candidate,
                 reference=reference,
                 run_id=manifest.run_id,
@@ -438,6 +462,7 @@ def visual_report_from_gabench(
             VisualPair(
                 task_id=task.id,
                 title=task.title,
+                prompt=task.prompt,
                 candidate=candidate,
                 reference=reference,
                 source_status="external_gabench_output",

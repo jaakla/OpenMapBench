@@ -24,7 +24,7 @@ def test_image_run_becomes_manual_side_by_side_review(tmp_path: Path) -> None:
 id: map-demo
 title: Map demo
 category: cartography
-prompt: Create a map image.
+prompt: Create a map image with <all> values & labels.
 output:
   path: map.png
   kind: file
@@ -63,6 +63,12 @@ Image.new("RGB", (160, 100), "#2563eb").save(Path(os.environ["OPENMAPBENCH_OUTPU
         assert composed.width > 320
         assert composed.height > 120
     assert (tmp_path / "visual-review" / "index.html").is_file()
+    html = (tmp_path / "visual-review" / "index.html").read_text(encoding="utf-8")
+    assert "Task prompt" in html
+    assert "Create a map image with &lt;all&gt; values &amp; labels." in html
+    assert report["comparisons"][0]["prompt"] == (
+        "Create a map image with <all> values & labels."
+    )
     assert "manual_result" in (tmp_path / "visual-review" / "review.csv").read_text()
 
 
@@ -76,7 +82,7 @@ def test_gabench_visual_report_matches_images_by_imported_output_name(tmp_path: 
                 "id": "gabench-001",
                 "title": "GABench 1: visual map",
                 "category": "visualization",
-                "prompt": "Create the map.",
+                "prompt": "Create the map.\nLabel <Town> & river.",
                 "output": {"path": "expected-map.png", "kind": "file"},
             },
             sort_keys=False,
@@ -119,6 +125,8 @@ def test_gabench_visual_report_matches_images_by_imported_output_name(tmp_path: 
     html = (tmp_path / "gabench-review" / "index.html").read_text(encoding="utf-8")
     assert "Generated images are on the left" in html
     assert "do not commit or redistribute" in html
+    assert "Create the map.\nLabel &lt;Town&gt; &amp; river." in html
+    assert report["comparisons"][0]["prompt"] == "Create the map.\nLabel <Town> & river."
 
     review_path = tmp_path / "gabench-review" / "review.csv"
     with review_path.open(newline="", encoding="utf-8") as handle:
