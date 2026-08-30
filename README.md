@@ -231,6 +231,34 @@ The importer reads the actual upstream columns, discovers input files named in e
 description, records the upstream commit and checksums, generates local task contracts, and points
 the manifest at upstream reference files. Nothing from GABench is copied into this repository.
 
+Run every imported task in one isolated batch:
+
+```bash
+uv run --no-sync python scripts/run_gabench_all.py \
+  --agent-command "my-agent --task {task_file} --output {output_path}" \
+  --agent-name my-agent \
+  --model my-model \
+  --timeout-seconds 1800
+```
+
+The script defaults to `.openmapbench/gabench/manifest.json`, continues after individual failures,
+and creates a timestamped directory under `runs/gabench/`:
+
+```text
+runs/gabench/<batch-id>/
+├── batch.json             # batch provenance, outcomes, and skipped-task reasons
+├── report.json            # aggregate machine-readable score
+├── report.md              # readable score and per-task status table
+├── task-runs/             # immutable artifact, log, and manifest folder for every task
+└── visual-review/         # HTML, CSV, manifest, and comparison PNGs for image tasks
+```
+
+The process returns nonzero after completing the batch if any task failed, errored, or could not be
+run. Image tasks in `needs_review` do not cause a runner failure, but remain excluded from the
+strict score. Set `OPENMAPBENCH_AGENT_COMMAND` instead of `--agent-command` if preferred. Commands
+are executed directly without shell expansion; use an agent wrapper script if pipes or redirects
+are required.
+
 Most upstream final artifacts are PNG maps. They are now usable through manual visual review while
 remaining outside the strict automated score. If generated images are already collected in one
 directory, compare them directly with the bundled GABench expectations:

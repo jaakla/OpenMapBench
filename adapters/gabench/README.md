@@ -39,6 +39,27 @@ The command:
 Use `--no-hash-inputs` only for a fast exploratory import. Hashing is enabled by default because a
 commit alone does not prove a local Git LFS worktree is clean.
 
+## Run all imported tests
+
+After importing, execute every entry in `.openmapbench/gabench/manifest.json` with the same agent
+contract:
+
+```bash
+uv run --no-sync python scripts/run_gabench_all.py \
+  --agent-command "my-agent --task {task_file} --output {output_path}" \
+  --timeout-seconds 1800
+```
+
+Each invocation creates a new `runs/gabench/<batch-id>/` folder containing immutable task runs,
+aggregate JSON and Markdown reports, a batch manifest, and the visual-review gallery. The runner
+checks that generated task contracts, inputs, references, and recorded reference checksums still
+match the imported manifest. Missing or invalid entries are reported as skipped, the remaining
+tasks continue, and the final process status is nonzero. Use `--batch-id NAME` for a stable folder
+name in automation, and `--agent-cwd PATH` if the agent must run from another project directory.
+
+The same command can be provided through `OPENMAPBENCH_AGENT_COMMAND`. Agent commands are parsed
+without a shell; wrap shell pipelines in a dedicated executable script.
+
 ## Current compatibility
 
 GABench's `Result` column predominantly names PNG maps. Those entries remain valid imported task
