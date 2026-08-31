@@ -149,6 +149,8 @@ core independent of model vendors: a Codex adapter, Claude Code adapter, contain
 client, or local script can use the same interface. Useful metadata can be recorded with
 `--agent-name`, `--model`, repeated `--skill`, and repeated
 `--tool` flags. Use a script wrapper when an agent needs pipes, redirects, or other shell syntax.
+Pass `-v`/`--verbose` to show runner stages and a live, readable summary of agent commands, tool
+calls, file changes, ordinary stdout, and stderr while the same lossless logs are retained.
 
 ### Execution audit and artifact lineage
 

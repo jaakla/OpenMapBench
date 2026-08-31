@@ -46,6 +46,10 @@ source line and the lossless `agent.stdout.log` are recorded. See the official
 `audit.inner_trace_status` is `captured`, `partial`, or `unavailable`. `unavailable` explicitly
 means that the runner could not observe inner actions—not that the agent used no tools.
 
+Use `openmapbench run -v` (or `--verbose`) to show the same useful action progress in the terminal
+as the run proceeds. JSONL command and tool events are summarized rather than dumped as raw JSON;
+the exact streams are still written to `agent.stdout.log` and `agent.stderr.log`.
+
 ### Vendor-neutral agent audit JSONL
 
 The runner exposes `OPENMAPBENCH_AUDIT_PATH`, normally `<run-dir>/agent.audit.jsonl`. Any agent or

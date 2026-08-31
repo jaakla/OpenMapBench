@@ -65,6 +65,14 @@ def run(
     skill: Annotated[list[str] | None, typer.Option()] = None,
     tool: Annotated[list[str] | None, typer.Option()] = None,
     agent_cwd: Annotated[Path | None, typer.Option(exists=True, file_okay=False)] = None,
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            "--verbose",
+            "-v",
+            help="Show runner stages and live agent command/tool progress.",
+        ),
+    ] = False,
 ) -> None:
     """Run one task end to end and write artifact, logs, and a run manifest."""
     manifest, manifest_path = run_task(
@@ -84,6 +92,7 @@ def run(
             if value not in (None, [])
         },
         agent_cwd=agent_cwd,
+        verbose=verbose,
     )
     typer.echo(str(manifest_path))
     typer.echo(f"status: {manifest.status.value}")

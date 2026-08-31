@@ -6,6 +6,7 @@ import platform
 import shlex
 import subprocess
 import sys
+import threading
 import time
 import uuid
 from datetime import UTC, datetime
@@ -57,6 +58,152 @@ def _as_text(value: str | bytes | None) -> str:
     return value.decode(errors="replace") if isinstance(value, bytes) else value
 
 
+def _short(value: str, limit: int = 500) -> str:
+    compact = " ".join(value.split())
+    return compact if len(compact) <= limit else f"{compact[: limit - 3]}..."
+
+
+def _verbose_message(message: str) -> None:
+    print(message, file=sys.stderr, flush=True)
+
+
+def _action_summary(item: dict[str, Any]) -> str | None:
+    item_type = str(item.get("type") or "")
+    if item_type == "command_execution":
+        return f"command: {_short(str(item.get('command') or 'unknown'))}"
+    if item_type == "mcp_tool_call" or item_type.endswith("_tool_call"):
+        server = f"{item.get('server')}/" if item.get("server") else ""
+        tool = str(item.get("tool") or item.get("name") or item_type)
+        arguments = item.get("arguments", item.get("parameters"))
+        suffix = ""
+        if arguments is not None:
+            suffix = f" {_short(json.dumps(arguments, ensure_ascii=False, sort_keys=True))}"
+        return f"tool: {server}{tool}{suffix}"
+    if item_type == "web_search":
+        query = item.get("query", item.get("queries", ""))
+        return f"web search: {_short(str(query))}"
+    if item_type == "file_change":
+        changes = item.get("changes")
+        paths = []
+        if isinstance(changes, list):
+            paths = [
+                str(change.get("path", change.get("file_path", "")))
+                for change in changes
+                if isinstance(change, dict)
+            ]
+        return f"file changes: {_short(', '.join(path for path in paths if path) or 'recorded')}"
+    return None
+
+
+def _emit_agent_line(
+    line: str,
+    *,
+    stream_name: str,
+    shown_items: set[str],
+) -> None:
+    text = line.rstrip("\r\n")
+    if not text:
+        return
+    if stream_name == "stdout":
+        try:
+            payload = json.loads(text)
+        except json.JSONDecodeError:
+            _verbose_message(f"[agent:stdout] {text}")
+            return
+        if not isinstance(payload, dict):
+            _verbose_message(f"[agent:stdout] {text}")
+            return
+        event_type = str(payload.get("type") or "")
+        item = payload.get("item")
+        if event_type.startswith("item.") and isinstance(item, dict):
+            item_id = str(item.get("id") or "")
+            summary = _action_summary(item)
+            if summary and item_id not in shown_items:
+                _verbose_message(f"[agent] {summary}")
+                shown_items.add(item_id)
+            if event_type == "item.completed" and summary:
+                status = item.get("status") or "completed"
+                exit_code = item.get("exit_code")
+                exit_text = f", exit {exit_code}" if exit_code is not None else ""
+                _verbose_message(f"[agent] {item.get('type')}: {status}{exit_text}")
+            return
+        if event_type == "turn.completed":
+            usage = payload.get("usage")
+            total = usage.get("total_tokens") if isinstance(usage, dict) else None
+            suffix = f" ({total:,} tokens)" if isinstance(total, int) else ""
+            _verbose_message(f"[agent] turn completed{suffix}")
+            return
+        if event_type in {"turn.failed", "error"}:
+            detail = payload.get("error", payload.get("message", "unknown error"))
+            _verbose_message(f"[agent] {event_type}: {_short(str(detail))}")
+        return
+    _verbose_message(f"[agent:stderr] {text}")
+
+
+def _run_verbose_process(
+    command: list[str],
+    *,
+    cwd: Path,
+    environment: dict[str, str],
+    timeout_seconds: float | None,
+) -> subprocess.CompletedProcess[str]:
+    process = subprocess.Popen(
+        command,
+        cwd=cwd,
+        env=environment,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    stdout_parts: list[str] = []
+    stderr_parts: list[str] = []
+    shown_items: set[str] = set()
+    output_lock = threading.Lock()
+
+    def drain(stream: Any, parts: list[str], stream_name: str) -> None:
+        for line in stream:
+            parts.append(line)
+            with output_lock:
+                _emit_agent_line(line, stream_name=stream_name, shown_items=shown_items)
+        stream.close()
+
+    assert process.stdout is not None
+    assert process.stderr is not None
+    stdout_thread = threading.Thread(
+        target=drain,
+        args=(process.stdout, stdout_parts, "stdout"),
+        daemon=True,
+    )
+    stderr_thread = threading.Thread(
+        target=drain,
+        args=(process.stderr, stderr_parts, "stderr"),
+        daemon=True,
+    )
+    stdout_thread.start()
+    stderr_thread.start()
+    try:
+        return_code = process.wait(timeout=timeout_seconds)
+    except subprocess.TimeoutExpired as exc:
+        process.kill()
+        process.wait()
+        stdout_thread.join()
+        stderr_thread.join()
+        raise subprocess.TimeoutExpired(
+            exc.cmd,
+            exc.timeout,
+            output="".join(stdout_parts),
+            stderr="".join(stderr_parts),
+        ) from exc
+    stdout_thread.join()
+    stderr_thread.join()
+    return subprocess.CompletedProcess(
+        command,
+        return_code,
+        stdout="".join(stdout_parts),
+        stderr="".join(stderr_parts),
+    )
+
+
 def run_task(
     task_file: Path,
     reference: Path,
@@ -66,6 +213,7 @@ def run_task(
     timeout_seconds: float | None = None,
     agent: dict[str, Any] | None = None,
     agent_cwd: Path | None = None,
+    verbose: bool = False,
 ) -> tuple[RunManifest, Path]:
     """Execute an arbitrary agent command, evaluate its artifact, and always write a manifest."""
     task_file = task_file.resolve()
@@ -115,20 +263,34 @@ def run_task(
     evaluation_started: datetime | None = None
     evaluation_finished: datetime | None = None
     execution_cwd = agent_cwd.resolve() if agent_cwd else task_file.parent
+    if verbose:
+        _verbose_message(f"[openmapbench] task {spec.id}: {spec.title}")
+        _verbose_message(f"[openmapbench] run directory: {run_dir}")
+        _verbose_message(f"[openmapbench] starting agent: {shlex.join(command)}")
     try:
-        process = subprocess.run(
-            command,
-            cwd=execution_cwd,
-            env=environment,
-            capture_output=True,
-            text=True,
-            timeout=timeout_seconds,
-            check=False,
-        )
+        if verbose:
+            process = _run_verbose_process(
+                command,
+                cwd=execution_cwd,
+                environment=environment,
+                timeout_seconds=timeout_seconds,
+            )
+        else:
+            process = subprocess.run(
+                command,
+                cwd=execution_cwd,
+                env=environment,
+                capture_output=True,
+                text=True,
+                timeout=timeout_seconds,
+                check=False,
+            )
         exit_code = process.returncode
         stdout = process.stdout
         stderr = process.stderr
         agent_finished = _now()
+        if verbose:
+            _verbose_message(f"[openmapbench] agent exited with code {exit_code}")
         if exit_code != 0:
             error = f"agent command exited with code {exit_code}"
         elif not candidate.is_file():
@@ -136,6 +298,8 @@ def run_task(
             error = f"agent did not create expected output: {candidate}"
         else:
             evaluation_started = _now()
+            if verbose:
+                _verbose_message(f"[openmapbench] evaluating {candidate.name}")
             if (
                 spec.output.kind == OutputKind.FILE
                 and is_supported_image_path(candidate)
@@ -196,14 +360,20 @@ def run_task(
                     status = RunStatus.EVALUATOR_ERROR
                     error = f"{type(exc).__name__}: {exc}"
             evaluation_finished = _now()
+            if verbose:
+                _verbose_message(f"[openmapbench] evaluation status: {status.value}")
     except subprocess.TimeoutExpired as exc:
         agent_finished = _now()
         stdout = _as_text(exc.stdout)
         stderr = _as_text(exc.stderr)
         error = f"agent command timed out after {timeout_seconds} seconds"
+        if verbose:
+            _verbose_message(f"[openmapbench] {error}")
     except OSError as exc:
         agent_finished = _now()
         error = f"{type(exc).__name__}: {exc}"
+        if verbose:
+            _verbose_message(f"[openmapbench] could not start agent: {error}")
 
     stdout_path.write_text(stdout, encoding="utf-8")
     stderr_path.write_text(stderr, encoding="utf-8")
@@ -294,4 +464,6 @@ def run_task(
         json.dumps(manifest.model_dump(mode="json"), indent=2, sort_keys=True),
         encoding="utf-8",
     )
+    if verbose:
+        _verbose_message(f"[openmapbench] manifest: {manifest_path}")
     return manifest, manifest_path
