@@ -67,6 +67,7 @@ def run_gabench_batch(
     timeout_seconds: float | None = None,
     agent: dict[str, Any] | None = None,
     agent_cwd: Path | None = None,
+    skip_ids: list[str] | None = None,
 ) -> tuple[dict[str, Any], Path]:
     """Run every task in a GABench import manifest and write an isolated batch bundle."""
     manifest_path = manifest_path.resolve()
@@ -91,6 +92,7 @@ def run_gabench_batch(
     start_clock = time.monotonic()
     results: list[dict[str, Any]] = []
     skipped: list[dict[str, str]] = []
+    skip_ids_set = set(skip_ids or [])
 
     print(f"OpenMapBench GABench batch: {batch_id}")
     print(f"Imported tasks: {total}")
@@ -102,7 +104,9 @@ def run_gabench_batch(
         prefix = f"[{index:03d}/{total:03d}] {task_id}"
 
         reason: str | None = None
-        if not task_path.is_file():
+        if task_id in skip_ids_set:
+            reason = "skipped via --skip flag"
+        elif not task_path.is_file():
             reason = f"task file missing: {task_path}"
         elif not reference_path.is_file():
             reason = f"reference file missing: {reference_path}"
@@ -282,6 +286,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model", help="Model recorded in run manifests")
     parser.add_argument("--skill", action="append", default=[], help="Repeatable skill metadata")
     parser.add_argument("--tool", action="append", default=[], help="Repeatable tool metadata")
+    parser.add_argument(
+        "--skip",
+        action="append",
+        default=[],
+        help="Repeatable task ID to skip (e.g., --skip task-001 --skip task-002)",
+    )
     return parser
 
 
@@ -313,6 +323,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             timeout_seconds=args.timeout_seconds,
             agent=agent,
             agent_cwd=args.agent_cwd,
+            skip_ids=args.skip,
         )
     except (OSError, ValueError) as exc:
         parser.exit(2, f"error: {exc}\n")
