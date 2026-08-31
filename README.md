@@ -143,11 +143,26 @@ placeholders:
 - `{run_dir}`.
 
 The same values are exposed as `OPENMAPBENCH_TASK_FILE`, `OPENMAPBENCH_TASK_DIR`,
-`OPENMAPBENCH_OUTPUT_DIR`, `OPENMAPBENCH_OUTPUT_PATH`, and `OPENMAPBENCH_RUN_DIR`. This keeps the
+`OPENMAPBENCH_OUTPUT_DIR`, `OPENMAPBENCH_OUTPUT_PATH`, and `OPENMAPBENCH_RUN_DIR`; the optional
+agent audit stream is exposed as `OPENMAPBENCH_AUDIT_PATH`. This keeps the
 core independent of model vendors: a Codex adapter, Claude Code adapter, container wrapper, MCP
 client, or local script can use the same interface. Useful metadata can be recorded with
 `--agent-name`, `--model`, repeated `--skill`, and repeated
 `--tool` flags. Use a script wrapper when an agent needs pipes, redirects, or other shell syntax.
+
+### Execution audit and artifact lineage
+
+Run manifests use schema `0.3` and contain a layered `audit` trail. The runner always records its
+exact subprocess argument vector, working directory, runner-owned environment values, exit state,
+and evaluator step. With `codex exec --json`, it also records inner commands, MCP tools and their
+arguments, web searches, and file changes in JSONL source order. The manifest links back to the
+lossless stdout/stderr logs rather than treating a missing inner trace as proof that no tools ran.
+
+The runner inventories task inputs, intermediate files under the isolated run directory, the
+candidate, reference, and logs. Each artifact has a final checksum and evidence-labelled lineage.
+Wrappers for any agent can report additional actions and exact `derived_from` relationships by
+appending vendor-neutral JSONL to the path in `OPENMAPBENCH_AUDIT_PATH`. See
+[docs/run-manifest.md](docs/run-manifest.md) for the event and artifact format.
 
 ### Token usage and cost
 
@@ -269,6 +284,19 @@ openmapbench gabench-import \
 The importer reads the actual upstream columns, discovers input files named in each task's data
 description, records the upstream commit and checksums, generates local task contracts, and points
 the manifest at upstream reference files. Nothing from GABench is copied into this repository.
+
+Run a single imported task:
+
+```bash
+uv run --no-sync openmapbench run \
+  .openmapbench/gabench/tasks/gabench-008/task.yaml \
+  --reference ../GABench/dataset/result/Fire_Service_Analysis.png \
+  --agent-command 'codex exec --json --ephemeral --approve-for-me -m gpt-5.6-luna -c model_reasoning_effort=low "Read the OpenMapBench task at {task_file}, complete it using the declared inputs, and write the required artifact exactly to {output_path}. Create the file rather than only explaining the result."' \
+  --agent-name codex \
+  --model gpt-5.6-luna \
+  --timeout-seconds 1800 \
+  --run-root runs/gabench
+```
 
 Run every imported task in one isolated batch:
 

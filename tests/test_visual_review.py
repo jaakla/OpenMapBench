@@ -37,10 +37,22 @@ output:
     solver.write_text(
         """
 import os
+import json
 from pathlib import Path
 from PIL import Image
 
 Image.new("RGB", (160, 100), "#2563eb").save(Path(os.environ["OPENMAPBENCH_OUTPUT_PATH"]))
+print(json.dumps({
+    "type": "item.completed",
+    "item": {
+        "id": "render-1",
+        "type": "mcp_tool_call",
+        "server": "qgis",
+        "tool": "render_map",
+        "arguments": {"style": "blue", "width": 160},
+        "status": "completed",
+    },
+}))
 """.strip(),
         encoding="utf-8",
     )
@@ -66,6 +78,13 @@ Image.new("RGB", (160, 100), "#2563eb").save(Path(os.environ["OPENMAPBENCH_OUTPU
     html = (tmp_path / "visual-review" / "index.html").read_text(encoding="utf-8")
     assert "Task prompt" in html
     assert "Create a map image with &lt;all&gt; values &amp; labels." in html
+    assert "Execution audit" in html
+    assert "Layered timeline" in html
+    assert "Artifact lineage" in html
+    assert "Tool: render_map" in html
+    assert "&quot;style&quot;: &quot;blue&quot;" in html
+    assert "agent.stdout.log" in html
+    assert report["comparisons"][0]["audit"]["inner_trace_status"] == "captured"
     assert report["comparisons"][0]["prompt"] == (
         "Create a map image with <all> values & labels."
     )

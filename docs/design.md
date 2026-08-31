@@ -48,6 +48,8 @@ Each run records:
 - agent implementation/version;
 - enabled skills/instructions;
 - available tools;
+- executed commands and tools, parameters, sequence, and trace-capture completeness;
+- intermediate files and evidence-labelled artifact lineage;
 - wall-clock runtime;
 - token usage and cost where available;
 - candidate artifact hashes;

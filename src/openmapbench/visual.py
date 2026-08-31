@@ -27,6 +27,8 @@ class VisualPair:
     reference: Path
     run_id: str | None = None
     source_status: str | None = None
+    audit: dict[str, Any] | None = None
+    run_manifest_path: Path | None = None
 
 
 def is_supported_image_path(path: Path) -> bool:
@@ -151,6 +153,217 @@ def _existing_reviews(path: Path) -> dict[tuple[str, str], dict[str, str]]:
         }
 
 
+def _json_block(value: Any) -> str:
+    return html.escape(json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True))
+
+
+def _file_size(value: Any) -> str:
+    if not isinstance(value, int):
+        return "size unavailable"
+    if value < 1024:
+        return f"{value} B"
+    if value < 1024 * 1024:
+        return f"{value / 1024:.1f} KiB"
+    return f"{value / (1024 * 1024):.1f} MiB"
+
+
+def _event_depths(events: list[dict[str, Any]]) -> dict[str, int]:
+    by_id = {str(event.get("event_id")): event for event in events}
+    depths: dict[str, int] = {}
+
+    def depth(event_id: str, seen: set[str] | None = None) -> int:
+        if event_id in depths:
+            return depths[event_id]
+        event = by_id.get(event_id)
+        parent = str(event.get("parent_event_id") or "") if event else ""
+        visited = set(seen or ())
+        if not parent or parent not in by_id or parent in visited:
+            result = 0
+        else:
+            visited.add(event_id)
+            result = min(depth(parent, visited) + 1, 4)
+        depths[event_id] = result
+        return result
+
+    for event_id in by_id:
+        depth(event_id)
+    return depths
+
+
+def _audit_html(audit: dict[str, Any] | None, manifest_path: str | None) -> str:
+    if not audit:
+        return ""
+    events = audit.get("events") if isinstance(audit.get("events"), list) else []
+    artifacts = audit.get("artifacts") if isinstance(audit.get("artifacts"), list) else []
+    notes = audit.get("notes") if isinstance(audit.get("notes"), list) else []
+    trace_status = str(audit.get("inner_trace_status") or "unavailable")
+    depths = _event_depths([event for event in events if isinstance(event, dict)])
+    event_cards: list[str] = []
+    for event in events:
+        if not isinstance(event, dict):
+            continue
+        event_id = str(event.get("event_id") or "")
+        sequence = event.get("sequence")
+        kind = html.escape(str(event.get("kind") or "event"))
+        name = html.escape(str(event.get("name") or "Event"))
+        status = str(event.get("status") or "recorded")
+        status_text = html.escape(status)
+        status_class = _slug(status)
+        depth = depths.get(event_id, 0)
+        rows: list[str] = []
+        command = event.get("command")
+        if command is not None:
+            command_text = (
+                json.dumps(command, ensure_ascii=False)
+                if isinstance(command, list)
+                else str(command)
+            )
+            rows.append(
+                '<div class="audit-field"><dt>Command</dt>'
+                f'<dd><pre class="command">{html.escape(command_text)}</pre></dd></div>'
+            )
+        tool = event.get("tool")
+        if isinstance(tool, dict):
+            server = f"{tool.get('server')} / " if tool.get("server") else ""
+            rows.append(
+                '<div class="audit-field"><dt>Tool</dt>'
+                f"<dd><code>{html.escape(server + str(tool.get('name') or 'tool'))}</code></dd>"
+                "</div>"
+            )
+            parameters = tool.get("parameters")
+            if parameters:
+                rows.append(
+                    '<div class="audit-field"><dt>Tool parameters</dt>'
+                    f"<dd><pre>{_json_block(parameters)}</pre></dd></div>"
+                )
+        parameters = event.get("parameters")
+        if parameters:
+            rows.append(
+                '<div class="audit-field"><dt>Parameters</dt>'
+                f"<dd><pre>{_json_block(parameters)}</pre></dd></div>"
+            )
+        result = event.get("result")
+        if result and any(value is not None for value in result.values()):
+            rows.append(
+                '<div class="audit-field"><dt>Result</dt>'
+                f"<dd><pre>{_json_block(result)}</pre></dd></div>"
+            )
+        details = event.get("details")
+        if details:
+            rows.append(
+                '<div class="audit-field"><dt>Details</dt>'
+                f"<dd><pre>{_json_block(details)}</pre></dd></div>"
+            )
+        source_lines = event.get("source_lines") or []
+        timing = " → ".join(
+            str(value)
+            for value in (event.get("started_at"), event.get("finished_at"))
+            if value
+        )
+        source_text = str(event.get("source") or "unknown")
+        if source_lines:
+            source_text += f" · source lines {', '.join(str(line) for line in source_lines)}"
+        rows.append(
+            '<div class="audit-field"><dt>Evidence</dt>'
+            f"<dd>{html.escape(source_text)}"
+            f"{' · ' + html.escape(timing) if timing else ''}</dd></div>"
+        )
+        event_cards.append(
+            f"""
+            <details class="audit-event" style="--depth:{depth}">
+              <summary>
+                <span class="sequence">{int(sequence):02d}</span>
+                <span class="event-kind">{kind}</span>
+                <span class="event-name">{name}</span>
+                <span class="event-status {status_class}">{status_text}</span>
+              </summary>
+              <dl>{''.join(rows)}</dl>
+            </details>
+            """
+        )
+
+    log_links: list[str] = []
+    artifact_cards: list[str] = []
+    for artifact in artifacts:
+        if not isinstance(artifact, dict):
+            continue
+        artifact_id = str(artifact.get("artifact_id") or "artifact")
+        path = Path(str(artifact.get("path") or ""))
+        role = str(artifact.get("role") or "artifact")
+        exists = bool(artifact.get("exists_at_finish"))
+        path_text = html.escape(str(path))
+        file_link = (
+            f'<a href="{html.escape(path.resolve().as_uri(), quote=True)}">{path_text}</a>'
+            if exists
+            else path_text
+        )
+        if role == "log" and exists:
+            log_links.append(
+                f'<a href="{html.escape(path.resolve().as_uri(), quote=True)}">'
+                f"{html.escape(path.name)}</a>"
+            )
+        lineage = artifact.get("lineage")
+        lineage_items = []
+        if isinstance(lineage, list):
+            for link in lineage:
+                if not isinstance(link, dict):
+                    continue
+                lineage_items.append(
+                    f"<li>{html.escape(str(link.get('relationship') or 'related_to'))} "
+                    f"<code>{html.escape(str(link.get('target_id') or 'unknown'))}</code> "
+                    f"<span class=\"evidence\">({html.escape(str(link.get('evidence') or 'unspecified'))})</span></li>"
+                )
+        checksum = str(artifact.get("sha256") or "not available")
+        metadata = artifact.get("metadata")
+        metadata_html = (
+            f'<div class="audit-field"><dt>Metadata</dt><dd><pre>{_json_block(metadata)}</pre></dd></div>'
+            if metadata
+            else ""
+        )
+        artifact_cards.append(
+            f"""
+            <details class="artifact">
+              <summary><span class="artifact-role {html.escape(_slug(role))}">{html.escape(role)}</span>
+                <code>{html.escape(artifact_id)}</code> · {html.escape(path.name or str(path))}</summary>
+              <dl>
+                <div class="audit-field"><dt>Path</dt><dd>{file_link}</dd></div>
+                <div class="audit-field"><dt>At finish</dt><dd>{'present' if exists else 'missing'} ·
+                  {_file_size(artifact.get('size_bytes'))}</dd></div>
+                <div class="audit-field"><dt>SHA-256</dt><dd><code>{html.escape(checksum)}</code></dd></div>
+                <div class="audit-field"><dt>Lineage</dt><dd><ul>{''.join(lineage_items) or '<li>None declared</li>'}</ul></dd></div>
+                {metadata_html}
+              </dl>
+            </details>
+            """
+        )
+    note_items = "".join(f"<li>{html.escape(str(note))}</li>" for note in notes)
+    manifest_link = ""
+    if manifest_path:
+        resolved_manifest = Path(manifest_path).resolve()
+        manifest_link = (
+            f'<a href="{html.escape(resolved_manifest.as_uri(), quote=True)}">run manifest</a>'
+        )
+    source_links = " · ".join(link for link in [manifest_link, *log_links] if link)
+    return f"""
+      <details class="audit">
+        <summary>
+          <span>Execution audit</span>
+          <span class="audit-summary">{len(events)} events · {len(artifacts)} artifacts ·
+            inner trace: <strong>{html.escape(trace_status)}</strong></span>
+        </summary>
+        <div class="audit-body">
+          <p class="audit-links">Evidence: {source_links or 'embedded manifest data'}</p>
+          <h3>Layered timeline</h3>
+          <div class="timeline">{''.join(event_cards) or '<p>No events recorded.</p>'}</div>
+          <h3>Artifact lineage</h3>
+          <div class="artifacts">{''.join(artifact_cards) or '<p>No artifacts recorded.</p>'}</div>
+          <h3>Capture notes</h3>
+          <ul class="audit-notes">{note_items or '<li>None</li>'}</ul>
+        </div>
+      </details>
+    """
+
+
 def _write_html(report: dict[str, Any], output: Path) -> None:
     cards: list[str] = []
     for item in report["comparisons"]:
@@ -163,6 +376,7 @@ def _write_html(report: dict[str, Any], output: Path) -> None:
         run_id = html.escape(item.get("run_id") or "direct GABench output")
         review_result = html.escape(item["manual_review_result"])
         review_class = _slug(item["manual_review_result"])
+        audit = _audit_html(item.get("audit"), item.get("run_manifest_path"))
         cards.append(
             f"""
             <article class="card">
@@ -179,6 +393,7 @@ def _write_html(report: dict[str, Any], output: Path) -> None:
                 <a href="{candidate_url}">generated image</a> ·
                 <a href="{reference_url}">expected image</a>
               </p>
+              {audit}
             </article>
             """
         )
@@ -223,6 +438,43 @@ def _write_html(report: dict[str, Any], output: Path) -> None:
     .review.pass {{ color: #166534; background: #dcfce7; }}
     .review.fail {{ color: #991b1b; background: #fee2e2; }}
     .meta {{ color: #64748b; font-size: .9rem; margin-bottom: 0; }}
+    .audit {{ margin-top: 16px; border: 1px solid #cbd5e1; border-radius: 10px;
+              background: #f8fafc; }}
+    .audit > summary {{ display: flex; justify-content: space-between; gap: 16px;
+                        cursor: pointer; padding: 13px 14px; font-weight: 700; }}
+    .audit-summary {{ color: #64748b; font-size: .82rem; font-weight: 500; }}
+    .audit-body {{ border-top: 1px solid #dbe2ea; padding: 14px; }}
+    .audit-body h3 {{ margin-top: 18px; }}
+    .audit-links {{ margin: 0; color: #64748b; font-size: .88rem; }}
+    .audit-event {{ margin: 7px 0 7px calc(var(--depth) * 22px); background: white;
+                    border: 1px solid #dbe2ea; border-left: 4px solid #94a3b8;
+                    border-radius: 7px; }}
+    .audit-event > summary {{ display: flex; align-items: center; gap: 8px; cursor: pointer;
+                              padding: 9px 10px; }}
+    .sequence {{ min-width: 2.1em; color: #64748b; font: 650 .78rem ui-monospace, monospace; }}
+    .event-kind, .artifact-role {{ color: #334155; background: #e2e8f0; border-radius: 999px;
+                                  padding: 3px 7px; font-size: .72rem; font-weight: 700; }}
+    .event-name {{ flex: 1; font-weight: 650; }}
+    .event-status {{ color: #475569; font-size: .78rem; }}
+    .event-status.completed, .event-status.passed {{ color: #166534; }}
+    .event-status.failed, .event-status.error, .event-status.timed-out {{ color: #991b1b; }}
+    .audit dl, .artifact dl {{ margin: 0; padding: 0 12px 10px; }}
+    .audit-field {{ display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 10px;
+                    padding: 7px 0; border-top: 1px solid #eef2f7; }}
+    .audit-field dt {{ color: #64748b; font-size: .78rem; font-weight: 700;
+                       text-transform: uppercase; }}
+    .audit-field dd {{ margin: 0; min-width: 0; overflow-wrap: anywhere; }}
+    .audit pre {{ margin: 0; padding: 9px; max-height: 320px; overflow: auto;
+                  white-space: pre-wrap; overflow-wrap: anywhere; background: #0f172a;
+                  color: #e2e8f0; border-radius: 6px; font: .78rem/1.5 ui-monospace, monospace; }}
+    .artifact {{ margin: 7px 0; background: white; border: 1px solid #dbe2ea;
+                 border-radius: 7px; }}
+    .artifact > summary {{ cursor: pointer; padding: 9px 10px; }}
+    .artifact-role.candidate {{ color: #166534; background: #dcfce7; }}
+    .artifact-role.intermediate, .artifact-role.working {{ color: #92400e; background: #fef3c7; }}
+    .artifact ul {{ margin: 0; padding-left: 18px; }}
+    .evidence {{ color: #64748b; font-size: .82rem; }}
+    .audit-notes {{ color: #475569; font-size: .86rem; }}
     code {{ color: #475569; }}
     a {{ color: #075985; }}
   </style>
@@ -295,12 +547,16 @@ def build_visual_report(
                 "manual_review_result": previous.get("manual_result") or "pending",
                 "notes": previous.get("notes") or "",
                 "image_metadata": dimensions,
+                "audit": pair.audit,
+                "run_manifest_path": (
+                    str(pair.run_manifest_path.resolve()) if pair.run_manifest_path else None
+                ),
             }
         )
 
     output.mkdir(parents=True, exist_ok=True)
     report = {
-        "schema_version": "0.2",
+        "schema_version": "0.3",
         "review_mode": "manual_side_by_side",
         "created_at": datetime.now(UTC).isoformat(),
         "source_type": source_type,
@@ -392,6 +648,8 @@ def visual_report_from_runs(
                 reference=reference,
                 run_id=manifest.run_id,
                 source_status=manifest.status.value,
+                audit=(manifest.audit.model_dump(mode="json") if manifest.audit else None),
+                run_manifest_path=manifest_path,
             )
         )
     return build_visual_report(

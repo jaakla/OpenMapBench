@@ -91,6 +91,57 @@ class FileRecord(BaseModel):
     size_bytes: int | None = None
 
 
+class AuditToolInvocation(BaseModel):
+    name: str
+    server: str | None = None
+    parameters: dict[str, Any] = Field(default_factory=dict)
+
+
+class AuditEvent(BaseModel):
+    sequence: int = Field(ge=1)
+    event_id: str
+    parent_event_id: str | None = None
+    source: str
+    kind: str
+    name: str
+    status: str | None = None
+    command: str | list[str] | None = None
+    tool: AuditToolInvocation | None = None
+    parameters: dict[str, Any] = Field(default_factory=dict)
+    result: dict[str, Any] = Field(default_factory=dict)
+    details: dict[str, Any] = Field(default_factory=dict)
+    started_at: str | None = None
+    finished_at: str | None = None
+    source_lines: list[int] = Field(default_factory=list)
+
+
+class ArtifactLineageLink(BaseModel):
+    relationship: Literal["produced_by", "derived_from", "declared_input"]
+    target_id: str
+    evidence: str
+
+
+class AuditArtifact(BaseModel):
+    artifact_id: str
+    path: str
+    role: Literal["task", "input", "intermediate", "working", "candidate", "reference", "log"]
+    exists_at_finish: bool
+    sha256: str | None = None
+    size_bytes: int | None = None
+    media_type: str | None = None
+    lineage: list[ArtifactLineageLink] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class AuditTrail(BaseModel):
+    schema_version: Literal["0.1"] = "0.1"
+    inner_trace_status: Literal["captured", "partial", "unavailable"]
+    capture_sources: list[str] = Field(default_factory=list)
+    events: list[AuditEvent] = Field(default_factory=list)
+    artifacts: list[AuditArtifact] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
 class TokenUsage(BaseModel):
     source: str
     model: str | None = None
@@ -117,7 +168,7 @@ class CostEstimate(BaseModel):
 
 
 class RunManifest(BaseModel):
-    schema_version: Literal["0.1", "0.2"] = "0.2"
+    schema_version: Literal["0.1", "0.2", "0.3"] = "0.3"
     run_id: str
     status: RunStatus
     task_id: str
@@ -138,5 +189,6 @@ class RunManifest(BaseModel):
     exit_code: int | None = None
     token_usage: TokenUsage | None = None
     cost_estimate: CostEstimate | None = None
+    audit: AuditTrail | None = None
     evaluation: dict[str, Any] | None = None
     error: str | None = None

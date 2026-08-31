@@ -186,18 +186,23 @@ def backfill_usage(run_root: Path) -> dict[str, Any]:
         cost = estimate_cost(usage) if usage is not None else None
         desired_usage = usage.model_dump(mode="json") if usage else None
         desired_cost = cost.model_dump(mode="json") if cost else None
+        desired_schema = (
+            "0.3"
+            if payload.get("schema_version") == "0.3" or payload.get("audit") is not None
+            else "0.2"
+        )
         if usage is None:
             summary["no_usage_found"] += 1
             continue
         if (
-            payload.get("schema_version") == "0.2"
+            payload.get("schema_version") == desired_schema
             and payload.get("token_usage") == desired_usage
             and payload.get("cost_estimate") == desired_cost
         ):
             summary["already_complete"] += 1
             continue
 
-        payload["schema_version"] = "0.2"
+        payload["schema_version"] = desired_schema
         payload["token_usage"] = desired_usage
         payload["cost_estimate"] = desired_cost
         try:
