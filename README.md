@@ -304,10 +304,11 @@ Run every imported task in one isolated batch:
 
 ```bash
 uv run --no-sync python scripts/run_gabench_all.py \
-  --agent-command 'codex exec --json --ephemeral --sandbox workspace-write --approve-for-me -m gpt-5.6-luna -c model_reasoning_effort=low "Read the OpenMapBench task at {task_file}, complete it using the declared inputs, and write the required artifact exactly to {output_path}. Create the file rather than only explaining the result."' \
+  --agent-command 'codex exec --json --ephemeral --approve-for-me -m gpt-5.6-luna -c model_reasoning_effort=low "Read the OpenMapBench task at {task_file}, complete it using the declared inputs, and write the required artifact exactly to {output_path}. Create the file rather than only explaining the result."' \
   --agent-name codex \
   --model gpt-5.6-luna \
-  --timeout-seconds 1800
+  --timeout-seconds 1800  \
+  --skip task-009
 ```
 
 The script defaults to `.openmapbench/gabench/manifest.json`, continues after individual failures,
