@@ -335,7 +335,7 @@ directory, compare them directly with the bundled GABench expectations:
 ```bash
 openmapbench gabench-visual-report \
   .openmapbench/gabench/manifest.json \
-  --candidate-root ../generated-gabench-images \
+  --candidate-root runs/gabench \
   --output visual-reviews/gabench
 ```
 
