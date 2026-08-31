@@ -190,6 +190,104 @@ def _event_depths(events: list[dict[str, Any]]) -> dict[str, int]:
     return depths
 
 
+MAX_INLINE_CAPTURE_CHARS = 40_000
+
+
+def _capture_text(stored: Path | None) -> str | None:
+    """Read a preserved copy so the report can show the logic that produced an output."""
+    if stored is None or not stored.is_file():
+        return None
+    try:
+        content = stored.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError, ValueError):
+        return None
+    if len(content) > MAX_INLINE_CAPTURE_CHARS:
+        return (
+            content[:MAX_INLINE_CAPTURE_CHARS]
+            + "\n… truncated in this report; open the stored copy for the complete file."
+        )
+    return content
+
+
+def _capture_index(artifacts: list[Any]) -> dict[str, list[str]]:
+    """Map each event id to the files whose content was preserved while it ran."""
+    index: dict[str, list[str]] = {}
+    for artifact in artifacts:
+        if not isinstance(artifact, dict):
+            continue
+        name = Path(str(artifact.get("path") or "")).name or str(artifact.get("artifact_id") or "")
+        for capture in artifact.get("content_captures") or []:
+            if not isinstance(capture, dict):
+                continue
+            for observation in capture.get("observations") or []:
+                if not isinstance(observation, dict):
+                    continue
+                event_id = observation.get("event_id")
+                if not event_id:
+                    continue
+                label = f"{name} · {str(capture.get('sha256') or '')[:12]}"
+                index.setdefault(str(event_id), [])
+                if label not in index[str(event_id)]:
+                    index[str(event_id)].append(label)
+    return index
+
+
+def _content_captures_html(artifact: dict[str, Any], run_dir: Path | None) -> str:
+    captures = artifact.get("content_captures")
+    if not isinstance(captures, list) or not captures:
+        return ""
+    blocks: list[str] = []
+    for index, capture in enumerate(captures, start=1):
+        if not isinstance(capture, dict):
+            continue
+        stored_path = str(capture.get("stored_path") or "")
+        stored = (run_dir / stored_path) if run_dir and stored_path else None
+        link = html.escape(stored_path)
+        if stored is not None and stored.is_file():
+            link = (
+                f'<a href="{html.escape(stored.resolve().as_uri(), quote=True)}">'
+                f"{html.escape(stored_path)}</a>"
+            )
+        reasons = sorted(
+            {
+                str(observation.get("reason"))
+                for observation in capture.get("observations") or []
+                if isinstance(observation, dict) and observation.get("reason")
+            }
+        )
+        meta = " · ".join(
+            part
+            for part in (
+                _file_size(capture.get("size_bytes")),
+                f"{capture.get('line_count')} lines"
+                if isinstance(capture.get("line_count"), int)
+                else "",
+                f"observed via {', '.join(reasons)}" if reasons else "",
+                html.escape(str(capture.get("first_observed_at") or "")),
+            )
+            if part
+        )
+        content = _capture_text(stored) if capture.get("encoding") == "utf-8" else None
+        body = (
+            f"<pre>{html.escape(content)}</pre>"
+            if content is not None
+            else "<p class=\"capture-note\">Binary or unavailable content; open the stored copy.</p>"
+        )
+        blocks.append(
+            f"""
+            <div class="capture">
+              <div class="capture-meta">version {index} · <code>{html.escape(str(capture.get('sha256') or '')[:16])}</code>
+                · {meta} · {link}</div>
+              {body}
+            </div>
+            """
+        )
+    return (
+        '<div class="audit-field"><dt>Preserved content</dt>'
+        f'<dd>{"".join(blocks)}</dd></div>'
+    )
+
+
 def _audit_html(audit: dict[str, Any] | None, manifest_path: str | None) -> str:
     if not audit:
         return ""
@@ -197,6 +295,10 @@ def _audit_html(audit: dict[str, Any] | None, manifest_path: str | None) -> str:
     artifacts = audit.get("artifacts") if isinstance(audit.get("artifacts"), list) else []
     notes = audit.get("notes") if isinstance(audit.get("notes"), list) else []
     trace_status = str(audit.get("inner_trace_status") or "unavailable")
+    content_store = audit.get("content_store")
+    content_store = content_store if isinstance(content_store, dict) else None
+    run_dir = Path(manifest_path).resolve().parent if manifest_path else None
+    captures_by_event = _capture_index(artifacts)
     depths = _event_depths([event for event in events if isinstance(event, dict)])
     event_cards: list[str] = []
     for event in events:
@@ -263,6 +365,13 @@ def _audit_html(audit: dict[str, Any] | None, manifest_path: str | None) -> str:
         source_text = str(event.get("source") or "unknown")
         if source_lines:
             source_text += f" · source lines {', '.join(str(line) for line in source_lines)}"
+        preserved = captures_by_event.get(event_id) or []
+        if preserved:
+            rows.append(
+                '<div class="audit-field"><dt>Preserved files</dt><dd><ul>'
+                + "".join(f"<li><code>{html.escape(item)}</code></li>" for item in preserved)
+                + "</ul></dd></div>"
+            )
         rows.append(
             '<div class="audit-field"><dt>Evidence</dt>'
             f"<dd>{html.escape(source_text)}"
@@ -320,23 +429,55 @@ def _audit_html(audit: dict[str, Any] | None, manifest_path: str | None) -> str:
             if metadata
             else ""
         )
+        captures = artifact.get("content_captures") or []
+        captures_html = _content_captures_html(artifact, run_dir)
+        badge = ""
+        if captures and not exists:
+            badge = '<span class="capture-badge">content preserved</span>'
+        elif captures:
+            badge = '<span class="capture-badge kept">content preserved</span>'
+        finish_note = "present" if exists else "missing"
+        if not exists and captures:
+            finish_note = "deleted during the run · content preserved below"
         artifact_cards.append(
             f"""
             <details class="artifact">
               <summary><span class="artifact-role {html.escape(_slug(role))}">{html.escape(role)}</span>
-                <code>{html.escape(artifact_id)}</code> · {html.escape(path.name or str(path))}</summary>
+                <code>{html.escape(artifact_id)}</code> · {html.escape(path.name or str(path))}{badge}</summary>
               <dl>
                 <div class="audit-field"><dt>Path</dt><dd>{file_link}</dd></div>
-                <div class="audit-field"><dt>At finish</dt><dd>{'present' if exists else 'missing'} ·
+                <div class="audit-field"><dt>At finish</dt><dd>{finish_note} ·
                   {_file_size(artifact.get('size_bytes'))}</dd></div>
                 <div class="audit-field"><dt>SHA-256</dt><dd><code>{html.escape(checksum)}</code></dd></div>
                 <div class="audit-field"><dt>Lineage</dt><dd><ul>{''.join(lineage_items) or '<li>None declared</li>'}</ul></dd></div>
+                {captures_html}
                 {metadata_html}
               </dl>
             </details>
             """
         )
     note_items = "".join(f"<li>{html.escape(str(note))}</li>" for note in notes)
+    store_html = ""
+    store_summary = ""
+    if content_store:
+        skipped = content_store.get("skipped") or []
+        skipped_items = "".join(
+            f"<li><code>{html.escape(str(item.get('path') or ''))}</code>: "
+            f"{html.escape(str(item.get('reason') or 'unknown'))}"
+            f"{' · ' + html.escape(str(item.get('detail'))) if item.get('detail') else ''}</li>"
+            for item in skipped
+            if isinstance(item, dict)
+        )
+        store_summary = f" · {content_store.get('file_count', 0)} preserved files"
+        store_html = f"""
+          <h3>Preserved file content</h3>
+          <p class="audit-links">{content_store.get('file_count', 0)} file(s),
+            {content_store.get('version_count', 0)} version(s),
+            {_file_size(content_store.get('total_bytes'))} stored under
+            <code>{html.escape(str(content_store.get('path') or ''))}/</code> inside the run
+            directory. Files the agent deleted before exiting are still readable here.</p>
+          <ul class="audit-notes">{skipped_items or '<li>Nothing was skipped.</li>'}</ul>
+        """
     manifest_link = ""
     if manifest_path:
         resolved_manifest = Path(manifest_path).resolve()
@@ -348,7 +489,7 @@ def _audit_html(audit: dict[str, Any] | None, manifest_path: str | None) -> str:
       <details class="audit">
         <summary>
           <span>Execution audit</span>
-          <span class="audit-summary">{len(events)} events · {len(artifacts)} artifacts ·
+          <span class="audit-summary">{len(events)} events · {len(artifacts)} artifacts{store_summary} ·
             inner trace: <strong>{html.escape(trace_status)}</strong></span>
         </summary>
         <div class="audit-body">
@@ -357,6 +498,7 @@ def _audit_html(audit: dict[str, Any] | None, manifest_path: str | None) -> str:
           <div class="timeline">{''.join(event_cards) or '<p>No events recorded.</p>'}</div>
           <h3>Artifact lineage</h3>
           <div class="artifacts">{''.join(artifact_cards) or '<p>No artifacts recorded.</p>'}</div>
+          {store_html}
           <h3>Capture notes</h3>
           <ul class="audit-notes">{note_items or '<li>None</li>'}</ul>
         </div>
@@ -473,6 +615,13 @@ def _write_html(report: dict[str, Any], output: Path) -> None:
     .artifact-role.candidate {{ color: #166534; background: #dcfce7; }}
     .artifact-role.intermediate, .artifact-role.working {{ color: #92400e; background: #fef3c7; }}
     .artifact ul {{ margin: 0; padding-left: 18px; }}
+    .capture-badge {{ margin-left: 8px; color: #5b21b6; background: #ede9fe; border-radius: 999px;
+                      padding: 3px 7px; font-size: .72rem; font-weight: 700; }}
+    .capture-badge.kept {{ color: #155e75; background: #cffafe; }}
+    .capture {{ margin: 0 0 10px; }}
+    .capture-meta {{ color: #64748b; font-size: .78rem; margin-bottom: 5px; }}
+    .capture-note {{ margin: 0; color: #64748b; font-size: .82rem; }}
+    .capture pre {{ max-height: 460px; }}
     .evidence {{ color: #64748b; font-size: .82rem; }}
     .audit-notes {{ color: #475569; font-size: .86rem; }}
     code {{ color: #475569; }}

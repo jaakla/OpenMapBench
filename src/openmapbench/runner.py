@@ -15,6 +15,7 @@ from typing import Any
 
 from . import __version__
 from .audit import build_audit_trail
+from .capture import CaptureConfig, ContentCapture
 from .evaluator import evaluate
 from .models import FileRecord, OutputKind, RunManifest, RunStatus
 from .pricing import estimate_cost
@@ -95,22 +96,26 @@ def _action_summary(item: dict[str, Any]) -> str | None:
     return None
 
 
+def _json_object(line: str) -> dict[str, Any] | None:
+    try:
+        payload = json.loads(line)
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
 def _emit_agent_line(
     line: str,
     *,
     stream_name: str,
     shown_items: set[str],
+    payload: dict[str, Any] | None = None,
 ) -> None:
     text = line.rstrip("\r\n")
     if not text:
         return
     if stream_name == "stdout":
-        try:
-            payload = json.loads(text)
-        except json.JSONDecodeError:
-            _verbose_message(f"[agent:stdout] {text}")
-            return
-        if not isinstance(payload, dict):
+        if payload is None:
             _verbose_message(f"[agent:stdout] {text}")
             return
         event_type = str(payload.get("type") or "")
@@ -140,13 +145,16 @@ def _emit_agent_line(
     _verbose_message(f"[agent:stderr] {text}")
 
 
-def _run_verbose_process(
+def _run_streaming_process(
     command: list[str],
     *,
     cwd: Path,
     environment: dict[str, str],
     timeout_seconds: float | None,
+    verbose: bool,
+    capture: ContentCapture | None,
 ) -> subprocess.CompletedProcess[str]:
+    """Run the agent while reading its output live, so transient files can be preserved."""
     process = subprocess.Popen(
         command,
         cwd=cwd,
@@ -163,8 +171,21 @@ def _run_verbose_process(
     def drain(stream: Any, parts: list[str], stream_name: str) -> None:
         for line in stream:
             parts.append(line)
-            with output_lock:
-                _emit_agent_line(line, stream_name=stream_name, shown_items=shown_items)
+            payload = (
+                _json_object(line.rstrip("\r\n"))
+                if stream_name == "stdout" and (capture is not None or verbose)
+                else None
+            )
+            if capture is not None and stream_name == "stdout" and payload is not None:
+                capture.observe_codex_event(payload)
+            if verbose:
+                with output_lock:
+                    _emit_agent_line(
+                        line,
+                        stream_name=stream_name,
+                        shown_items=shown_items,
+                        payload=payload,
+                    )
         stream.close()
 
     assert process.stdout is not None
@@ -263,17 +284,32 @@ def run_task(
     evaluation_started: datetime | None = None
     evaluation_finished: datetime | None = None
     execution_cwd = agent_cwd.resolve() if agent_cwd else task_file.parent
+    capture_config = CaptureConfig.from_environment()
+    content_capture = (
+        ContentCapture(
+            run_dir=run_dir,
+            execution_cwd=execution_cwd,
+            started_at=started,
+            config=capture_config,
+            exempt_paths=[task_file, reference, *spec.resolve_input_paths(task_file)],
+            exempt_dirs=[run_root.resolve()],
+        )
+        if capture_config.enabled
+        else None
+    )
     if verbose:
         _verbose_message(f"[openmapbench] task {spec.id}: {spec.title}")
         _verbose_message(f"[openmapbench] run directory: {run_dir}")
         _verbose_message(f"[openmapbench] starting agent: {shlex.join(command)}")
     try:
-        if verbose:
-            process = _run_verbose_process(
+        if verbose or content_capture is not None:
+            process = _run_streaming_process(
                 command,
                 cwd=execution_cwd,
                 environment=environment,
                 timeout_seconds=timeout_seconds,
+                verbose=verbose,
+                capture=content_capture,
             )
         else:
             process = subprocess.run(
@@ -289,6 +325,8 @@ def run_task(
         stdout = process.stdout
         stderr = process.stderr
         agent_finished = _now()
+        if content_capture is not None:
+            content_capture.sweep(reason="final_state", force=True)
         if verbose:
             _verbose_message(f"[openmapbench] agent exited with code {exit_code}")
         if exit_code != 0:
@@ -366,6 +404,8 @@ def run_task(
         agent_finished = _now()
         stdout = _as_text(exc.stdout)
         stderr = _as_text(exc.stderr)
+        if content_capture is not None:
+            content_capture.sweep(reason="final_state", force=True)
         error = f"agent command timed out after {timeout_seconds} seconds"
         if verbose:
             _verbose_message(f"[openmapbench] {error}")
@@ -416,6 +456,7 @@ def run_task(
         reference=reference,
         output_dir=output_dir,
         run_dir=run_dir,
+        content_capture=content_capture,
         output_kind=spec.output.kind,
         run_status=status,
         evaluation=evaluation_payload,

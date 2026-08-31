@@ -116,9 +116,58 @@ class AuditEvent(BaseModel):
 
 
 class ArtifactLineageLink(BaseModel):
-    relationship: Literal["produced_by", "derived_from", "declared_input"]
+    relationship: Literal["produced_by", "derived_from", "declared_input", "referenced_by"]
     target_id: str
     evidence: str
+
+
+class ContentCaptureObservation(BaseModel):
+    """One moment at which the runner saw a file holding a specific content version."""
+
+    observed_at: str
+    reason: Literal[
+        "file_change",
+        "command_reference",
+        "directory_sweep",
+        "final_state",
+    ]
+    relationship: Literal["produced_by", "referenced_by"] = "referenced_by"
+    event_id: str | None = None
+
+
+class ArtifactContentCapture(BaseModel):
+    """A preserved copy of one content version of a transient file."""
+
+    sha256: str
+    size_bytes: int = Field(ge=0)
+    stored_path: str
+    encoding: Literal["utf-8", "binary"]
+    line_count: int | None = Field(default=None, ge=0)
+    media_type: str | None = None
+    first_observed_at: str
+    last_observed_at: str
+    observations: list[ContentCaptureObservation] = Field(default_factory=list)
+
+
+class SkippedContentCapture(BaseModel):
+    """A file the runner wanted to preserve but deliberately or unavoidably did not."""
+
+    path: str
+    reason: Literal["exceeds_max_file_bytes", "capture_budget_exhausted", "unreadable"]
+    observed_at: str
+    size_bytes: int | None = Field(default=None, ge=0)
+    detail: str | None = None
+
+
+class AuditContentStore(BaseModel):
+    """Index of the run-local store that holds preserved content of transient files."""
+
+    path: str
+    file_count: int = Field(ge=0)
+    version_count: int = Field(ge=0)
+    total_bytes: int = Field(ge=0)
+    policy: dict[str, Any] = Field(default_factory=dict)
+    skipped: list[SkippedContentCapture] = Field(default_factory=list)
 
 
 class AuditArtifact(BaseModel):
@@ -130,15 +179,17 @@ class AuditArtifact(BaseModel):
     size_bytes: int | None = None
     media_type: str | None = None
     lineage: list[ArtifactLineageLink] = Field(default_factory=list)
+    content_captures: list[ArtifactContentCapture] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class AuditTrail(BaseModel):
-    schema_version: Literal["0.1"] = "0.1"
+    schema_version: Literal["0.1", "0.2"] = "0.2"
     inner_trace_status: Literal["captured", "partial", "unavailable"]
     capture_sources: list[str] = Field(default_factory=list)
     events: list[AuditEvent] = Field(default_factory=list)
     artifacts: list[AuditArtifact] = Field(default_factory=list)
+    content_store: AuditContentStore | None = None
     notes: list[str] = Field(default_factory=list)
 
 

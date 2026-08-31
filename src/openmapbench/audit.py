@@ -5,6 +5,7 @@ import mimetypes
 from pathlib import Path
 from typing import Any
 
+from .capture import STORE_DIR_NAME, ContentCapture
 from .models import (
     ArtifactLineageLink,
     AuditArtifact,
@@ -347,6 +348,7 @@ def collect_audit_artifacts(
     agent_event_id: str,
     events: list[AuditEvent],
     declarations: list[tuple[dict[str, Any], str | None]],
+    content_capture: ContentCapture | None = None,
 ) -> list[AuditArtifact]:
     drafts: dict[str, dict[str, Any]] = {}
     used_ids: set[str] = set()
@@ -416,9 +418,13 @@ def collect_audit_artifacts(
         add(agent_audit_path, "log", "log-agent-audit")
 
     known_paths = set(drafts)
+    content_store_dir = (run_dir / STORE_DIR_NAME).resolve()
     intermediate_index = 1
     for path in sorted(run_dir.rglob("*")):
-        if not path.is_file() or str(path.resolve()) in known_paths:
+        resolved_path = path.resolve()
+        if not path.is_file() or str(resolved_path) in known_paths:
+            continue
+        if resolved_path == content_store_dir or content_store_dir in resolved_path.parents:
             continue
         add(
             path,
@@ -496,6 +502,44 @@ def collect_audit_artifacts(
             prefer_explicit_id=declaration.get("artifact_id") is not None,
         )
 
+    if content_capture is not None:
+        for draft in drafts.values():
+            content_capture.capture(
+                Path(draft["path"]),
+                reason="final_state",
+                event_id=agent_event_id,
+                relationship="produced_by",
+            )
+        captured_index = 1
+        for captured_path in sorted(content_capture.captures_by_path()):
+            if captured_path in drafts:
+                continue
+            add(
+                Path(captured_path),
+                "working",
+                f"captured-{captured_index:03d}",
+                metadata={"observed_scope": "content_capture"},
+            )
+            captured_index += 1
+
+    captures = content_capture.captures_by_path() if content_capture is not None else {}
+    for path_key, versions in captures.items():
+        draft = drafts.get(path_key)
+        if draft is None:
+            continue
+        draft["content_captures"] = versions
+        for version in versions:
+            for observation in version.observations:
+                if not observation.event_id:
+                    continue
+                link = _lineage(
+                    observation.relationship,
+                    observation.event_id,
+                    "runner_content_capture",
+                )
+                if link not in draft["lineage"]:
+                    draft["lineage"].append(link)
+
     records: list[AuditArtifact] = []
     for draft in drafts.values():
         path = Path(draft["path"])
@@ -519,6 +563,7 @@ def collect_audit_artifacts(
                 size_bytes=size_bytes,
                 media_type=media_type,
                 lineage=draft["lineage"],
+                content_captures=draft.get("content_captures", []),
                 metadata=draft["metadata"],
             )
         )
@@ -547,6 +592,7 @@ def build_audit_trail(
     run_dir: Path,
     output_kind: OutputKind,
     run_status: RunStatus,
+    content_capture: ContentCapture | None = None,
     evaluation: dict[str, Any] | None,
     error: str | None,
     evaluation_started_at: str | None,
@@ -626,7 +672,9 @@ def build_audit_trail(
         agent_event_id=agent_event_id,
         events=events,
         declarations=declarations,
+        content_capture=content_capture,
     )
+    content_store = content_capture.store_summary() if content_capture is not None else None
 
     capture_sources = ["openmapbench_runner"]
     if codex_detected:
@@ -648,10 +696,31 @@ def build_audit_trail(
             "The agent emitted no recognized inner trace. This does not mean no tools ran; use "
             "Codex --json or append JSONL events to OPENMAPBENCH_AUDIT_PATH."
         )
+    if content_store is not None:
+        capture_sources.append(f"content_capture:{content_store.path}")
+        if content_store.file_count:
+            notes.append(
+                f"Content of {content_store.file_count} file(s) observed during the run "
+                f"({content_store.version_count} version(s), {content_store.total_bytes} bytes) is "
+                f"preserved under {content_store.path}/, including files the agent deleted before "
+                "exiting. The task file, declared inputs, the reference, and files already kept in "
+                "the run directory are not duplicated."
+            )
+        else:
+            notes.append(
+                "No transient file content needed preserving: no file outside the run directory "
+                "was created or modified while the agent ran."
+            )
+        if content_store.skipped:
+            notes.append(
+                f"{len(content_store.skipped)} observed file(s) were not preserved; see "
+                "audit.content_store.skipped for the exact paths and reasons."
+            )
     return AuditTrail(
         inner_trace_status=inner_trace_status,
         capture_sources=capture_sources,
         events=events,
         artifacts=artifacts,
+        content_store=content_store,
         notes=notes,
     )

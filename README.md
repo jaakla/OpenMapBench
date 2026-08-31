@@ -166,6 +166,16 @@ Wrappers for any agent can report additional actions and exact `derived_from` re
 appending vendor-neutral JSONL to the path in `OPENMAPBENCH_AUDIT_PATH`. See
 [docs/run-manifest.md](docs/run-manifest.md) for the event and artifact format.
 
+Agents usually put the logic that decides an output into a throwaway script—`render_heat.py`,
+`.tmp_make_map.py`—and delete it before exiting, which leaves a path and a checksum for a file
+nobody can read. The runner therefore watches the agent stream live and copies observed files into
+`<run-dir>/captured-files/` as they appear: files named by a `file_change` item, files named
+anywhere in a command including heredoc bodies, and files created or changed under the agent
+working directory. Deleted files keep `exists_at_finish: false` and gain their preserved content,
+so a run stays reviewable and reproducible. Task inputs, the reference, and files already kept in
+the run directory are not duplicated. `audit.content_store` records the size, policy, and anything
+deliberately skipped; `OPENMAPBENCH_AUDIT_CAPTURE=0` turns capture off.
+
 ### Token usage and cost
 
 The runner recognizes Codex CLI usage in both JSON Lines output and the human-readable stderr
@@ -300,7 +310,7 @@ uv run --no-sync openmapbench run \
   --run-root runs/gabench
 ```
 
-Run every imported task in one isolated batch:
+Run every imported task in one isolated batch, skip one problematic one as an example case:
 
 ```bash
 uv run --no-sync python scripts/run_gabench_all.py \
@@ -308,7 +318,7 @@ uv run --no-sync python scripts/run_gabench_all.py \
   --agent-name codex \
   --model gpt-5.6-luna \
   --timeout-seconds 1800  \
-  --skip task-009
+  --skip gabench-009
 ```
 
 The script defaults to `.openmapbench/gabench/manifest.json`, continues after individual failures,

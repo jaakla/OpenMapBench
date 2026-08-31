@@ -8,3 +8,4 @@ runs/
 report.json
 report.md
 visual-reviews/
+.DS_Store

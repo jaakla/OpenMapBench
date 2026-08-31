@@ -13,13 +13,15 @@ The manifest records:
   their parameters and results, and the evaluator step;
 - task, input, intermediate, working, candidate, reference, and log artifacts with hashes and
   evidence-labelled lineage links;
+- preserved content of the transient files the run created, used, or deleted;
 - Python and platform metadata without copying arbitrary environment values;
 - candidate and reference paths, sizes, and checksums;
 - detected token usage, model, reasoning effort, and a cost estimate when supported;
 - subprocess exit code, deterministic evaluation checks, diagnostics, or explicit error.
 
 Run-manifest schema `0.3` adds the `audit` block. Schema `0.2` added `token_usage` and
-`cost_estimate`; schemas `0.1` and `0.2` remain readable.
+`cost_estimate`; schemas `0.1` and `0.2` remain readable. Inside the block, `audit.schema_version`
+`0.2` adds `audit.content_store` and per-artifact `content_captures`.
 Codex CLI `--json` output can provide input, cached-input, cache-write, output, and reasoning-output
 token categories. Without JSON output, OpenMapBench recovers the final `tokens used` total from
 `agent.stderr.log`. Total-only usage receives a cost range because the mix of differently priced
@@ -66,15 +68,70 @@ Supported event fields are `event_id`, `parent_event_id`, `type`/`kind`, `name`,
 An artifact supports `artifact_id`, `path`, `role`, `produced_by`, `derived_from`, and `metadata`.
 Paths are resolved relative to the agent working directory.
 
+### Preserved content of transient files
+
+Agents routinely put the logic that decides an output into a throwaway helper script—
+`render_heat.py`, `.tmp_make_map.py`—run it, and delete it before exiting. A path and a checksum of
+a file that no longer exists cannot be reviewed or reproduced, so the runner reads the agent stream
+while the agent is still running and copies observed files into `<run-dir>/captured-files/`.
+
+Content is preserved when the runner sees a file:
+
+- named by a Codex `file_change` item, including the version that a later item deletes;
+- named anywhere in a `command_execution` command, heredoc bodies included;
+- created or modified under the agent working directory during the run, found by a bounded sweep
+  after each observed action and once more when the agent exits.
+
+A file is never copied twice: the store is addressed by content, and repeated observations of the
+same bytes only append to that version's `observations`. Every version records when it was first and
+last seen, how it was observed, and which event was running at the time.
+
+Nothing is duplicated needlessly. The task file, declared inputs, the reference, and everything
+already kept inside the run directory are exempt, and only files whose modification time falls
+inside the run are considered—reading an unchanged project file copies nothing.
+
+`audit.content_store` indexes the store and lists what was deliberately left out, so a reviewer can
+tell an empty store from a suppressed one:
+
+```json
+{"path":"captured-files","file_count":2,"version_count":3,"total_bytes":8134,
+ "policy":{"max_file_bytes":4194304,"max_total_bytes":268435456,"sweep_depth":4},
+ "skipped":[{"path":"/tmp/tiles.gpkg","reason":"exceeds_max_file_bytes","size_bytes":91234567}]}
+```
+
+Each artifact carries the matching versions in `content_captures`, with `stored_path` relative to
+the run directory, the SHA-256, size, line count, and whether the bytes decode as UTF-8. An artifact
+whose `exists_at_finish` is `false` but whose `content_captures` is non-empty is exactly the case
+this exists for: the file is gone, its content is not. The visual review report inlines preserved
+text so the deciding logic is readable beside the image it produced.
+
+Four environment variables bound the store; set any of them before `openmapbench run`:
+
+| Variable | Default | Effect |
+| --- | --- | --- |
+| `OPENMAPBENCH_AUDIT_CAPTURE` | `1` | `0`, `false`, `off`, or `no` disables capture entirely |
+| `OPENMAPBENCH_AUDIT_CAPTURE_MAX_FILE_BYTES` | `4194304` | Largest single file preserved |
+| `OPENMAPBENCH_AUDIT_CAPTURE_MAX_TOTAL_BYTES` | `268435456` | Total store budget for one run |
+| `OPENMAPBENCH_AUDIT_CAPTURE_SWEEP_DEPTH` | `4` | Sweep depth below the agent working directory |
+
+The sweep never descends into `.git`, `.venv`, `node_modules`, `__pycache__`, `site-packages`, or
+the other build and cache directories listed in `audit.content_store.policy`. When capture is
+disabled, `audit.content_store` is absent rather than empty.
+
+The store holds verbatim bytes, so it is exactly as sensitive as whatever the agent wrote next to
+its working directory. Treat `<run-dir>/captured-files/` like the `agent.stdout.log` beside it, and
+lower the limits or disable capture for runs that touch credentials.
+
 ### Artifact lineage
 
-`audit.artifacts` stores the final existence state, SHA-256, size, media type, and lineage for each
-observed file. Each lineage link includes its evidence so reviewers can distinguish:
+`audit.artifacts` stores the final existence state, SHA-256, size, media type, preserved content,
+and lineage for each observed file. Each lineage link includes its evidence so reviewers can distinguish:
 
 - `runner_observation`: a file was observed inside the isolated run directory after the agent;
 - `task_contract`: an input was declared by the benchmark task;
 - `codex_jsonl`: a Codex file-change item named the file;
-- `agent_reported`: the agent or wrapper explicitly declared the relation.
+- `agent_reported`: the agent or wrapper explicitly declared the relation;
+- `runner_content_capture`: the runner preserved the file's content while that event was running.
 
 OpenMapBench does not invent dependency edges between intermediate files. Exact `derived_from`
 relationships require agent-reported audit records; otherwise the manifest records only the
