@@ -101,6 +101,8 @@ recast from the GISAgentBench case studies onto Estonian open data.
 | `gab-sjg-002` | One guaranteed-interior point per Estonian municipality, with projected coordinates | vector points | CRS misalignment, contract literalism |
 | `gab-spa-001` | Distinct parks per cell of a pinned 1 km grid over Tallinn | vector polygons | boundary ambiguity, multipart handling, wrong tool substitution |
 | `gab-spa-002` | Nearest-hospital service areas inside 1 km, clipped to Tallinn | vector polygons | wrong tool substitution, geometry topology |
+| `gab-sosa-002a` | Pärnu county rivers clipped to municipalities, written in the input CRS | vector lines | CRS preservation, geometry topology |
+| `gab-sosa-002b` | Clipped river length per source feature | table | CRS misalignment, geometry topology, unit mismatch |
 
 Run one with its bundled reference solver to see the whole loop:
 

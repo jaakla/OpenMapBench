@@ -229,6 +229,16 @@ identifier (for example the island name), switch to `match: entity` on that key.
 
 ### gab-sosa-002a / 002b — Clip shoreline to municipalities, preserve input CRS
 
+**Implemented** in `benchmark/tasks/gab-sosa-002a/` and `.../gab-sosa-002b/`, with two
+departures from the draft below, both forced by measurement. The line layer is the river
+network of four Pärnu county municipalities rather than the shoreline, because an OSM coastline
+runs *along* the municipality boundary and clipping it would score dataset registration noise
+instead of the operation. And the topology defect is a self-touching ring in a part disjoint
+from every other ring, not a nested one: a nested ring is repaired to a hole by `make_valid`
+and to filled area by `buffer(0)`, which would make the intended answer depend on the repair
+tool. Tolerances are 3 m Hausdorff and 1.5 m / 0.4 % on length, both set by the measured cost
+of clipping in EPSG:4326 rather than EPSG:3301.
+
 Source: `clipping_shoreline_to_boroughs` (Spatial Overlay & Suitability, failure: only 1/6
 preserved the input CRS; also a TopologyException until geometries were fixed).
 

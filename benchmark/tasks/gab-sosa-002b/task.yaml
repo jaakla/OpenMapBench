@@ -1,0 +1,66 @@
+schema_version: "0.1"
+id: gab-sosa-002b
+title: Clipped river length per source feature
+category: table
+prompt: >
+  inputs/rivers.geojson holds 593 river centrelines in EPSG:4326 and
+  inputs/municipalities.geojson holds four Pärnu county municipalities in EPSG:3301. Two of
+  the four municipality geometries are invalid: each carries an extra part whose ring
+  touches itself. Repair them before you use them; every area-preserving repair
+  (make_valid, a zero-width buffer, a self-union) gives the same region here, and dropping
+  the invalid features is not a repair.
+
+  Clip the rivers to the union of the four repaired municipality polygons and report how
+  much of each river survives the clip. Measure lengths in EPSG:3301, in metres.
+
+  Write river_lengths.csv with the columns source_fid and length_m, one row per input river
+  whose clipped length is greater than zero, length_m rounded to 2 decimals. Rivers that
+  fall entirely outside the municipalities are not in the table.
+
+inputs:
+  - path: inputs/rivers.geojson
+    role: rivers
+    source: "OpenStreetMap via Overpass API; way[waterway=river] in bbox 58.10,23.90,58.95,25.30, simplified at 5 m, kept within 2000 m of the four municipalities"
+    as_of: "2026-09-02"
+    checksum: sha256:091186cb02b22458c0ffedf7ce659bfb462e493db91624a9846ef12ccafea200
+    license: ODbL-1.0
+  - path: inputs/municipalities.geojson
+    role: municipalities
+    source: "Maa-amet Haldus- ja asustusjaotus, omavalitsus layer (https://geoportaal.maaamet.ee/docs/haldus_asustus/omavalitsus_shp.zip), four Pärnu county municipalities, generalised at 50 m, two carrying a deliberate topology defect (see inputs/README.md)"
+    as_of: "2024-12-01"
+    checksum: sha256:4075f10b01a1df36d65d95478432d15d3f08d34aa0706e0bf395e746885371ea
+    license: "Maa-amet open data (CC BY 4.0 equivalent, attribution: Maa-amet)"
+
+output:
+  path: river_lengths.csv
+  kind: table
+
+evaluation:
+  strict:
+    key: source_fid
+    required_columns: [source_fid, length_m]
+    numeric_tolerance:
+      default: {absolute: 0, relative: 0}
+      length_m: {absolute: 1.5, relative: 0.004}
+
+metadata:
+  difficulty: medium
+  family: spatial-overlay-and-suitability
+  failure_modes: [crs_misalignment, geometry_topology, unit_mismatch]
+  skills: [reprojection, geometry-repair, clip, length-measurement]
+  source_case: "GISAgentBench (arXiv:2608.01645) case clipping_shoreline_to_boroughs, recast onto Pärnu county rivers"
+  paired_task: gab-sosa-002a
+  tolerance_rationale: >
+    Rounding to 2 decimals contributes 0.005 m. The tolerance is set by a measured
+    mechanism instead: clipping in EPSG:4326 and measuring the reprojected result, rather
+    than clipping in EPSG:3301, changes a river's length by up to 1.44 m absolute and 0.34 %
+    relative, and both routes are defensible. Absolute 1.5 m with relative 0.4 % accepts
+    either and rejects everything wrong by a wide margin: lengths left in degrees are out by
+    five orders of magnitude, unclipped lengths by hundreds of metres on the 63 rivers that
+    cross the boundary, and dropping the two invalid municipalities instead of repairing
+    them changes 282 of the 510 rows.
+  reference_method: >
+    tools/solve.py measures the clipped length with an overlay intersection and,
+    independently, by splitting each river at the region boundary and summing the pieces
+    whose midpoint is covered by the region; the two must agree on every river to within
+    1e-6 m before a reference is written.
