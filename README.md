@@ -108,6 +108,7 @@ recast from the GISAgentBench case studies onto Estonian open data.
 | `gab-rsia-002b` | Region count and area per landcover class | table | connectivity, missing reprojection |
 | `gab-tmha-002` | Steep-slope regions on a 10 m grid resampled from a 30 m DEM | vector polygons | operation order, connectivity, boundary ambiguity |
 | `gab-tmha-002s` | Steep area, region count and maximum slope for the same analysis | scalar | operation order, connectivity |
+| `gab-rsia-001` | NDVI at Tartu address points from a four-band image | vector points | band order, NoData, CRS misalignment, sampling method |
 
 Run one with its bundled reference solver to see the whole loop:
 

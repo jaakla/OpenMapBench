@@ -1,0 +1,85 @@
+schema_version: "0.1"
+id: gab-rsia-001
+title: NDVI at address points from a four-band image
+category: vector
+prompt: >
+  inputs/image.tif is a four-band 10 m image over Tartu in EPSG:32635, 300 x 300 int16
+  pixels. The band order is 1 red, 2 green, 3 blue, 4 near infrared, and a stored value is
+  surface reflectance times 10000. NoData is -32768 and one 200 m block of the image is
+  NoData in every band. inputs/addresses.geojson holds 463 address points in EPSG:4326,
+  over an area wider than the image.
+
+  For every address point, sample the pixel it falls in — nearest pixel, no interpolation —
+  and compute NDVI = (NIR − red) / (NIR + red), rounded to 4 decimals. NDVI is null, not
+  zero and not an omitted row, when the point falls outside the image, when either band is
+  NoData at that pixel, or when NIR + red is zero.
+
+  Write addresses_ndvi.gpkg in EPSG:3301 with one point per input address, keeping the
+  original adr_id, street and housenumber attributes and adding ndvi. All 463 points are in
+  the output, including the ones whose NDVI is null.
+
+inputs:
+  - path: inputs/image.tif
+    role: image
+    source: "Sentinel-2 L2A scene S2B_T35VME_20250604T093340_L2A via Earth Search (element84), bands B04/B03/B02/B08 stacked as R/G/B/NIR over a 3 km window, BOA offset applied, one NoData block added (see inputs/README.md)"
+    as_of: "2025-06-04"
+    checksum: sha256:0b5b8d2062c00eedb247830dc1ceeff4bd3cf0606f9f4833f87883f5a3242df0
+    license: "CC-BY-SA-3.0-IGO (Copernicus Sentinel data 2025, processed by ESA)"
+  - path: inputs/addresses.geojson
+    role: addresses
+    source: "OpenStreetMap via Overpass API; node[addr:housenumber][addr:street] in bbox 58.3607,26.6879,58.3966,26.7712"
+    as_of: "2026-09-02"
+    checksum: sha256:16e4dfa7b4c359d1986c225bbed7ef65170819ed53796de30062c2abcf29c6ea
+    license: ODbL-1.0
+
+output:
+  path: addresses_ndvi.gpkg
+  kind: vector
+  geometry_type: Point
+  crs: EPSG:3301
+  required_fields: [adr_id, street, housenumber, ndvi]
+
+evaluation:
+  strict:
+    crs: exact
+    feature_count: exact
+    geometry:
+      metric: hausdorff_distance
+      tolerance: 0.5
+      comparison_crs: EPSG:3301
+      require_valid: true
+    attributes:
+      key: adr_id
+      columns: [adr_id, street, housenumber, ndvi]
+      numeric_tolerance:
+        default: {absolute: 0, relative: 0}
+        ndvi: {absolute: 0.0002, relative: 0}
+    vector_checks:
+      - {type: unique, field: adr_id}
+      - {type: field_range, field: ndvi, min: -1, max: 1, allow_null: true}
+
+metadata:
+  difficulty: medium
+  family: remote-sensing-and-image-analysis
+  failure_modes: [band_order, nodata, crs_misalignment, sampling_method]
+  skills: [raster-sampling, band-math, reprojection, null-semantics]
+  source_case: "GISAgentBench (arXiv:2608.01645) case extract_ndvi_values_at_randstad_address_points_from_cir_orthophoto, recast onto a Sentinel-2 window over Tartu"
+  tolerance_rationale: >
+    Rounding to 4 decimals contributes 0.00005 and computing in float32 rather than float64
+    adds less than 1e-6 on these values, so 0.0002 is a rounding budget and nothing more.
+    Every wrong route is far outside it: bilinear sampling instead of nearest changes 303 of
+    the 304 comparable points, by up to 0.21; reading the bands as a colour-infrared
+    composite, with near infrared first, flips the sign of every value; and sampling without
+    reprojecting the points to the image CRS puts every point outside the image. Point
+    geometry is checked with a 0.5 m Hausdorff distance, which absorbs the datum
+    transformation from EPSG:4326 to EPSG:3301 and rejects an unprojected output.
+  reference_method: >
+    tools/solve.py samples with GeoPandas reprojection plus rasterio's sampler and,
+    independently, with a bare pyproj transform plus array indexing through the inverse
+    affine transform; the two must agree on every point and on which points have no value.
+  scoring_caveat: >
+    154 of the 463 points have a null NDVI: 108 fall outside the image and 46 on the NoData
+    block. That is a third of the artifact, and the attribute comparison is null-aware, so
+    an agent that writes 0 for them fails on those rows alone. The third null case in the
+    contract, NIR + red being exactly zero, does not occur in this data; it is stated
+    because the quotient is otherwise undefined, not because it is exercised.

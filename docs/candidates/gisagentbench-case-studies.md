@@ -452,6 +452,12 @@ directly per `hosp_fid`, and the `area_m2` column becomes a secondary check.
 
 ### gab-rsia-001 — NDVI at address points from a 4-band orthophoto
 
+**Implemented** in `benchmark/tasks/gab-rsia-001/` with a Sentinel-2 window over Tartu rather
+than a Maa-amet orthophoto, because the Sentinel-2 archive gives a citable scene, a small
+frozen file and a real near-infrared band; the contract there supersedes the draft below. The
+draft's ADS points are OpenStreetMap address nodes, and the NoData clause needed a deliberate
+NoData block, since a cloud-free 3 km window contains none.
+
 Source: `extract_ndvi_values_at_randstad_address_points_from_cir_orthophoto` (Remote Sensing &
 Image Analysis, success, 3/6).
 
