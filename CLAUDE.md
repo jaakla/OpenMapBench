@@ -16,6 +16,8 @@
 
 This file guides Claude Code when working in this repository.
 
+Use @AGENTS.md for more instructions
+
 ## Project
 
 - **Project Name**: OpenMapBench
