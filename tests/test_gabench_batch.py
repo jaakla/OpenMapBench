@@ -112,6 +112,10 @@ sys.stderr.write("model: gpt-5.6-luna\\nreasoning effort: low\\ntokens used\\n1,
     assert (batch_dir / "report.json").is_file()
     assert (batch_dir / "report.md").is_file()
     assert (batch_dir / "visual-review" / "index.html").is_file()
+    assert batch["aggregate_report"]["html"] == str(batch_dir / "report.html")
+    page = (batch_dir / "report.html").read_text(encoding="utf-8")
+    assert page.count('<article class="card"') == 2
+    assert "visual review" in page
     assert batch["visual_review"]["comparison_count"] == 1
     report = json.loads((batch_dir / "report.json").read_text(encoding="utf-8"))
     assert report["strict_success_rate"] == 1.0

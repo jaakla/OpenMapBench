@@ -28,11 +28,17 @@ src/openmapbench/
   capture.py       Live content capture of transient agent files into <run_dir>/captured-files/
   usage.py         Token usage parsing and backfill
   pricing.py       Dated, source-linked model price catalog; cost estimates
-  reporting.py     Aggregate manifests into JSON/Markdown reports
-  visual.py        Side-by-side image sheets and HTML index for manual map review
+  reporting.py     Aggregate manifests into JSON/Markdown reports; load_manifests()
+  html_report.py   Detailed self-contained HTML report over a directory of runs
+  visual.py        Side-by-side image sheets and HTML index for manual map review; AUDIT_CSS,
+                   audit_html() are shared with html_report.py
+  batch.py         Shared batch plumbing: batch IDs, report writing, status roll-ups
+  benchmark_batch.py   Run every native benchmark task with one agent command
   gabench_batch.py Run every imported GABench task with one agent command
   adapters/gabench.py  Import GABench tasks from an external checkout (no vendoring)
-  cli.py           Typer CLI: validate, evaluate, run, report, usage-backfill, gabench-*, visual-report
+  cli.py           Typer CLI: validate, evaluate, run, run-suite, report, usage-backfill,
+                   gabench-*, visual-report
+scripts/run_benchmark_all.py Thin entry point for benchmark_batch.main
 scripts/run_gabench_all.py   Thin entry point for gabench_batch.main
 adapters/gabench/README.md   How the GABench bridge works and its license boundary
 benchmark/examples/          Tiny runnable example tasks (sum-values, buffer-schools)
@@ -56,6 +62,8 @@ uv run openmapbench run benchmark/examples/sum-values/task.yaml \
   --agent-command ".venv/bin/python benchmark/examples/sum-values/solve.py" \
   --run-root runs
 uv run openmapbench report runs --output report.md
+uv run openmapbench report runs --output report.html   # detailed browsable report
+uv run --no-sync python scripts/run_benchmark_all.py --reference-solver   # whole-suite smoke test
 ```
 
 CI runs exactly `ruff check .` and `pytest -q`. Both must pass before a task is declared done.
@@ -77,7 +85,8 @@ CI runs exactly `ruff check .` and `pytest -q`. Both must pass before a task is 
 - **Schema versions are contracts.** `TaskSpec.schema_version` is `"0.1"`; `RunManifest` accepts
   `"0.1"` through `"0.4"` and writes `0.4`. Adding a manifest field means bumping the version,
   keeping older versions loadable, and noting the change in `docs/run-manifest.md`. Adding a task
-  field must stay backward compatible within `0.1` or bump it.
+  field must stay backward compatible within `0.1` or bump it. Batch manifests carry their own
+  versions: `0.1` for the native suite bundle, `0.3` for the GABench bundle.
 - No scratch files in the project root. Use the session scratchpad or a run's `workspace/`
   folder.
 
@@ -115,6 +124,15 @@ CI runs exactly `ruff check .` and `pytest -q`. Both must pass before a task is 
    unpriced rather than borrowing another model's rates.
 11. **The evaluator reads only candidate, reference, and the task's evaluation block.** It must
     not inspect logs, trajectories, or the agent's environment.
+12. **Reports present, never decide.** `report.html` is a view over run manifests and
+    `report.json`; every number on it must already exist there. It may show logs, prompts, and
+    audit trails as evidence, but it must never compute a verdict of its own or turn a
+    diagnostic into a pass. The page stays self-contained: inline CSS and JS, no network
+    requests, no external assets.
+13. **A task that cannot be scored fairly is skipped, not failed.** The suite runner skips a task
+    with no reference artifact, a malformed contract, or inputs that no longer match their
+    checksums, records the reason in `batch.json` and the reports, and keeps it out of both sides
+    of the strict rate.
 
 ## How to extend the evaluators
 
@@ -138,11 +156,14 @@ folder with frozen data and a README naming source, license, acquisition date an
 pass, and `openmapbench run` with a trivial solver must exercise the strict contract end to end.
 Tag the GIS failure mode the task targets under `metadata` (CRS, units, topology, NoData,
 boundary handling). Prefer keyed aggregates over per-segment outputs when the natural output has
-no stable entity key.
+no stable entity key. The suite runner pairs each task with `<task-dir>/reference/<artifact>`, so
+the reference file must be named exactly like the declared `output.path`, and
+`python scripts/run_benchmark_all.py --reference-solver --task <id>` must end in `passed`.
 
 ## When you are the agent being evaluated
 
-If you are invoked through `openmapbench run` or the GABench batch runner:
+If you are invoked through `openmapbench run`, `openmapbench run-suite`, or either batch
+runner:
 
 - Read the task YAML at `OPENMAPBENCH_TASK_FILE`; its `inputs` are the only data you may rely on.
 - Write the artifact exactly to `OPENMAPBENCH_OUTPUT_PATH`, in the declared kind, geometry type,

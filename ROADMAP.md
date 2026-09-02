@@ -47,6 +47,13 @@ Run the same compatible task subset with:
 
 Report strict success, category breakdown, cost, and failure taxonomy.
 
+Status: the harness for it is in place. `scripts/run_benchmark_all.py` (also
+`openmapbench run-suite`) runs the whole native set with one agent command and writes a batch
+bundle whose `report.html` carries strict success, category, output-kind and failure-mode
+breakdowns, per-model token use and cost, and per-task evidence. Two batches run with different
+agent metadata are directly comparable. What remains is choosing the agents and the skill
+package and running them.
+
 ## Issue 8 — Native OpenMapBench v0 set
 Add 30–50 verified tasks emphasizing real GIS failure modes and reproducibility.
 

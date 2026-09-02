@@ -86,6 +86,12 @@ manifests are reported separately and are not silently counted.
 Reports also group strict success by each tag in the task's `metadata.failure_modes`; a run
 tagged with two pitfalls counts in both groups, and untagged runs are listed as `untagged`.
 
+A task the suite runner refused to run — no reference artifact, a malformed contract, or inputs
+that no longer match their declared checksums — is neither a success nor a failure. It is listed
+as skipped with its reason and stays out of both sides of the fraction, so a broken checkout is
+visible instead of quietly depressing the score. The JSON, Markdown, and HTML reports present the
+same numbers; the HTML report adds evidence per run and never introduces a verdict of its own.
+
 ## Token and cost reporting
 
 Token use and estimated cost are efficiency diagnostics; they never affect strict task success.

@@ -167,5 +167,53 @@ successes, and `needs_review` is excluded from the strictly scored denominator.
 - per-task and aggregate API-equivalent cost estimates or ranges;
 - invalid-manifest diagnostics.
 
-JSON is the default. A `.md` or `.markdown` output suffix produces a human-readable summary while
-preserving the same strict score semantics.
+JSON is the default. A `.md` or `.markdown` output suffix produces a human-readable summary, and
+an `.html` or `.htm` suffix produces the detailed browsable report described below. All three
+carry the same strict score semantics.
+
+## The HTML report
+
+`openmapbench report <run-root> --output report.html` and both batch runners write a single
+self-contained page: inline CSS, a few lines of filter JavaScript, no network requests, no
+external assets. It is a view over the run manifests, never a second source of truth — every
+number on it comes from `report.json`, and every per-run detail comes from that run's manifest
+and the task contract the manifest points at.
+
+The page carries, in order:
+
+- headline tiles: strict success rate, attempted tasks, pending manual reviews, total tokens,
+  estimated cost, and batch wall time;
+- the outcome distribution as one bar, with a legend per terminal status;
+- run context: batch ID, task source, agent name, model, the exact agent command, and timings;
+- strict success broken down by category, output kind, and tagged failure mode, plus token use
+  and cost per model;
+- tasks that were never scored, with the reason each was skipped and any unreadable manifest;
+- one card per run: status, task metadata chips, duration, exit code, diagnostic score, tokens
+  and cost, the task prompt, the declared artifact contract, every strict check with its
+  evidence, diagnostics, the agent's own stdout and stderr tails, links to the run directory,
+  manifest, candidate and reference, and the full execution audit from
+  [Execution audit](#execution-audit) above.
+
+Failure evidence is expanded by default and success evidence is collapsed: a failed run opens its
+diagnostics, and any run that did not pass opens its stderr tail. The per-task cards can be
+filtered by status or searched by task ID, title, category, or failure mode.
+
+## Batch bundles
+
+Both batch runners — `scripts/run_benchmark_all.py` for the native suite and
+`scripts/run_gabench_all.py` for the GABench bridge — write the same bundle:
+
+```text
+<output-root>/<batch-id>/
+├── batch.json     # batch provenance, per-task outcomes, and skipped-task reasons
+├── report.json    # aggregate score, token, model, and cost statistics
+├── report.md      # readable score, usage summary, and per-task table
+├── report.html    # the detailed report described above
+├── task-runs/     # immutable artifact, log, and manifest folder for every task
+└── visual-review/ # only when the batch produced image artifacts
+```
+
+`batch.json` for the native suite is schema `0.1`; the GABench batch manifest moved to `0.3` when
+`aggregate_report.html` was added. Both record `task_root` or `source_manifest`, the agent command
+and metadata, start and finish timestamps, per-task outcomes with run IDs and manifest paths, and
+the reason every skipped task was skipped.

@@ -16,7 +16,9 @@ The repository now contains a runnable MVP:
 - deterministic scalar/JSON, CSV/JSON-table, and vector evaluators;
 - immutable run directories with logs, checksums, environment metadata, and manifests;
 - automatic Codex token capture plus dated API-equivalent cost estimates;
-- aggregate JSON or Markdown reports with strict success and per-model usage statistics;
+- aggregate JSON, Markdown, or detailed self-contained HTML reports with strict success and
+  per-model usage statistics;
+- a suite runner that runs every native task with one agent and writes an isolated batch bundle;
 - static side-by-side visual-review folders with PNG sheets, an HTML index, an editable review
   CSV, and a machine-readable manifest;
 - a GABench importer that operates against an external checkout and never copies upstream
@@ -128,11 +130,56 @@ openmapbench run benchmark/tasks/gab-sjg-001/task.yaml \
 ```
 
 Every native task is checked in CI: its inputs must match their checksums and carry source,
-license, and acquisition date, and its reference must pass its own strict contract. After a
-batch of runs, `openmapbench report runs --output report.md` breaks strict success down by the
-failure modes the tasks are tagged with. The case-by-case rationale, including where the
-implemented contracts depart from the drafts and why, is in
-[docs/candidates/gisagentbench-case-studies.md](docs/candidates/gisagentbench-case-studies.md).
+license, and acquisition date, and its reference must pass its own strict contract. The
+case-by-case rationale, including where the implemented contracts depart from the drafts and why,
+is in [docs/candidates/gisagentbench-case-studies.md](docs/candidates/gisagentbench-case-studies.md).
+
+## Run the whole suite
+
+One command runs every native task against one agent, continues past individual failures, and
+writes an isolated batch bundle with a detailed HTML report:
+
+```bash
+uv run --no-sync python scripts/run_benchmark_all.py \
+  --agent-command 'codex exec --json --ephemeral --approve-for-me -m gpt-5.6-luna "Read the OpenMapBench task at {task_file}, complete it using the declared inputs, and write the required artifact exactly to {output_path}. Create the file rather than only explaining the result."' \
+  --agent-name codex \
+  --model gpt-5.6-luna \
+  --timeout-seconds 1800
+```
+
+The same runner is available as `openmapbench run-suite benchmark/tasks --agent-command ...`. It
+defaults to `benchmark/tasks` and creates a timestamped directory under `runs/benchmark/`:
+
+```text
+runs/benchmark/<batch-id>/
+├── batch.json    # batch provenance, per-task outcomes, and skipped-task reasons
+├── report.json   # aggregate score, token, model, and cost statistics
+├── report.md     # readable score, usage summary, and per-task table
+├── report.html   # detailed browsable report: evidence, logs, and audit per task
+└── task-runs/    # immutable artifact, log, and manifest folder for every task
+```
+
+Open `report.html` to review a batch. It is one self-contained page — no network requests, no
+external assets — with headline tiles, the outcome distribution, strict success broken down by
+category, output kind, and tagged failure mode, and one card per task carrying the prompt, the
+declared artifact contract, every strict check with its evidence, diagnostics, the agent's own
+stdout and stderr, links to the artifact and reference, and the full execution audit. Failed runs
+open their diagnostics and stderr by default; the cards filter by status and search by task ID,
+title, category, or failure mode. `openmapbench report <run-root> --output report.html` produces
+the same page for any directory of runs.
+
+Useful flags: `--task <id>` and `--skip <id>` are repeatable, `--reference-solver` runs each
+task's own `tools/solve.py` as the agent, and `--no-verify-inputs` runs tasks whose frozen inputs
+no longer match their checksums. The process returns nonzero if any task failed, errored, or
+could not be run. A task that cannot be scored fairly — no reference artifact, malformed contract,
+or altered inputs — is reported as skipped rather than counted as a failure.
+
+The reference solvers are also the suite's smoke test: every task must pass its own strict
+contract when solved by its bundled solver.
+
+```bash
+uv run --no-sync python scripts/run_benchmark_all.py --reference-solver
+```
 
 ## Generic task contract
 
@@ -393,6 +440,7 @@ runs/gabench/<batch-id>/
 ├── batch.json             # batch provenance, outcomes, and skipped-task reasons
 ├── report.json            # aggregate score, token, model, and cost statistics
 ├── report.md              # readable score, usage summary, and per-task table
+├── report.html            # detailed browsable report: evidence, logs, and audit per task
 ├── task-runs/             # immutable artifact, log, and manifest folder for every task
 └── visual-review/         # HTML, CSV, manifest, and comparison PNGs for image tasks
 ```

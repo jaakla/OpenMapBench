@@ -7,7 +7,9 @@ from typing import Annotated
 import typer
 
 from .adapters.gabench import import_gabench
+from .benchmark_batch import reference_solver_command, run_benchmark_batch
 from .evaluator import evaluate as evaluate_result
+from .html_report import write_html_report
 from .models import RunStatus
 from .reporting import aggregate_manifests, report_markdown
 from .runner import run_task
@@ -111,20 +113,111 @@ def run(
 def report(
     run_root: Annotated[Path, typer.Argument(exists=True, file_okay=False)],
     output: Annotated[
-        Path | None, typer.Option(help="Optional JSON or Markdown report path.")
+        Path | None,
+        typer.Option(
+            help=(
+                "Optional report path. The suffix picks the format: .md for Markdown, "
+                ".html for the detailed browsable report, anything else for JSON."
+            )
+        ),
     ] = None,
+    title: Annotated[str, typer.Option(help="Title of the HTML report.")] = (
+        "OpenMapBench report"
+    ),
 ) -> None:
     """Aggregate run manifests and calculate the strict success score."""
     aggregate = aggregate_manifests(run_root)
     if output:
         output.parent.mkdir(parents=True, exist_ok=True)
-        if output.suffix.lower() in {".md", ".markdown"}:
+        suffix = output.suffix.lower()
+        if suffix in {".md", ".markdown"}:
             output.write_text(report_markdown(aggregate), encoding="utf-8")
+        elif suffix in {".html", ".htm"}:
+            write_html_report(
+                run_root,
+                output,
+                title=title,
+                subtitle=f"{aggregate['attempted_tasks']} runs aggregated from {run_root}",
+                aggregate=aggregate,
+            )
         else:
             output.write_text(json.dumps(aggregate, indent=2, sort_keys=True), encoding="utf-8")
         typer.echo(str(output.resolve()))
     else:
         typer.echo(json.dumps(aggregate, indent=2, sort_keys=True))
+
+
+@app.command("run-suite")
+def run_suite(
+    task_root: Annotated[
+        Path,
+        typer.Argument(exists=True, file_okay=False, help="Directory of <task-id>/task.yaml."),
+    ] = Path("benchmark/tasks"),
+    agent_command: Annotated[
+        str | None,
+        typer.Option(help="Command to run without a shell; supports the same placeholders."),
+    ] = None,
+    reference_solver: Annotated[
+        bool,
+        typer.Option(
+            "--reference-solver",
+            help="Use each task's bundled tools/solve.py as the agent (suite smoke test).",
+        ),
+    ] = False,
+    output_root: Annotated[
+        Path, typer.Option(help="Parent folder for timestamped batch directories.")
+    ] = Path("runs/benchmark"),
+    batch_id: Annotated[str | None, typer.Option(help="Stable batch directory name.")] = None,
+    timeout_seconds: Annotated[float | None, typer.Option(min=0.001)] = None,
+    agent_name: Annotated[str | None, typer.Option()] = None,
+    model: Annotated[str | None, typer.Option()] = None,
+    skill: Annotated[list[str] | None, typer.Option()] = None,
+    tool: Annotated[list[str] | None, typer.Option()] = None,
+    agent_cwd: Annotated[
+        Path | None,
+        typer.Option(
+            exists=True,
+            file_okay=False,
+            help="Agent working directory (default: each run's own workspace/ folder).",
+        ),
+    ] = None,
+    task: Annotated[
+        list[str] | None, typer.Option(help="Repeatable task ID to run; default is all.")
+    ] = None,
+    skip: Annotated[list[str] | None, typer.Option(help="Repeatable task ID to skip.")] = None,
+    verify_inputs: Annotated[
+        bool, typer.Option(help="Skip tasks whose frozen inputs no longer match their checksums.")
+    ] = True,
+) -> None:
+    """Run a whole task suite with one agent and write JSON, Markdown, and HTML reports."""
+    if reference_solver and agent_command:
+        raise typer.BadParameter("--reference-solver and --agent-command are mutually exclusive")
+    command = reference_solver_command() if reference_solver else agent_command
+    if not command:
+        raise typer.BadParameter("--agent-command or --reference-solver is required")
+    batch, batch_manifest_path = run_benchmark_batch(
+        task_root,
+        command,
+        output_root,
+        batch_id=batch_id,
+        timeout_seconds=timeout_seconds,
+        agent={
+            key: value
+            for key, value in {
+                "name": agent_name or ("reference-solver" if reference_solver else None),
+                "model": model,
+                "skills": skill or [],
+                "tools": tool or [],
+            }.items()
+            if value not in (None, [])
+        },
+        agent_cwd=agent_cwd,
+        only_ids=task or [],
+        skip_ids=skip or [],
+        verify_inputs=verify_inputs,
+    )
+    typer.echo(str(batch_manifest_path))
+    raise typer.Exit(code=0 if batch["completed_without_failures"] else 1)
 
 
 @app.command("usage-backfill")

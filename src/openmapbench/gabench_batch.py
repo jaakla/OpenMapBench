@@ -3,28 +3,26 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
+import shlex
 import sys
 import time
-import uuid
 from collections import Counter
 from collections.abc import Sequence
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from .models import RunStatus
-from .reporting import aggregate_manifests, report_markdown
+from .batch import (
+    failed_results,
+    now,
+    resolve_batch_id,
+    status_counts,
+    write_aggregate_reports,
+    write_batch_html,
+    write_json,
+)
 from .runner import run_task
 from .taskio import load_task, sha256_file
 from .visual import visual_report_from_runs
-
-COMPLETED_STATUSES = {RunStatus.PASSED, RunStatus.NEEDS_REVIEW}
-BATCH_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
-
-
-def _now() -> datetime:
-    return datetime.now(UTC)
 
 
 def _resolve_entry_path(value: Any, manifest_dir: Path) -> Path:
@@ -50,14 +48,6 @@ def _load_import_manifest(path: Path) -> dict[str, Any]:
     return payload
 
 
-def _new_batch_id() -> str:
-    return f"{_now().strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:8]}"
-
-
-def _write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
-
-
 def run_gabench_batch(
     manifest_path: Path,
     agent_command: str,
@@ -75,11 +65,7 @@ def run_gabench_batch(
         raise ValueError("agent command must be non-empty")
     if timeout_seconds is not None and timeout_seconds <= 0:
         raise ValueError("timeout must be greater than zero")
-    batch_id = batch_id or _new_batch_id()
-    if not BATCH_ID_PATTERN.fullmatch(batch_id):
-        raise ValueError(
-            "batch ID may contain only letters, numbers, dots, underscores, and dashes"
-        )
+    batch_id = resolve_batch_id(batch_id)
 
     imported = _load_import_manifest(manifest_path)
     batch_dir = (output_root / batch_id).resolve()
@@ -88,7 +74,7 @@ def run_gabench_batch(
     task_runs_dir.mkdir(parents=True, exist_ok=False)
     manifest_dir = manifest_path.parent
     total = len(imported["tasks"])
-    started = _now()
+    started = now()
     start_clock = time.monotonic()
     results: list[dict[str, Any]] = []
     skipped: list[dict[str, str]] = []
@@ -180,20 +166,17 @@ def run_gabench_batch(
             }
         )
 
-    aggregate = aggregate_manifests(task_runs_dir)
-    report_json_path = batch_dir / "report.json"
-    report_markdown_path = batch_dir / "report.md"
-    _write_json(report_json_path, aggregate)
-    report_markdown_path.write_text(report_markdown(aggregate), encoding="utf-8")
+    reports = write_aggregate_reports(batch_dir, task_runs_dir)
+    aggregate = reports["aggregate"]
+    report_json_path = reports["json"]
+    report_markdown_path = reports["markdown"]
     visual = visual_report_from_runs(task_runs_dir, visual_dir)
 
-    failed_results = [
-        item for item in results if RunStatus(item["status"]) not in COMPLETED_STATUSES
-    ]
-    completed_without_failures = not skipped and not failed_results and len(results) == total
-    finished = _now()
+    failures = failed_results(results)
+    completed_without_failures = not skipped and not failures and len(results) == total
+    finished = now()
     batch = {
-        "schema_version": "0.2",
+        "schema_version": "0.3",
         "batch_id": batch_id,
         "source_manifest": str(manifest_path),
         "source_manifest_sha256": sha256_file(manifest_path),
@@ -209,13 +192,14 @@ def run_gabench_batch(
         "executed_count": len(results),
         "skipped_count": len(skipped),
         "completed_without_failures": completed_without_failures,
-        "status_counts": dict(sorted(Counter(item["status"] for item in results).items())),
+        "status_counts": status_counts(results),
         "usage": aggregate["usage"],
         "results": results,
         "skipped": skipped,
         "aggregate_report": {
             "json": str(report_json_path),
             "markdown": str(report_markdown_path),
+            "html": str(batch_dir / "report.html"),
         },
         "visual_review": {
             "index": str(visual_dir / "index.html"),
@@ -228,7 +212,29 @@ def run_gabench_batch(
         ),
     }
     batch_manifest_path = batch_dir / "batch.json"
-    _write_json(batch_manifest_path, batch)
+    write_json(batch_manifest_path, batch)
+    agent_label = (agent or {}).get("name") or Path(shlex.split(agent_command)[0]).name
+    write_batch_html(
+        batch_dir,
+        task_runs_dir,
+        aggregate,
+        batch,
+        title="OpenMapBench GABench bridge batch",
+        subtitle=(
+            f"Batch {batch_id} · {len(results)} of {total} imported tasks executed by "
+            f"{agent_label}"
+        ),
+        extra_links=(
+            [("visual review", visual_dir / "index.html")]
+            if visual["comparison_count"]
+            else None
+        ),
+        notice=(
+            "Local batch metadata only. GABench content stays in the external checkout under "
+            "its upstream terms. Manual image reviews are never strict passes, and raster and "
+            "image artifacts have no strict evaluator."
+        ),
+    )
 
     print("Batch complete")
     print(f"Executed: {len(results)}/{total}; skipped: {len(skipped)}")
@@ -241,7 +247,7 @@ def run_gabench_batch(
             f"{token_stats['minimum']:,}/{token_stats['average']:,.1f}/"
             f"{token_stats['maximum']:,} min/avg/max per task"
         )
-    print(f"Report: {report_markdown_path}")
+    print(f"Report: {batch_dir / 'report.html'}")
     if visual["comparison_count"]:
         print(f"Visual review: {visual_dir / 'index.html'}")
     return batch, batch_manifest_path
