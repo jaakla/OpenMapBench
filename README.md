@@ -103,6 +103,7 @@ recast from the GISAgentBench case studies onto Estonian open data.
 | `gab-spa-002` | Nearest-hospital service areas inside 1 km, clipped to Tallinn | vector polygons | wrong tool substitution, geometry topology |
 | `gab-sosa-002a` | Pärnu county rivers clipped to municipalities, written in the input CRS | vector lines | CRS preservation, geometry topology |
 | `gab-sosa-002b` | Clipped river length per source feature | table | CRS misalignment, geometry topology, unit mismatch |
+| `gab-tmha-001` | Braided versus single-channel length per watercourse | table | wrong tool substitution, geometry topology |
 
 Run one with its bundled reference solver to see the whole loop:
 

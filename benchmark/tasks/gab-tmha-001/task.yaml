@@ -1,0 +1,68 @@
+schema_version: "0.1"
+id: gab-tmha-001
+title: Multichannel classification of a drainage network
+category: vector
+prompt: >
+  inputs/network.geojson holds 791 watercourse and ditch centrelines in EPSG:4326 from the
+  lower Emajõgi and the Peipsi shore polders. Work out how much of each line runs through a
+  braided, multichannel part of the network and how much is a single channel.
+
+  Planarize the network first: split every line at every point where it meets another line.
+  Then polygonize the planarized linework and call each resulting polygon an island. A
+  planarized segment is multichannel when the island boundaries cover it, that is when every
+  point of the segment lies on the boundary of at least one island. A segment that only
+  shares an endpoint with an island is not multichannel.
+
+  Report the result per input line, not per segment. Write canal_classes.csv with the
+  columns orig_fid, multich_len_m, single_len_m and total_len_m: the multichannel length,
+  the remaining length, and their sum, measured in EPSG:3301 in metres and rounded to 2
+  decimals. Write one row for every input line, including the 677 lines whose multichannel
+  length is zero. total_len_m is the length of the whole input line.
+
+inputs:
+  - path: inputs/network.geojson
+    role: network
+    source: "OpenStreetMap via Overpass API; way[waterway~ditch|drain|stream|canal|river] in bbox 58.40,26.80,58.80,27.20, unsimplified"
+    as_of: "2026-09-02"
+    checksum: sha256:813803cc0f92ac5e4c97ed4729d99f867d4ac99165a9db72faa19b0264b2cff9
+    license: ODbL-1.0
+
+output:
+  path: canal_classes.csv
+  kind: table
+
+evaluation:
+  strict:
+    key: orig_fid
+    required_columns: [orig_fid, multich_len_m, single_len_m, total_len_m]
+    numeric_tolerance:
+      default: {absolute: 0.05, relative: 0.0001}
+
+metadata:
+  difficulty: medium
+  family: terrain-modeling-and-hydrology
+  failure_modes: [wrong_tool_substitution, geometry_topology, boundary_ambiguity]
+  skills: [planarize, polygonize, network-topology, keyed-aggregation]
+  source_case: "GISAgentBench (arXiv:2608.01645) case classifying_multichannel_canal_segments, recast onto the lower Emajõgi and Peipsi polders"
+  tolerance_rationale: >
+    Rounding to 2 decimals contributes 0.005 m, and the absolute tolerance of 0.05 m with a
+    relative term of 0.0001 covers reprojection rounding on lines up to tens of kilometres
+    long. Nothing loose is being forgiven: the network's lines meet at shared vertices, so
+    planarizing in EPSG:4326 and measuring in EPSG:3301 gives lengths identical to
+    planarizing in EPSG:3301 to the last measured digit, and every wrong classification rule
+    is out by whole segments. Treating a segment that merely touches an island as
+    multichannel reports 53.41 km instead of 17.71 km and gets 28 rows wrong; skipping the
+    planarisation and classifying whole lines reports 9.80 km and gets 22 rows wrong.
+  reference_method: >
+    tools/solve.py classifies the planarized segments geometrically, by asking whether the
+    polygonized island boundaries cover the segment, and independently as a graph problem:
+    the segments are the edges of a multigraph and an edge borders an enclosed face exactly
+    when it is not a bridge, which an iterative Tarjan search decides without building a
+    single polygon. The two agree on all 1063 segments; the script refuses to write a
+    reference otherwise.
+  scoring_caveat: >
+    The primary artifact is a keyed aggregate per source line rather than the planarized
+    segments themselves, because planarized segments have no stable identifier: two correct
+    agents would split the same line into the same pieces but have no way to agree on names
+    for them. The aggregate is also the practitioner's question, which is how much of each
+    canal is braided.

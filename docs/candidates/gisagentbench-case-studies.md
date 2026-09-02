@@ -270,6 +270,12 @@ CRS by orders of magnitude.
 
 ### gab-tmha-001 — Multichannel classification of a drainage network
 
+**Implemented** in `benchmark/tasks/gab-tmha-001/` on the lower Emajõgi and Peipsi shore
+network (791 lines, 87 enclosed islands) as the keyed aggregate this section proposes; the
+contract there supersedes the draft below. "Touches" turned out to be the wrong predicate to
+write into the contract: counting a segment that merely touches an island triples the answer,
+so the implemented prompt requires the island boundaries to *cover* the segment.
+
 Source: `classifying_multichannel_canal_segments` (Terrain Modeling & Hydrology, success, 6/6).
 
 Recast: ETAK ditch and watercourse lines in a polder or delta landscape (Kasari delta or a
