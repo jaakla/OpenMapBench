@@ -154,8 +154,10 @@ client, or local script can use the same interface. Useful metadata can be recor
 The agent process runs from `<run_dir>/workspace/` unless `--agent-cwd` is given. Helper scripts
 and other scratch files an agent writes to its working directory therefore stay inside the
 gitignored run directory and are inventoried by the audit, instead of accumulating in the project
-root. Pass `--agent-cwd .` only when the agent must see project-level instructions or skills from
-the repository.
+root. Relative paths inside the agent command resolve against that working directory, so refer to
+local solvers or interpreters by absolute path, through the `{task_dir}` placeholder, or pass
+`--agent-cwd .` as the example above does. Use `--agent-cwd` also when the agent must see
+project-level instructions or skills from the repository.
 Pass `-v`/`--verbose` to show runner stages and a live, readable summary of agent commands, tool
 calls, file changes, ordinary stdout, and stderr while the same lossless logs are retained.
 
