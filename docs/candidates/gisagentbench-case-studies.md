@@ -308,6 +308,15 @@ aggregating join give the same lengths.
 
 ### gab-tmha-002 — Polygons of steep slope from a DEM
 
+**Implemented** in `benchmark/tasks/gab-tmha-002/` with the companion scalar task
+`benchmark/tasks/gab-tmha-002s/`, on a Copernicus GLO-30 window over the Haanja upland; the
+contracts there supersede the draft below. The draft's guess of 0.02 was too tight, and the
+reason is worth recording: GDAL's warper and a direct bilinear interpolation at the target
+cell centres are both correct readings of "resample bilinearly, then take Horn's slope", and
+they differ by 0.0376 in symmetric difference (289 regions over 754.6 ha against 294 over
+756.5 ha). The implemented tolerance is 0.06, measured rather than guessed, and the wrong
+order still fails at 0.4033.
+
 Source: `polygonizing_steep_slope_areas` (Terrain Modeling & Hydrology, failure, 0/6; an
 inserted clump step changed the result and no model matched the reference).
 
