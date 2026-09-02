@@ -98,6 +98,7 @@ recast from the GISAgentBench case studies onto Estonian open data.
 | --- | --- | --- | --- |
 | `gab-sjg-001` | Schools and kindergartens within one mile of each Tartu bus stop | vector points | unit mismatch, CRS misalignment, boundary ambiguity |
 | `gab-sosa-001` | 3 km inward inset of Saare maakond, exploded to single parts | vector polygons | geometry topology, multipart handling |
+| `gab-sjg-002` | One guaranteed-interior point per Estonian municipality, with projected coordinates | vector points | CRS misalignment, contract literalism |
 
 Run one with its bundled reference solver to see the whole loop:
 

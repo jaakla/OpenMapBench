@@ -1,0 +1,70 @@
+schema_version: "0.1"
+id: gab-sjg-002
+title: Interior point per municipality with projected coordinates
+category: vector
+prompt: >
+  inputs/municipalities.geojson holds the 79 Estonian municipalities in EPSG:4326; 30 of
+  them are multipart because of islands and several are strongly concave. Produce exactly
+  one point per municipality that is guaranteed to lie strictly inside that municipality's
+  own polygon: not on its boundary, not merely inside its bounding box or convex hull, and
+  not inside a neighbour. A centroid is not acceptable, because six of these polygons do
+  not contain their own centroid.
+
+  Write the points to municipality_points.gpkg in EPSG:3301 with the fields poly_fid
+  (copied from the input), name, and the point's own projected coordinates x_3301 and
+  y_3301 in metres, rounded to 2 decimals. The coordinate fields must be the coordinates of
+  the geometry that is written, in EPSG:3301, not the input degrees.
+
+inputs:
+  - path: inputs/municipalities.geojson
+    role: municipalities
+    source: "Maa-amet Haldus- ja asustusjaotus, omavalitsus layer (https://geoportaal.maaamet.ee/docs/haldus_asustus/omavalitsus_shp.zip), all 79 municipalities, generalised at 50 m and reprojected to EPSG:4326 (see inputs/README.md)"
+    as_of: "2024-12-01"
+    checksum: sha256:274ed8caf0f26533d4a0243c612e1bb210c122fac48761d478116b1d34b765d3
+    license: "Maa-amet open data (CC BY 4.0 equivalent, attribution: Maa-amet)"
+
+output:
+  path: municipality_points.gpkg
+  kind: vector
+  geometry_type: Point
+  crs: EPSG:3301
+  required_fields: [poly_fid, name, x_3301, y_3301]
+
+evaluation:
+  strict:
+    crs: exact
+    feature_count: exact
+    geometry:
+      metric: ignore
+    vector_checks:
+      - {type: within, input_role: municipalities, key: poly_fid, input_key: poly_fid}
+      - {type: count_per_input, input_role: municipalities, key: poly_fid, input_key: poly_fid, count: 1}
+      - {type: unique, field: poly_fid}
+      - {type: field_equals_geometry, x: x_3301, y: y_3301, tolerance: 0.01, crs: EPSG:3301}
+
+metadata:
+  difficulty: easy
+  family: spatial-joining-and-geocoding
+  failure_modes: [crs_misalignment, operation_order, contract_literalism]
+  skills: [reprojection, interior-point, attribute-derivation]
+  source_case: "GISAgentBench (arXiv:2608.01645) case creating_interior_points_with_projected_coordinates, recast onto Estonian municipalities"
+  tolerance_rationale: >
+    There is no unique correct point, so nothing is compared against the reference
+    geometrically: the reference is used only for the feature count and the artifact is
+    scored by predicates. A point must be strictly within its own municipality, there must
+    be exactly one per input polygon, and the coordinate fields must agree with the written
+    geometry to 0.01 m, which is the rounding the prompt asks for (2 decimals, so at most
+    0.005 m) plus headroom for float32 storage in GeoPackage. tools/solve.py verifies that
+    two structurally different constructions, whose points differ by up to 22 km, both pass.
+  reference_method: >
+    tools/solve.py reprojects to EPSG:3301 and takes a guaranteed-interior representative
+    point per municipality, then re-derives an independent answer as the grid cell centre
+    farthest from the boundary of each municipality's largest part, and asserts that both
+    satisfy every predicate in the contract before writing the reference.
+  scoring_caveat: >
+    The source case failed models that computed the interior point before reprojecting. On
+    this data that specific route is not actually wrong: all 79 naive points stay inside
+    their municipality once reprojected, and the reference records that measurement rather
+    than pretending otherwise. What the contract does score is the literal output
+    requirement: an answer left in EPSG:4326, or one that writes degrees into x_3301 and
+    y_3301, misses by about 400 km.

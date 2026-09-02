@@ -132,6 +132,13 @@ handling is actually scored.
 
 ### gab-sjg-002 — Interior point per polygon with projected coordinates
 
+**Implemented** in `benchmark/tasks/gab-sjg-002/` over all 79 Estonian municipalities; the
+contract there supersedes the draft below. Building it settled the open question in this
+section: on real data the "interior point before reprojection" route is *not* wrong, because a
+projection is a homeomorphism and all 79 naive points stay inside their municipality. The
+implemented task scores what is genuinely scorable (the output CRS and the meaning of the
+coordinate columns, a 400 km error when degrees are written) and records the measurement.
+
 Source: `creating_interior_points_with_projected_coordinates` (Spatial Joining & Geocoding,
 failure: interior point computed before reprojection).
 
