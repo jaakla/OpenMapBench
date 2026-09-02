@@ -338,6 +338,10 @@ scored.
 
 ### gab-spa-001 — Count distinct parks intersecting each 1 km grid cell
 
+**Implemented** in `benchmark/tasks/gab-spa-001/` with OpenStreetMap parks for Tallinn on a
+22 x 28 km grid and four synthetic probes on the grid lines; the contract there supersedes the
+draft below.
+
 Source: `counting_park_overlaps_in_grid_cells` (Spatial Pattern Analysis, success, 4/6).
 
 Recast: Tallinn green areas (ETAK) over a 1 km grid. The grid must be pinned: origin at the

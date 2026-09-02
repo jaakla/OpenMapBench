@@ -1,0 +1,74 @@
+schema_version: "0.1"
+id: gab-spa-001
+title: Count distinct parks intersecting each 1 km grid cell
+category: vector
+prompt: >
+  Build a 1 km square grid over Tallinn and count how many distinct parks
+  (inputs/parks.geojson, EPSG:3301) fall in each cell.
+
+  The grid is fully specified, so build exactly this one: EPSG:3301, extent xmin 531000,
+  ymin 6579000, xmax 553000, ymax 6607000, cell size 1000 m, giving 22 columns and 28 rows
+  for 616 cells. Column indices start at 0 in the west, row indices start at 0 in the
+  south, and grid_id = row * 22 + col.
+
+  A park counts for a cell when the area of the intersection between the park and the cell
+  is greater than zero. A park that only touches a cell along an edge or at a corner does
+  not count for that cell. Each park counts at most once per cell no matter how many parts
+  it has; two of the parks in the input are multipart.
+
+  Write every one of the 616 cells as a polygon to park_grid.gpkg in EPSG:3301 with the
+  integer fields grid_id and park_count. Cells without parks get park_count 0.
+
+inputs:
+  - path: inputs/parks.geojson
+    role: parks
+    source: "OpenStreetMap via Overpass API; way[leisure=park] in bbox 59.33,24.52,59.62,24.96, plus 4 synthetic probes (see inputs/README.md)"
+    as_of: "2026-09-02"
+    checksum: sha256:362990d6e14163341bd3edc345b14f6d1e80cb0578b48cd4ef6c0b81dc9d74cc
+    license: ODbL-1.0
+
+output:
+  path: park_grid.gpkg
+  kind: vector
+  geometry_type: Polygon
+  crs: EPSG:3301
+  required_fields: [grid_id, park_count]
+
+evaluation:
+  strict:
+    crs: exact
+    feature_count: exact
+    geometry:
+      metric: symmetric_difference_ratio
+      tolerance: 0.0001
+      require_valid: true
+    attributes:
+      key: grid_id
+      columns: [grid_id, park_count]
+      numeric_tolerance:
+        default: {absolute: 0, relative: 0}
+    vector_checks:
+      - {type: unique, field: grid_id}
+      - {type: field_range, field: park_count, min: 0}
+
+metadata:
+  difficulty: medium
+  family: spatial-pattern-analysis
+  failure_modes: [boundary_ambiguity, multipart_handling, wrong_tool_substitution]
+  skills: [grid-construction, spatial-join, distinct-aggregation]
+  source_case: "GISAgentBench (arXiv:2608.01645) case counting_park_overlaps_in_grid_cells, recast onto Tallinn parks"
+  tolerance_rationale: >
+    The grid origin, cell size, extent, indexing and identifier formula are all fixed by the
+    prompt, so a correct grid differs from the reference only by floating-point noise; the
+    symmetric-difference tolerance of 0.0001 is three orders of magnitude below any real
+    disagreement and a half-cell offset costs 0.5. Counts are integers and compared exactly.
+    The rule "positive intersection area" is robust on this data: the smallest positive
+    park-cell overlap in the frozen input is 0.32 m2, twelve orders of magnitude above the
+    area of a floating-point sliver, while the deliberate edge and corner contacts are
+    exactly zero.
+  reference_method: >
+    tools/solve.py counts cell-first with a spatial join plus an explicit intersection-area
+    test, and independently park-first by walking the cell indices each park's bounding box
+    covers with no spatial join at all, then requires the two to agree on all 616 cells.
+    It also measures the two substitutions the source case reports: counting any touching
+    park gets 4 cells wrong, counting parts instead of parks gets 2 cells wrong.
