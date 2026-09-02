@@ -178,6 +178,11 @@ unprojected representative point drifts outside a concave polygon.
 
 ### gab-sosa-001 — Inward inset of a county boundary
 
+**Implemented** in `benchmark/tasks/gab-sosa-001/` with the Maa-amet county layer for Saare
+maakond and a grid-verified reference; the contract there supersedes the draft below, and its
+geometry tolerance is 0.006 rather than 0.002 because the measured spread across plausible
+buffer segmentations is larger than the draft assumed.
+
 Source: `creating_inland_county_boundary_inset` (Spatial Overlay & Suitability, success, 6/6).
 
 Recast: Saare maakond (Saaremaa and surrounding islands). Inset the county polygon 3000 m

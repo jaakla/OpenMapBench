@@ -91,10 +91,15 @@ evaluation failure. An image artifact awaiting manual review exits successfully 
 ## Native benchmark tasks
 
 Native tasks live under `benchmark/tasks/<id>/` with a `task.yaml`, frozen `inputs/` and their
-provenance README, a `reference/` artifact, and the `tools/` scripts that built both. The first
-one, `gab-sjg-001`, counts school and kindergarten destinations within one mile of every Tartu
-bus stop from OpenStreetMap data delivered in EPSG:4326. Run it with the bundled reference solver
-to see the whole loop:
+provenance README, a `reference/` artifact, and the `tools/` scripts that built both. They are
+recast from the GISAgentBench case studies onto Estonian open data.
+
+| Task | Question | Output | Failure modes exercised |
+| --- | --- | --- | --- |
+| `gab-sjg-001` | Schools and kindergartens within one mile of each Tartu bus stop | vector points | unit mismatch, CRS misalignment, boundary ambiguity |
+| `gab-sosa-001` | 3 km inward inset of Saare maakond, exploded to single parts | vector polygons | geometry topology, multipart handling |
+
+Run one with its bundled reference solver to see the whole loop:
 
 ```bash
 openmapbench run benchmark/tasks/gab-sjg-001/task.yaml \

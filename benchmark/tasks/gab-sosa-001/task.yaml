@@ -1,0 +1,71 @@
+schema_version: "0.1"
+id: gab-sosa-001
+title: Inward inset of a county boundary
+category: vector
+prompt: >
+  inputs/saare_maakond.geojson holds Saare maakond, a single multipart county polygon in
+  EPSG:3301 whose 1065 parts are the Estonian island county and its islets. Produce the
+  3000 m inward inset of the county: every point of the county that lies at least 3000 m
+  from the county boundary. Explode the result into single-part polygons and drop any part
+  smaller than 1 hectare.
+
+  Write the parts to county_inset.gpkg in EPSG:3301, one feature per surviving part, with
+  the field orig_fid carrying the input county_id value and the integer field inset_m set
+  to 3000. Do not write empty or invalid geometries.
+
+inputs:
+  - path: inputs/saare_maakond.geojson
+    role: county
+    source: "Maa-amet Haldus- ja asustusjaotus, maakond layer (https://geoportaal.maaamet.ee/docs/haldus_asustus/maakond_shp.zip), Saare maakond only, generalised at 25 m (see inputs/README.md)"
+    as_of: "2024-12-01"
+    checksum: sha256:9ddaf2b7e14c95a0a16f9cddc3cea33a213c262226c0cd6d9e27f88fe5fce448
+    license: "Maa-amet open data (CC BY 4.0 equivalent, attribution: Maa-amet)"
+
+output:
+  path: county_inset.gpkg
+  kind: vector
+  geometry_type: Polygon
+  crs: EPSG:3301
+  required_fields: [orig_fid, inset_m]
+
+evaluation:
+  strict:
+    crs: exact
+    feature_count: exact
+    geometry:
+      metric: symmetric_difference_ratio
+      tolerance: 0.006
+      require_valid: true
+    attributes:
+      key: null
+      columns: [orig_fid, inset_m]
+      numeric_tolerance:
+        default: {absolute: 0, relative: 0}
+    vector_checks:
+      - {type: within, input_role: county, key: orig_fid, input_key: county_id}
+      - {type: field_range, field: inset_m, min: 3000, max: 3000}
+
+metadata:
+  difficulty: easy
+  family: spatial-overlay-and-suitability
+  failure_modes: [geometry_topology, multipart_handling, boundary_ambiguity]
+  skills: [buffer, negative-buffer, multipart-explode, area-filter]
+  source_case: "GISAgentBench (arXiv:2608.01645) case creating_inland_county_boundary_inset, recast onto Saare maakond"
+  tolerance_rationale: >
+    The inset is defined as an exact point set, so the only freedom a correct agent has is
+    how finely the offset arcs at reflex vertices are segmented. Measured against the
+    reference (16 segments per quarter circle): 4 segments 0.0052, the QGIS default of 5
+    segments 0.0032, the GEOS default of 8 segments 0.0011, 32 and 64 segments below
+    0.0004. A 50 m error in the inset distance costs 0.0084, bevel joins 0.027, mitre joins
+    0.38 and a degrees-as-metres inset 0.12. A tolerance of 0.006 therefore accepts every
+    plausible segmentation and rejects every wrong distance, join style or CRS. Feature
+    count is exact because the surviving parts are 736 ha and larger, three orders of
+    magnitude away from the 1 ha rule, and their number does not change with segmentation.
+  reference_method: >
+    tools/solve.py builds the inset with a negative buffer and then verifies it without
+    buffering at all: a 250 m point grid over the county is classified by the task's own
+    definition (inside the county and at least 3000 m from its boundary) and compared with
+    membership in the constructed polygons. 47011 interior grid points agree; only the 56
+    points within 5 m of the 3000 m isoline, where polygonal arc approximation is
+    undecidable, are excluded. The script refuses to write a reference on any other
+    disagreement, and also asserts that every part is valid and within the county.
