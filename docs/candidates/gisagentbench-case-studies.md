@@ -543,18 +543,23 @@ prompt states outright.
 
 ## Summary table
 
-| ID | Family | Source outcome | Trap kept | Output kind | Scorable today |
+All ten cases are implemented as native tasks under `benchmark/tasks/`; three of them are
+scored as a pair of artifacts, and the terrain case has a scalar companion, so ten cases
+became thirteen task directories. The "as built" column is the contract that actually shipped
+where it differs from the draft above.
+
+| ID | Family | Source outcome | Trap kept | Output kind | As built |
 |---|---|---|---|---|---|
-| gab-sjg-001 | Join | pass 6/6 | unit + CRS + boundary | vector | yes |
-| gab-sjg-002 | Join | fail | order around reprojection | vector | yes, via vector_checks |
-| gab-sosa-001 | Overlay | pass 6/6 | topology, multipart | vector | yes |
-| gab-sosa-002a/b | Overlay | fail 1/6 | preserve input CRS, invalid geometry | vector + table | yes |
-| gab-tmha-001 | Terrain | pass 6/6 | aggregating join vs plain join | table | yes |
-| gab-tmha-002(+s) | Terrain | fail 0/6 | resample before slope, connectivity | vector + scalar | yes, loose tolerance |
-| gab-spa-001 | Pattern | pass 4/6 | boundary inclusion, multipart | vector | yes |
-| gab-spa-002 | Pattern | fail 1/6 | composite tool substitution | vector | yes, entity matching |
-| gab-rsia-001 | Remote sensing | pass 3/6 | band order, NoData, CRS | vector | yes |
-| gab-rsia-002a/b | Remote sensing | fail 0/6 | skipped reprojection, connectivity | vector + table | yes |
+| gab-sjg-001 | Join | pass 6/6 | unit + CRS + boundary | vector | as drafted |
+| gab-sjg-002 | Join | fail | order around reprojection | vector | predicates only; the drafted order-of-operations trap does not reproduce, the CRS of the artifact and the coordinate columns do |
+| gab-sosa-001 | Overlay | pass 6/6 | topology, multipart | vector | geometry tolerance 0.006, measured, not 0.002 |
+| gab-sosa-002a/b | Overlay | fail 1/6 | preserve input CRS, invalid geometry | vector + table | rivers instead of shoreline; disjoint self-touching ring instead of a nested one |
+| gab-tmha-001 | Terrain | pass 6/6 | aggregating join vs plain join | table | "covers", not "touches" |
+| gab-tmha-002(+s) | Terrain | fail 0/6 | resample before slope, connectivity | vector + scalar | tolerance 0.06 and 5 %, set by the measured gap between two correct resamplers |
+| gab-spa-001 | Pattern | pass 4/6 | boundary inclusion, multipart | vector | as drafted, with four probes on the grid lines |
+| gab-spa-002 | Pattern | fail 1/6 | composite tool substitution | vector | per-entity IoU at 0.97 |
+| gab-rsia-001 | Remote sensing | pass 3/6 | band order, NoData, CRS | vector | Sentinel-2 window instead of an orthophoto; a deliberate NoData block |
+| gab-rsia-002a/b | Remote sensing | fail 0/6 | skipped reprojection, connectivity | vector + table | per-class entity matching; regions must be written valid |
 
 None of the ten requires a raster output artifact, so all are within reach of the current
 scalar, table, and vector evaluators. This holds for the paper's raster families too: their
@@ -573,21 +578,30 @@ documented in `docs/task-contract.md`.
    and `unique`, plus `geometry.metric: ignore`. gab-sjg-002 is now scorable.
 3. **Null semantics in attribute comparison.** Done: null equals null and never a value, in
    tables and vector attributes.
-4. **Multi-artifact tasks.** Open. Splitting into paired tasks works but doubles run cost; an
-   `outputs:` list with per-artifact strict blocks would be cleaner and is a task-contract change
-   rather than an evaluator change.
+4. **Multi-artifact tasks.** Still open, and now exercised three times: gab-sosa-002a/b,
+   gab-rsia-002a/b and gab-tmha-002 with its scalar companion are each one analysis split
+   across two task directories with duplicated inputs, linked only by a `metadata.paired_task`
+   tag. An `outputs:` list with per-artifact strict blocks would be cleaner and is a
+   task-contract change rather than an evaluator change.
 5. **Caveat and failure-mode reporting.** Done: manifests keep `task_metadata`, and reports
    group strict success by `metadata.failure_modes`. The audit trail remains the basis for
    labelling the paper's mechanism taxonomy for roadmap Issue 7 without scoring trajectories.
 
 ## Next steps
 
-1. Pick the five that are scorable today with no evaluator change (gab-sjg-001, gab-sosa-001,
-   gab-sosa-002a/b, gab-tmha-001, gab-spa-001, gab-rsia-002a/b) and freeze inputs, licences, and
-   checksums.
-2. Produce references with two independent toolchains (for example GeoPandas/Shapely and QGIS
-   processing) and record the observed disagreement; that number, not a guess, sets the final
-   tolerance.
-3. Implement null handling and per-entity geometry matching, then add gab-spa-002 and
-   gab-rsia-001.
-4. Add vector predicates, then gab-sjg-002.
+The ten cases are built, so what is left is the work they made visible.
+
+1. **Measure the tolerances against a second engine, not a second implementation.** Every
+   reference here is cross-checked by two routes inside the same GEOS/GDAL/PROJ stack. The
+   one place that matters most is gab-tmha-002, where two resamplers inside one stack already
+   disagree by 0.0376; a QGIS or GRASS run would say whether 0.06 is generous or still tight.
+2. **Multi-artifact tasks.** Three of the ten had to be split into a pair to keep one output
+   per task, which doubles the run cost and lets an agent pass one half and fail the other
+   with no record that they were one analysis. An `outputs:` list with per-artifact strict
+   blocks would fix it; `metadata.paired_task` is the stopgap the built tasks use.
+3. **Widen the set beyond these ten.** Roadmap Issue 8 asks for 30-50 tasks. The families
+   with only one implemented task each - remote sensing, terrain - are the thin ones, and
+   raster output artifacts remain unscorable by design.
+4. **Run them against real agents.** Roadmap Issue 7. Every task ships the measured cost of
+   its plausible wrong routes, so a failing run can be attributed to a mechanism rather than
+   to a difference of opinion about the contract.

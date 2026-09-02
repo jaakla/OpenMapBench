@@ -54,6 +54,18 @@ Candidate sources: ten tasks reinterpreted from the GISAgentBench case studies (
 are drafted with contracts, tolerance rationale, and evaluator gaps in
 [docs/candidates/gisagentbench-case-studies.md](docs/candidates/gisagentbench-case-studies.md).
 
-Status: the first native task, `benchmark/tasks/gab-sjg-001` (destinations within one mile of
-each Tartu bus stop, OpenStreetMap data, cross-checked reference), is in place and guarded by
-`tests/test_benchmark_tasks.py`, which validates every native task and scores its reference.
+Status: all ten worked cases from the GISAgentBench appendix are implemented, as 13 task
+directories (three cases score two artifacts each and are split into pairs): gab-sjg-001,
+gab-sjg-002, gab-sosa-001, gab-sosa-002a/b, gab-tmha-001, gab-tmha-002 with its scalar
+companion gab-tmha-002s, gab-spa-001, gab-spa-002, gab-rsia-001 and gab-rsia-002a/b. Inputs
+are frozen with source, licence, date and checksum; every reference is produced by two
+independent methods that must agree; every input README records the measured cost of the
+plausible wrong routes. `tests/test_benchmark_tasks.py` validates every task and scores its
+reference in CI.
+
+Remaining for this issue: grow the set towards 30-50 tasks, thicken the thin families
+(terrain and remote sensing have one case each), and cross-check the tolerances against a
+second engine rather than a second implementation inside the same GEOS/GDAL/PROJ stack. The
+open contract change is multi-artifact tasks, which would retire the paired-task workaround;
+see the evaluator-gaps section of
+[docs/candidates/gisagentbench-case-studies.md](docs/candidates/gisagentbench-case-studies.md).

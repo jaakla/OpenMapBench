@@ -91,8 +91,15 @@ evaluation failure. An image artifact awaiting manual review exits successfully 
 ## Native benchmark tasks
 
 Native tasks live under `benchmark/tasks/<id>/` with a `task.yaml`, frozen `inputs/` and their
-provenance README, a `reference/` artifact, and the `tools/` scripts that built both. They are
-recast from the GISAgentBench case studies onto Estonian open data.
+provenance README, a `reference/` artifact, and the `tools/` scripts that built both. All ten
+worked cases from the GISAgentBench appendix are implemented here, recast onto Estonian open
+data; three of them score two artifacts and are split into a pair of tasks.
+
+Every reference is produced by two independent methods that must agree before it is written,
+and every input README records what the data actually discriminates: how many rows, cells or
+features each plausible wrong approach gets wrong, measured rather than asserted. Where a
+tolerance is not a rounding budget — `gab-tmha-002`, where two correct resamplers disagree —
+the task says so.
 
 | Task | Question | Output | Failure modes exercised |
 | --- | --- | --- | --- |
@@ -121,8 +128,10 @@ openmapbench run benchmark/tasks/gab-sjg-001/task.yaml \
 ```
 
 Every native task is checked in CI: its inputs must match their checksums and carry source,
-license, and acquisition date, and its reference must pass its own strict contract. Candidate
-tasks and the rationale behind them are in
+license, and acquisition date, and its reference must pass its own strict contract. After a
+batch of runs, `openmapbench report runs --output report.md` breaks strict success down by the
+failure modes the tasks are tagged with. The case-by-case rationale, including where the
+implemented contracts depart from the drafts and why, is in
 [docs/candidates/gisagentbench-case-studies.md](docs/candidates/gisagentbench-case-studies.md).
 
 ## Generic task contract
