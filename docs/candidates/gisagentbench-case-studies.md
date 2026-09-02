@@ -486,6 +486,13 @@ scored.
 
 ### gab-rsia-002a / 002b — Vectorize landcover classes (8-connected)
 
+**Implemented** in `benchmark/tasks/gab-rsia-002a/` and `.../gab-rsia-002b/` on an ESA
+WorldCover window over Ruhnu; the contracts there supersede the draft below. Two refinements
+came out of building it: 002a scores geometry per class with `match: entity` rather than over
+the union, since the union really is just the raster extent; and the contract has to say that
+diagonally self-touching regions must be written as valid geometry, because 41 of the 360
+regions are invalid as single rings.
+
 Source: `vectorize_randstad_landcover_raster_classes_into_polygons` (Remote Sensing & Image
 Analysis, failure, 0/6; every model skipped the reprojection).
 

@@ -104,6 +104,8 @@ recast from the GISAgentBench case studies onto Estonian open data.
 | `gab-sosa-002a` | Pärnu county rivers clipped to municipalities, written in the input CRS | vector lines | CRS preservation, geometry topology |
 | `gab-sosa-002b` | Clipped river length per source feature | table | CRS misalignment, geometry topology, unit mismatch |
 | `gab-tmha-001` | Braided versus single-channel length per watercourse | table | wrong tool substitution, geometry topology |
+| `gab-rsia-002a` | ESA WorldCover regions over Ruhnu as 8-connected polygons | vector polygons | connectivity, missing reprojection |
+| `gab-rsia-002b` | Region count and area per landcover class | table | connectivity, missing reprojection |
 
 Run one with its bundled reference solver to see the whole loop:
 

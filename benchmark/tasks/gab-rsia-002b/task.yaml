@@ -1,0 +1,59 @@
+schema_version: "0.1"
+id: gab-rsia-002b
+title: Landcover region count and area per class
+category: table
+prompt: >
+  inputs/landcover.tif is an ESA WorldCover 10 m landcover raster over Ruhnu, 1020 x 660
+  uint8 pixels on the native EPSG:4326 grid, with NoData 0 and seven classes present (10
+  tree cover, 30 grassland, 40 cropland, 50 built-up, 60 bare, 80 water, 90 wetland).
+
+  For each class, report how many 8-connected regions of that class the raster contains and
+  how much ground they cover. Work on the raster's own grid and reproject afterwards; do not
+  warp or resample the raster, because that would move the class boundaries and merge
+  regions.
+
+  Write landcover_classes.csv with the columns raster_val, region_count and area_m2, one row
+  per class present in the raster, area measured in EPSG:3301 in square metres and rounded
+  to 2 decimals. NoData is not a class and gets no row.
+
+inputs:
+  - path: inputs/landcover.tif
+    role: landcover
+    source: "ESA WorldCover 10 m 2021 v200, tile N57E021 (https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N57E021_Map.tif), window 23.20/57.775/23.285/57.83 copied unchanged"
+    as_of: "2021-12-31"
+    checksum: sha256:d42a82398aa2d9321fffd9e3a6ab52cba7fcea152f59e6a47f577576dbad2a9d
+    license: "CC-BY-4.0 (© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium)"
+
+output:
+  path: landcover_classes.csv
+  kind: table
+
+evaluation:
+  strict:
+    key: raster_val
+    required_columns: [raster_val, region_count, area_m2]
+    numeric_tolerance:
+      default: {absolute: 0, relative: 0}
+      area_m2: {absolute: 0, relative: 0.001}
+
+metadata:
+  difficulty: easy
+  control: true
+  family: remote-sensing-and-image-analysis
+  failure_modes: [crs_misalignment, missing_operation, connectivity]
+  skills: [connected-components, connectivity, reprojection, area-measurement]
+  source_case: "GISAgentBench (arXiv:2608.01645) case vectorize_randstad_landcover_raster_classes_into_polygons, recast onto ESA WorldCover over Ruhnu"
+  paired_task: gab-rsia-002a
+  tolerance_rationale: >
+    Region counts are integers and compared exactly, which is the point of the task:
+    8-connected gives 42/127/22/48/37/11/73 regions per class and 4-connected gives
+    45/153/24/52/51/16/86, while the areas are identical to 2e-15 relative. The area
+    tolerance of 0.1 % covers only how a correct answer measures the same polygons after
+    reprojection; the wrong route the source case reports, warping the raster to EPSG:3301
+    first, changes class 40 by 3.5 % and class 50 by 2.3 %, loses a quarter of the regions
+    and adds a NoData row.
+  reference_method: >
+    tools/solve.py counts regions by polygonizing with rasterio and independently by
+    labelling 8-connected components with a union-find over the pixel array, and measures
+    area both from the reprojected polygons and by summing the shoelace area of every
+    pixel's four reprojected corners. Counts must match exactly and areas to 1e-6 relative.

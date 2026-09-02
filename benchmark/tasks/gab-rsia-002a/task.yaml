@@ -1,0 +1,75 @@
+schema_version: "0.1"
+id: gab-rsia-002a
+title: Vectorize landcover classes into 8-connected polygons
+category: vector
+prompt: >
+  inputs/landcover.tif is an ESA WorldCover 10 m landcover raster over Ruhnu, 1020 x 660
+  uint8 pixels on the native EPSG:4326 grid, with NoData 0 and seven classes present (10
+  tree cover, 30 grassland, 40 cropland, 50 built-up, 60 bare, 80 water, 90 wetland).
+
+  Produce one polygon per 8-connected region of equal pixel value. Vectorize on the raster's
+  own grid and reproject the resulting polygons to EPSG:3301 afterwards; do not warp or
+  resample the raster, because that would move the class boundaries. Regions that touch
+  themselves diagonally must be written as valid geometry, which makes them multipolygons.
+
+  Write the regions to landcover_polygons.gpkg in EPSG:3301 with the integer field
+  raster_val holding the class code. One feature per region: 360 regions, not one feature
+  per class and not one feature per pixel.
+
+inputs:
+  - path: inputs/landcover.tif
+    role: landcover
+    source: "ESA WorldCover 10 m 2021 v200, tile N57E021 (https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N57E021_Map.tif), window 23.20/57.775/23.285/57.83 copied unchanged"
+    as_of: "2021-12-31"
+    checksum: sha256:d42a82398aa2d9321fffd9e3a6ab52cba7fcea152f59e6a47f577576dbad2a9d
+    license: "CC-BY-4.0 (© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium)"
+
+output:
+  path: landcover_polygons.gpkg
+  kind: vector
+  geometry_type: MultiPolygon
+  crs: EPSG:3301
+  required_fields: [raster_val]
+
+evaluation:
+  strict:
+    crs: exact
+    feature_count: exact
+    geometry:
+      metric: symmetric_difference_ratio
+      match: entity
+      key: raster_val
+      tolerance: 0.001
+      require_valid: true
+    vector_checks:
+      - {type: field_range, field: raster_val, min: 10, max: 95}
+
+metadata:
+  difficulty: easy
+  control: true
+  family: remote-sensing-and-image-analysis
+  failure_modes: [crs_misalignment, missing_operation, connectivity]
+  skills: [polygonize, connectivity, reprojection, geometry-repair]
+  source_case: "GISAgentBench (arXiv:2608.01645) case vectorize_randstad_landcover_raster_classes_into_polygons, recast onto ESA WorldCover over Ruhnu"
+  paired_task: gab-rsia-002b
+  tolerance_rationale: >
+    Vectorizing a fixed grid with a fixed connectivity is deterministic, so the geometry
+    tolerance covers only reprojection: the polygon edges are straight chords between
+    reprojected pixel corners, and the difference against a per-pixel reprojection is under
+    1e-9 relative at this latitude. The 0.001 threshold leaves six orders of magnitude of
+    headroom and still fails the route the source case reports, warping the raster first,
+    which moves class 40 by 0.035 and class 50 by 0.023 and invents two NoData regions.
+    Geometry is matched per class rather than over the union because the union of all
+    classes is simply the raster extent and would score nothing. Feature count is exact
+    because that is the connectivity decision itself: 8-connected gives 360 regions and
+    4-connected gives 427, with identical total area.
+  reference_method: >
+    tools/solve.py polygonizes with rasterio and cross-checks against a route that
+    vectorizes nothing: 8-connected components labelled with a union-find over the pixel
+    array give the region counts, and the shoelace area of every pixel's four reprojected
+    corners gives the class areas. Counts must match exactly and areas to 1e-6 relative.
+  scoring_caveat: >
+    This is the family's no-caveat control in the sense of the source paper: the prompt
+    states the connectivity, the order of operations and the output CRS outright, so a
+    failure here is a failure to follow a fully specified contract rather than a trap. The
+    published case failed all six models on the reprojection alone.
