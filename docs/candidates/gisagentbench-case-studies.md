@@ -147,17 +147,29 @@ honest contract is predicate-based:
 - `x_3301`/`y_3301` equal the point's own geometry coordinates within 0.01 m;
 - one point per input polygon, CRS EPSG:3301.
 
-**Evaluator gap:** the vector evaluator has no reference-independent predicates. A
-`vector_checks` block analogous to the existing scalar `json_checks` is needed, at minimum
-`within: {input_role: polygons, key: poly_fid}` and `field_equals_geometry: {x: x_3301, y:
-y_3301, tolerance: 0.01}`. Until then this task can be validated but not strictly scored.
-
 ```yaml
+output:
+  path: municipality_points.gpkg
+  kind: vector
+  geometry_type: Point
+  crs: EPSG:3301
+  required_fields: [poly_fid, x_3301, y_3301]
+evaluation:
+  strict:
+    crs: exact
+    geometry: {metric: ignore}
+    vector_checks:
+      - {type: within, input_role: municipalities, key: poly_fid, input_key: fid}
+      - {type: count_per_input, input_role: municipalities, key: poly_fid, input_key: fid}
+      - {type: field_equals_geometry, x: x_3301, y: y_3301, tolerance: 0.01, crs: EPSG:3301}
 metadata:
   failure_modes: [crs_misalignment, operation_order]
   difficulty: easy
-  evaluator_requirements: [vector_predicates]
 ```
+
+The reference artifact is still passed to the runner but only its structure is used; any
+interior point passes, and a point computed before reprojection fails `within` whenever the
+unprojected representative point drifts outside a concave polygon.
 
 ---
 
@@ -195,8 +207,8 @@ segment count differences between engines produce area deltas on the order of 0.
 result, so 0.002 leaves headroom without accepting a wrong distance (a 2500 m inset differs by
 several percent). The 1 ha minimum-part rule exists solely to make `feature_count: exact`
 robust to engine-specific slivers. Attribute comparison needs a unique key; single parts have
-none, so only the constant column is checked. Per-part matching would need the entity-level
-geometry matcher noted in the gaps section.
+none, so only the constant column is checked. If the frozen inputs assign a stable part
+identifier (for example the island name), switch to `match: entity` on that key.
 
 ---
 
@@ -385,8 +397,8 @@ metadata:
 Tolerance: 0.002 on the union and 0.5 % per-feature area both come from circular-buffer
 segmentation (a 1000 m circle with 16 versus 64 segments per quarter differs by roughly 0.2 % in
 area). Overlapping hospitals closer than 2 km must exist in the frozen inputs, otherwise the
-Voronoi step is a no-op. Per-entity geometry matching (IoU ≥ 0.5 per `hosp_fid`) would be the
-cleaner check; see gaps.
+Voronoi step is a no-op. With `geometry: {metric: iou, tolerance: 0.98, match: entity}` the partition is scored
+directly per `hosp_fid`, and the `area_m2` column becomes a secondary check.
 
 ---
 
@@ -428,8 +440,8 @@ before, which is fine here because nearest-pixel sampling makes both orders iden
 bilinear sampling were allowed they would differ, so the prompt fixes nearest. Include address
 points on the tile edge (NoData) and on a saturated water pixel where NIR + R can be 0.
 
-**Check needed:** confirm that the table/vector attribute comparison treats null equal to null and
-null unequal to 0; otherwise the NoData clause is unscored.
+Attribute comparison is null-aware: null equals null and never equals 0, so the NoData clause is
+scored.
 
 ---
 
@@ -473,14 +485,14 @@ prompt states outright.
 | ID | Family | Source outcome | Trap kept | Output kind | Scorable today |
 |---|---|---|---|---|---|
 | gab-sjg-001 | Join | pass 6/6 | unit + CRS + boundary | vector | yes |
-| gab-sjg-002 | Join | fail | order around reprojection | vector | needs vector predicates |
+| gab-sjg-002 | Join | fail | order around reprojection | vector | yes, via vector_checks |
 | gab-sosa-001 | Overlay | pass 6/6 | topology, multipart | vector | yes |
 | gab-sosa-002a/b | Overlay | fail 1/6 | preserve input CRS, invalid geometry | vector + table | yes |
 | gab-tmha-001 | Terrain | pass 6/6 | aggregating join vs plain join | table | yes |
 | gab-tmha-002(+s) | Terrain | fail 0/6 | resample before slope, connectivity | vector + scalar | yes, loose tolerance |
 | gab-spa-001 | Pattern | pass 4/6 | boundary inclusion, multipart | vector | yes |
-| gab-spa-002 | Pattern | fail 1/6 | composite tool substitution | vector | partial (needs per-entity) |
-| gab-rsia-001 | Remote sensing | pass 3/6 | band order, NoData, CRS | vector | yes, verify null handling |
+| gab-spa-002 | Pattern | fail 1/6 | composite tool substitution | vector | yes, entity matching |
+| gab-rsia-001 | Remote sensing | pass 3/6 | band order, NoData, CRS | vector | yes |
 | gab-rsia-002a/b | Remote sensing | fail 0/6 | skipped reprojection, connectivity | vector + table | yes |
 
 None of the ten requires a raster output artifact, so all are within reach of the current
@@ -489,24 +501,23 @@ tasks end in points, polygons, or tables.
 
 ## Evaluator gaps surfaced by this exercise
 
-1. **Per-entity geometry matching.** The paper scores polygons by IoU ≥ 0.5 per matched entity
-   and points/lines by a distance threshold, reporting entity precision, recall, and F1.
-   OpenMapBench compares the union of all features, which cannot detect a wrong partition
-   (gab-spa-002) or mismatched parts (gab-sosa-001). Adding `geometry.match: entity` keyed by
-   `attributes.key`, with per-entity IoU or Hausdorff, would close this.
-2. **Reference-independent vector predicates.** Containment, field-equals-geometry, validity per
-   feature, and count-per-input-feature checks would make gab-sjg-002 scorable and would remove
-   the need for a reference in several "produce one X per Y" tasks.
-3. **Null semantics in attribute comparison.** Needed for every NoData task.
-4. **Multi-artifact tasks.** Two of the ten cases naturally produce a vector and a table. Splitting
-   into paired tasks works but doubles run cost; an `outputs:` list with per-artifact strict
-   blocks would be cleaner. Not urgent.
-5. **Caveat and failure-mode reporting.** The report already breaks down by category and model.
-   Grouping by `metadata.failure_modes` would reproduce the paper's Table 3 / caveat analysis for
-   free once tasks carry the tags. The audit trail (tool invocations, artifact lineage) is
-   sufficient to label the paper's mechanism taxonomy (missing operation, order violation,
-   redundant rework, wrong substitution, output never delivered) for roadmap Issue 7 without
-   ever scoring trajectories.
+These were gaps when this note was first written; all but the last are now implemented and
+documented in `docs/task-contract.md`.
+
+1. **Per-entity geometry matching.** Done: `geometry.match: entity` groups by key, unions the
+   parts of each entity, applies the metric per entity, and reports entity precision, recall, and
+   F1, mirroring the paper's entity-level scoring. gab-sosa-001 and gab-spa-002 use it.
+2. **Reference-independent vector predicates.** Done: `vector_checks` with `within` and other
+   relations, `count_per_input`, `field_equals_geometry`, `field_equals_measure`, `field_range`,
+   and `unique`, plus `geometry.metric: ignore`. gab-sjg-002 is now scorable.
+3. **Null semantics in attribute comparison.** Done: null equals null and never a value, in
+   tables and vector attributes.
+4. **Multi-artifact tasks.** Open. Splitting into paired tasks works but doubles run cost; an
+   `outputs:` list with per-artifact strict blocks would be cleaner and is a task-contract change
+   rather than an evaluator change.
+5. **Caveat and failure-mode reporting.** Done: manifests keep `task_metadata`, and reports
+   group strict success by `metadata.failure_modes`. The audit trail remains the basis for
+   labelling the paper's mechanism taxonomy for roadmap Issue 7 without scoring trajectories.
 
 ## Next steps
 

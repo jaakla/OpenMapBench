@@ -400,7 +400,7 @@ def run_task(
                         status = RunStatus.NEEDS_REVIEW
             else:
                 try:
-                    result = evaluate(spec, candidate, reference)
+                    result = evaluate(spec, candidate, reference, task_file=task_file)
                     evaluation_payload = result.to_dict()
                     status = RunStatus.PASSED if result.success else RunStatus.FAILED
                 except Exception as exc:  # noqa: BLE001 - plugins may raise arbitrary exceptions
@@ -481,6 +481,7 @@ def run_task(
         task_id=spec.id,
         task_title=spec.title,
         category=spec.category,
+        task_metadata=spec.metadata,
         output_kind=spec.output.kind,
         task_file=_file_record(task_file),
         inputs=input_records,

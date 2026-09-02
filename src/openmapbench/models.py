@@ -219,12 +219,13 @@ class CostEstimate(BaseModel):
 
 
 class RunManifest(BaseModel):
-    schema_version: Literal["0.1", "0.2", "0.3"] = "0.3"
+    schema_version: Literal["0.1", "0.2", "0.3", "0.4"] = "0.4"
     run_id: str
     status: RunStatus
     task_id: str
     task_title: str
     category: str
+    task_metadata: dict[str, Any] = Field(default_factory=dict)
     output_kind: OutputKind
     task_file: FileRecord
     inputs: list[FileRecord] = Field(default_factory=list)

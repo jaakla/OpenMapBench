@@ -101,7 +101,7 @@ def test_runner_records_usage_and_report_statistics(tmp_path: Path) -> None:
     first, first_path = run_task(task, reference, _solver(tmp_path, 100), run_root)
     second, _ = run_task(task, reference, _solver(tmp_path, 300), run_root)
 
-    assert first.schema_version == "0.3"
+    assert first.schema_version == "0.4"
     assert first.token_usage is not None
     assert first.token_usage.total_tokens == 100
     assert first.cost_estimate is not None

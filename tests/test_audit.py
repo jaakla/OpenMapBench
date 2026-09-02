@@ -120,7 +120,7 @@ Path(os.environ["OPENMAPBENCH_AUDIT_PATH"]).write_text(
         tmp_path / "runs",
     )
 
-    assert manifest.schema_version == "0.3"
+    assert manifest.schema_version == "0.4"
     assert manifest.audit is not None
     assert manifest.audit.inner_trace_status == "captured"
     assert manifest.audit.capture_sources == [

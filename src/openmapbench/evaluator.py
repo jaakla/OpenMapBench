@@ -9,6 +9,9 @@ from pathlib import Path
 from typing import Any
 
 from .models import OutputKind, TaskSpec
+from .vector_checks import run_vector_checks
+
+_NULL_STRINGS = {"", "null", "none", "nan"}
 
 
 @dataclass
@@ -41,6 +44,17 @@ def _try_number(value: Any) -> float | None:
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _is_null(value: Any) -> bool:
+    """Null-aware equality basis: None, NaN, pandas NA, and empty or null-like CSV cells."""
+    if value is None:
+        return True
+    if isinstance(value, str):
+        return value.strip().lower() in _NULL_STRINGS
+    if isinstance(value, float) and math.isnan(value):
+        return True
+    return type(value).__name__ in {"NAType", "NaTType"}
 
 
 def _compare_json_value(
@@ -255,9 +269,15 @@ def _compare_rows(
         for column in sorted(expected_columns):
             c_value = candidate_row.get(column)
             r_value = reference_row.get(column)
+            c_null = _is_null(c_value)
+            r_null = _is_null(r_value)
             c_number = _try_number(c_value)
             r_number = _try_number(r_value)
-            if c_number is not None and r_number is not None:
+            if c_null or r_null:
+                # Null equals null only. A null never equals zero or an empty-looking value
+                # that the other side wrote as a real number or string.
+                equal = c_null and r_null
+            elif c_number is not None and r_number is not None:
                 abs_tol, rel_tol = _column_tolerance(config, column)
                 equal = _numeric_equal(c_number, r_number, abs_tol, rel_tol)
             else:
@@ -268,8 +288,8 @@ def _compare_rows(
                         "row": row_index,
                         "key": candidate_row.get(key) if key else None,
                         "column": column,
-                        "candidate": c_value,
-                        "reference": r_value,
+                        "candidate": None if c_null else c_value,
+                        "reference": None if r_null else r_value,
                     }
                 )
 
@@ -360,13 +380,95 @@ def _read_vector(gpd: Any, path: Path, layer: str | None) -> Any:
     return gpd.read_file(path, layer=layer)
 
 
+def _geometry_metric(candidate_geometry: Any, reference_geometry: Any, metric_name: str) -> float:
+    if metric_name == "symmetric_difference_ratio":
+        denominator = max(float(reference_geometry.area), 1e-15)
+        return float(candidate_geometry.symmetric_difference(reference_geometry).area / denominator)
+    if metric_name == "iou":
+        union_area = float(candidate_geometry.union(reference_geometry).area)
+        intersection_area = float(candidate_geometry.intersection(reference_geometry).area)
+        return 1.0 if union_area == 0 else intersection_area / union_area
+    if metric_name == "hausdorff_distance":
+        return float(candidate_geometry.hausdorff_distance(reference_geometry))
+    raise ValueError(f"unsupported vector geometry metric: {metric_name}")
+
+
+def _metric_passes(metric_name: str, value: float | None, tolerance: float) -> bool:
+    if value is None:
+        return False
+    return value >= tolerance if metric_name == "iou" else value <= tolerance
+
+
+def _group_geometries(frame: Any, key: str) -> dict[str, Any]:
+    from shapely import union_all
+
+    groups: dict[str, list[Any]] = {}
+    for value, geometry in zip(frame[key].astype(str), frame.geometry, strict=True):
+        groups.setdefault(value, []).append(geometry)
+    return {value: union_all(geometries) for value, geometries in groups.items()}
+
+
+def _entity_geometry_metric(
+    candidate: Any,
+    reference: Any,
+    key: str,
+    metric_name: str,
+    tolerance: float,
+) -> tuple[float | None, dict[str, Any]]:
+    """Score geometry per entity key; partitions inside one entity are unioned first."""
+    for name, frame in (("candidate", candidate), ("reference", reference)):
+        if key not in frame.columns:
+            raise ValueError(f"entity geometry matching requires key column {key!r} in {name}")
+    candidate_groups = _group_geometries(candidate, key)
+    reference_groups = _group_geometries(reference, key)
+    missing = sorted(set(reference_groups) - set(candidate_groups))
+    extra = sorted(set(candidate_groups) - set(reference_groups))
+    values = {
+        entity: _geometry_metric(candidate_groups[entity], reference_groups[entity], metric_name)
+        for entity in sorted(set(candidate_groups) & set(reference_groups))
+    }
+    failed = [
+        {"key": entity, "value": value}
+        for entity, value in values.items()
+        if not _metric_passes(metric_name, value, tolerance)
+    ]
+    passed = len(values) - len(failed)
+    precision = passed / len(candidate_groups) if candidate_groups else 0.0
+    recall = passed / len(reference_groups) if reference_groups else 0.0
+    entity_f1 = 0.0 if passed == 0 else 2 * precision * recall / (precision + recall)
+    if values:
+        worst = min(values.values()) if metric_name == "iou" else max(values.values())
+    else:
+        worst = None
+    diagnostics = {
+        "key": key,
+        "reference_entities": len(reference_groups),
+        "candidate_entities": len(candidate_groups),
+        "matched_entities": len(values),
+        "passed_entities": passed,
+        "missing": missing[:50],
+        "extra": extra[:50],
+        "failed": failed[:50],
+        "entity_precision": precision,
+        "entity_recall": recall,
+        "entity_f1": entity_f1,
+        "worst_value": worst,
+    }
+    return worst, diagnostics
+
+
 def evaluate_vector(
     candidate: Path,
     reference: Path,
     config: dict[str, Any],
     output: Any | None = None,
+    inputs: dict[str, Path] | None = None,
 ) -> EvaluationResult:
-    """Compare vector artifacts semantically, independent of order and partitioning."""
+    """Compare vector artifacts semantically, independent of order and partitioning.
+
+    ``inputs`` maps declared input roles to files so reference-independent ``vector_checks``
+    can relate the candidate to the task's own input layers.
+    """
     try:
         import geopandas as gpd
     except ImportError as exc:
@@ -443,7 +545,16 @@ def evaluate_vector(
         )
     )
 
-    if candidate_frame.empty and reference_frame.empty:
+    metric_name = geometry_config.get("metric", "auto")
+    match_mode = geometry_config.get("match", "union")
+    tolerance = float(geometry_config.get("tolerance", 0.0))
+    entity_diagnostics: dict[str, Any] | None = None
+    entity_ok = True
+    if match_mode not in {"union", "entity"}:
+        raise ValueError(f"unsupported geometry match mode: {match_mode}")
+    if metric_name == "ignore":
+        metric_value = None
+    elif candidate_frame.empty and reference_frame.empty:
         metric_name, metric_value = "empty_equivalence", 0.0
     elif candidate_frame.empty != reference_frame.empty:
         metric_name, metric_value = "empty_equivalence", 1.0
@@ -459,43 +570,63 @@ def evaluate_vector(
         )
         candidate_projected = candidate_frame.to_crs(comparison_crs)
         reference_projected = reference_frame.to_crs(comparison_crs)
-        candidate_union = candidate_projected.geometry.union_all()
-        reference_union = reference_projected.geometry.union_all()
-        metric_name = geometry_config.get("metric", "auto")
         if metric_name == "auto":
             families = _geometry_family(reference_projected.geom_type.dropna().unique())
             metric_name = (
                 "symmetric_difference_ratio" if families <= {"polygon"} else "hausdorff_distance"
             )
-        if metric_name == "symmetric_difference_ratio":
-            denominator = max(float(reference_union.area), 1e-15)
-            metric_value = float(
-                candidate_union.symmetric_difference(reference_union).area / denominator
+        if match_mode == "entity":
+            key = geometry_config.get("key") or (config.get("attributes") or {}).get("key")
+            if not key:
+                raise ValueError("entity geometry matching requires geometry.key or attributes.key")
+            metric_value, entity_diagnostics = _entity_geometry_metric(
+                candidate_projected,
+                reference_projected,
+                str(key),
+                metric_name,
+                tolerance,
             )
-        elif metric_name == "iou":
-            union_area = float(candidate_union.union(reference_union).area)
-            intersection_area = float(candidate_union.intersection(reference_union).area)
-            metric_value = 1.0 if union_area == 0 else intersection_area / union_area
-        elif metric_name == "hausdorff_distance":
-            metric_value = float(candidate_union.hausdorff_distance(reference_union))
+            entity_ok = (
+                not entity_diagnostics["missing"]
+                and not entity_diagnostics["extra"]
+                and not entity_diagnostics["failed"]
+                and entity_diagnostics["matched_entities"] > 0
+            )
         else:
-            raise ValueError(f"unsupported vector geometry metric: {metric_name}")
+            metric_value = _geometry_metric(
+                candidate_projected.geometry.union_all(),
+                reference_projected.geometry.union_all(),
+                metric_name,
+            )
 
-    tolerance = float(geometry_config.get("tolerance", 0.0))
-    geometry_ok = (
-        False
-        if metric_value is None
-        else metric_value >= tolerance
-        if metric_name == "iou"
-        else metric_value <= tolerance
-    )
+    if metric_name == "ignore":
+        geometry_ok = True
+    elif match_mode == "entity" and entity_diagnostics is not None:
+        geometry_ok = entity_ok
+    else:
+        geometry_ok = _metric_passes(metric_name, metric_value, tolerance)
     checks.append(
         EvaluationCheck(
             id="geometry",
             passed=geometry_ok,
-            details={"metric": metric_name, "value": metric_value, "tolerance": tolerance},
+            required=metric_name != "ignore",
+            details={
+                "metric": metric_name,
+                "match": match_mode,
+                "value": metric_value,
+                "tolerance": tolerance,
+                **({"entities": entity_diagnostics} if entity_diagnostics else {}),
+            },
         )
     )
+
+    for check_id, passed, details in run_vector_checks(
+        candidate_frame,
+        config.get("vector_checks") or [],
+        inputs or {},
+        lambda path: _read_vector(gpd, path, None),
+    ):
+        checks.append(EvaluationCheck(id=check_id, passed=passed, details=details))
 
     attributes_config = config.get("attributes")
     attribute_diagnostics: dict[str, Any] | None = None
@@ -513,13 +644,14 @@ def evaluate_vector(
         checks.extend(attribute_checks)
 
     success = all(check.passed for check in checks if check.required)
-    closeness = (
-        0.0
-        if metric_value is None
-        else metric_value
-        if metric_name == "iou"
-        else max(0.0, 1.0 - metric_value)
-    )
+    if entity_diagnostics is not None:
+        closeness = float(entity_diagnostics["entity_f1"])
+    elif metric_name == "ignore" or metric_value is None:
+        closeness = 0.0
+    elif metric_name == "iou":
+        closeness = metric_value
+    else:
+        closeness = max(0.0, 1.0 - metric_value)
     return EvaluationResult(
         success=success,
         score=1.0 if success else min(1.0, closeness),
@@ -530,17 +662,30 @@ def evaluate_vector(
             "geometry_metric": metric_name,
             "geometry_value": metric_value,
             "geometry_tolerance": tolerance,
+            "geometry_match": match_mode,
+            "entities": entity_diagnostics,
             "attributes": attribute_diagnostics,
         },
     )
 
 
-def evaluate(task: TaskSpec, candidate: Path, reference: Path) -> EvaluationResult:
+def evaluate(
+    task: TaskSpec,
+    candidate: Path,
+    reference: Path,
+    task_file: Path | None = None,
+) -> EvaluationResult:
+    """Dispatch on output kind. ``task_file`` lets vector checks resolve declared input roles."""
     config = task.evaluation.strict
     if task.output.kind == OutputKind.SCALAR:
         return evaluate_scalar(candidate, reference, config)
     if task.output.kind == OutputKind.TABLE:
         return evaluate_table(candidate, reference, config)
     if task.output.kind == OutputKind.VECTOR:
-        return evaluate_vector(candidate, reference, config, task.output)
+        inputs: dict[str, Path] = {}
+        if task_file is not None:
+            for item, path in zip(task.inputs, task.resolve_input_paths(task_file), strict=True):
+                if item.role:
+                    inputs[item.role] = path
+        return evaluate_vector(candidate, reference, config, task.output, inputs=inputs)
     raise NotImplementedError(f"No evaluator implemented for {task.output.kind.value!r}")

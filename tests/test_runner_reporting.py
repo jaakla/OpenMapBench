@@ -7,7 +7,7 @@ from typer.testing import CliRunner
 
 from openmapbench.cli import app
 from openmapbench.models import RunStatus
-from openmapbench.reporting import aggregate_manifests
+from openmapbench.reporting import aggregate_manifests, report_markdown
 from openmapbench.runner import run_task
 
 
@@ -164,3 +164,56 @@ sys.stderr.write("loading source layer\\n")
     manifest_path = next(run_root.rglob("manifest.json"))
     stdout_log = manifest_path.parent / "agent.stdout.log"
     assert '"type": "item.completed"' in stdout_log.read_text(encoding="utf-8")
+
+
+def test_manifest_keeps_task_metadata_and_report_breaks_down_failure_modes(
+    tmp_path: Path,
+) -> None:
+    task = tmp_path / "task.yaml"
+    task.write_text(
+        """
+id: tagged-demo
+title: Tagged demo
+category: scalar
+prompt: Write 42.
+output:
+  path: result.txt
+  kind: scalar
+metadata:
+  failure_modes: [crs_misalignment, nodata]
+""".strip(),
+        encoding="utf-8",
+    )
+    reference = tmp_path / "reference.txt"
+    reference.write_text("42\n", encoding="utf-8")
+    solver = tmp_path / "solver.py"
+    solver.write_text(
+        "import os, pathlib; pathlib.Path(os.environ['OPENMAPBENCH_OUTPUT_PATH']).write_text('41\\n')",
+        encoding="utf-8",
+    )
+    command = f"{shlex.quote(sys.executable)} {shlex.quote(str(solver))}"
+
+    manifest, _ = run_task(task, reference, command, tmp_path / "runs")
+
+    assert manifest.schema_version == "0.4"
+    assert manifest.task_metadata["failure_modes"] == ["crs_misalignment", "nodata"]
+    report = aggregate_manifests(tmp_path / "runs")
+    assert report["by_failure_mode"] == {
+        "crs_misalignment": {
+            "attempted": 1,
+            "strictly_scored": 1,
+            "strict_successes": 0,
+            "strict_success_rate": 0.0,
+            "needs_manual_review": 0,
+        },
+        "nodata": {
+            "attempted": 1,
+            "strictly_scored": 1,
+            "strict_successes": 0,
+            "strict_success_rate": 0.0,
+            "needs_manual_review": 0,
+        },
+    }
+    markdown = report_markdown(report)
+    assert "## Strict success by tagged failure mode" in markdown
+    assert "| crs_misalignment | 1 | 1 | 0 | 0.0% |" in markdown

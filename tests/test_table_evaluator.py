@@ -29,3 +29,25 @@ def test_table_rejects_duplicate_entity_keys(tmp_path: Path) -> None:
     result = evaluate_table(candidate, reference, {"key": "id"})
     assert not result.success
     assert result.diagnostics["duplicate_keys"] == ["a"]
+
+
+def test_table_nulls_equal_nulls_but_never_values(tmp_path: Path) -> None:
+    reference = tmp_path / "reference.csv"
+    reference.write_text("id,value\na,\nb,\nc,1\n", encoding="utf-8")
+    config = {"key": "id"}
+
+    same = tmp_path / "same.csv"
+    same.write_text("id,value\na,\nb,NULL\nc,1\n", encoding="utf-8")
+    assert evaluate_table(same, reference, config).success
+
+    zero = tmp_path / "zero.csv"
+    zero.write_text("id,value\na,0\nb,\nc,1\n", encoding="utf-8")
+    result = evaluate_table(zero, reference, config)
+    assert not result.success
+    assert result.diagnostics["mismatches"] == [
+        {"row": 0, "key": "a", "column": "value", "candidate": "0", "reference": None}
+    ]
+
+    empty_for_value = tmp_path / "empty.csv"
+    empty_for_value.write_text("id,value\na,\nb,\nc,\n", encoding="utf-8")
+    assert not evaluate_table(empty_for_value, reference, config).success

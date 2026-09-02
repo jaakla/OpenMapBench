@@ -19,8 +19,10 @@ The manifest records:
 - detected token usage, model, reasoning effort, and a cost estimate when supported;
 - subprocess exit code, deterministic evaluation checks, diagnostics, or explicit error.
 
-Run-manifest schema `0.3` adds the `audit` block. Schema `0.2` added `token_usage` and
-`cost_estimate`; schemas `0.1` and `0.2` remain readable. Inside the block, `audit.schema_version`
+Run-manifest schema `0.4` adds `task_metadata`, the task's free-form metadata (including
+`failure_modes` tags) frozen at run time so reports can group by it. Schema `0.3` added the
+`audit` block. Schema `0.2` added `token_usage` and `cost_estimate`; schemas `0.1` to `0.3`
+remain readable. Inside the block, `audit.schema_version`
 `0.2` adds `audit.content_store` and per-artifact `content_captures`.
 Codex CLI `--json` output can provide input, cached-input, cache-write, output, and reasoning-output
 token categories. Without JSON output, OpenMapBench recovers the final `tokens used` total from

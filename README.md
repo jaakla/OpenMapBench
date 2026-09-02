@@ -222,6 +222,7 @@ CSV and JSON row arrays support:
 - entity keys and duplicate-key rejection;
 - required or ignored columns;
 - per-column numeric tolerances;
+- explicit null semantics (null equals null, never a number or string);
 - bounded mismatch diagnostics.
 
 ### Vectors
@@ -231,6 +232,13 @@ count, and semantic geometry equivalence. Polygon partitions and feature order d
 union-based score. Available metrics are symmetric-difference ratio, IoU, and Hausdorff distance.
 Geographic data is reprojected to a deterministic projected comparison CRS before area or distance
 metrics are computed.
+
+Two further modes cover tasks the union score cannot: `geometry.match: entity` scores each keyed
+entity separately (a Voronoi partition, per-source clipped buffers) and reports entity precision,
+recall, and F1; `vector_checks` are reference-independent predicates against the task's own
+inputs, such as "every point lies within the polygon with the same key", "exactly one feature per
+input feature", "the x/y fields equal the geometry", or "the area field equals the measured
+area". Attribute comparison is null-aware. See [docs/task-contract.md](docs/task-contract.md).
 
 ## Manual visual review
 
@@ -270,7 +278,8 @@ strict_success_rate = passed_runs / strictly_scored_runs
 
 Runs awaiting manual visual review are excluded from the strict denominator and reported
 separately. Near-miss diagnostics never turn a failed task into a success. Reports also break
-results down by category, output kind, and terminal status.
+results down by category, output kind, terminal status, and the `metadata.failure_modes` tags a
+task declares, so success under CRS, unit, NoData, or topology pitfalls can be read directly.
 
 ```bash
 openmapbench report runs

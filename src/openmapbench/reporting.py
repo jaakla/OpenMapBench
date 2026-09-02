@@ -9,25 +9,49 @@ from pydantic import ValidationError
 from .models import RunManifest, RunStatus
 
 
+def _group_statistics(items: list[RunManifest]) -> dict[str, Any]:
+    passed = sum(item.status == RunStatus.PASSED for item in items)
+    needs_review = sum(item.status == RunStatus.NEEDS_REVIEW for item in items)
+    strictly_scored = len(items) - needs_review
+    return {
+        "attempted": len(items),
+        "strictly_scored": strictly_scored,
+        "strict_successes": passed,
+        "strict_success_rate": passed / strictly_scored if strictly_scored else None,
+        "needs_manual_review": needs_review,
+    }
+
+
 def _breakdown(manifests: list[RunManifest], field: str) -> dict[str, dict[str, Any]]:
     grouped: dict[str, list[RunManifest]] = defaultdict(list)
     for manifest in manifests:
         value = getattr(manifest, field)
         key = value.value if hasattr(value, "value") else str(value)
         grouped[key].append(manifest)
-    result: dict[str, dict[str, Any]] = {}
-    for key, items in sorted(grouped.items()):
-        passed = sum(item.status == RunStatus.PASSED for item in items)
-        needs_review = sum(item.status == RunStatus.NEEDS_REVIEW for item in items)
-        strictly_scored = len(items) - needs_review
-        result[key] = {
-            "attempted": len(items),
-            "strictly_scored": strictly_scored,
-            "strict_successes": passed,
-            "strict_success_rate": passed / strictly_scored if strictly_scored else None,
-            "needs_manual_review": needs_review,
-        }
-    return result
+    return {key: _group_statistics(items) for key, items in sorted(grouped.items())}
+
+
+def _task_tags(manifest: RunManifest, field: str) -> list[str]:
+    value = manifest.task_metadata.get(field)
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        return [str(item) for item in value]
+    return [str(value)]
+
+
+def _tag_breakdown(manifests: list[RunManifest], field: str) -> dict[str, dict[str, Any]]:
+    """Group runs by each task tag; a run tagged twice contributes to both groups."""
+    grouped: dict[str, list[RunManifest]] = defaultdict(list)
+    for manifest in manifests:
+        tags = _task_tags(manifest, field)
+        if not tags:
+            grouped["untagged"].append(manifest)
+        for tag in tags:
+            grouped[tag].append(manifest)
+    return {key: _group_statistics(items) for key, items in sorted(grouped.items())}
 
 
 def _token_statistics(values: list[int]) -> dict[str, int | float | None]:
@@ -130,7 +154,7 @@ def aggregate_manifests(run_root: Path) -> dict[str, Any]:
     needs_review = sum(manifest.status == RunStatus.NEEDS_REVIEW for manifest in manifests)
     strictly_scored = attempted - needs_review
     return {
-        "schema_version": "0.2",
+        "schema_version": "0.3",
         "attempted_tasks": attempted,
         "strictly_scored_tasks": strictly_scored,
         "strict_successes": passed,
@@ -141,6 +165,7 @@ def aggregate_manifests(run_root: Path) -> dict[str, Any]:
         ),
         "by_category": _breakdown(manifests, "category"),
         "by_output_kind": _breakdown(manifests, "output_kind"),
+        "by_failure_mode": _tag_breakdown(manifests, "failure_modes"),
         "usage": _usage_summary(manifests),
         "runs": [
             {
@@ -234,6 +259,26 @@ def report_markdown(report: dict[str, Any]) -> str:
                 f"| {model} | {model_usage['runs']} | {model_usage['total_tokens']:,} | "
                 f"{model_stats['minimum']:,} | {model_stats['average']:,.1f} | "
                 f"{model_stats['maximum']:,} | {_cost_text(model_usage['cost'])} |"
+            )
+    failure_modes = {
+        key: value for key, value in report.get("by_failure_mode", {}).items() if key != "untagged"
+    }
+    if failure_modes:
+        lines.extend(
+            [
+                "",
+                "## Strict success by tagged failure mode",
+                "",
+                "| Failure mode | Attempted | Strictly scored | Strict successes | Rate |",
+                "| --- | ---: | ---: | ---: | ---: |",
+            ]
+        )
+        for mode, stats in failure_modes.items():
+            mode_rate = stats["strict_success_rate"]
+            lines.append(
+                f"| {mode} | {stats['attempted']} | {stats['strictly_scored']} | "
+                f"{stats['strict_successes']} | "
+                f"{f'{mode_rate:.1%}' if mode_rate is not None else '—'} |"
             )
     lines.extend(
         [

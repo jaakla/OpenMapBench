@@ -38,7 +38,7 @@ def evaluate_command(
 ) -> None:
     """Evaluate one candidate artifact against reference ground truth."""
     spec = load_task(task)
-    result = evaluate_result(spec, candidate, reference)
+    result = evaluate_result(spec, candidate, reference, task_file=task)
     typer.echo(json.dumps(result.to_dict(), indent=2, sort_keys=True))
     raise typer.Exit(code=0 if result.success else 1)
 

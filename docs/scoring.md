@@ -43,6 +43,12 @@ Useful geometry metrics include:
 
 Vertex order, ring orientation, serialization order, and harmless coordinate precision differences should not cause failure.
 
+Implemented: union-based comparison by default; per-entity comparison (`geometry.match: entity`)
+with entity precision, recall, and F1 when the partition itself is the result; and
+reference-independent predicate checks (`vector_checks`) for properties with many correct
+answers, such as one interior point per polygon. A failed entity-matched run reports entity F1 as
+its diagnostic closeness.
+
 ## Raster outputs
 
 Planned checks:
@@ -76,6 +82,9 @@ Only manifests with terminal status `passed` count as strict successes. Agent er
 outputs, evaluator errors, and deterministic comparison failures contribute zero to the numerator.
 `needs_review` remains an attempted task but is excluded from the strict denominator. Invalid
 manifests are reported separately and are not silently counted.
+
+Reports also group strict success by each tag in the task's `metadata.failure_modes`; a run
+tagged with two pitfalls counts in both groups, and untagged runs are listed as `untagged`.
 
 ## Token and cost reporting
 

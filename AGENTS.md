@@ -22,6 +22,7 @@ src/openmapbench/
   models.py        Pydantic models: TaskSpec (schema 0.1), RunManifest (schema 0.3), audit types
   taskio.py        Load and validate task YAML, checksum inputs
   evaluator.py     Deterministic scalar/JSON, table, and vector evaluators
+  vector_checks.py Reference-independent vector predicates (within, count_per_input, ...)
   runner.py        run_task(): launch agent subprocess, evaluate, always write a manifest
   audit.py         Execution audit trail and artifact lineage (Codex JSONL + generic JSONL)
   capture.py       Live content capture of transient agent files into <run_dir>/captured-files/
@@ -73,7 +74,7 @@ CI runs exactly `ruff check .` and `pytest -q`. Both must pass before a task is 
 - **Type everything.** Pydantic models for anything serialized; modules start with
   `from __future__ import annotations` and use 3.11 union syntax (`X | None`).
 - **Schema versions are contracts.** `TaskSpec.schema_version` is `"0.1"`; `RunManifest` accepts
-  `"0.1" | "0.2" | "0.3"` and writes `0.3`. Adding a manifest field means bumping the version,
+  `"0.1"` through `"0.4"` and writes `0.4`. Adding a manifest field means bumping the version,
   keeping older versions loadable, and noting the change in `docs/run-manifest.md`. Adding a task
   field must stay backward compatible within `0.1` or bump it.
 - No scratch files in the project root. Use the session scratchpad or a run's `workspace/`
@@ -122,10 +123,11 @@ CI runs exactly `ruff check .` and `pytest -q`. Both must pass before a task is 
 3. Document the option, its default, and its rationale in `docs/task-contract.md`.
 4. If it changes what counts as a pass, update `docs/scoring.md`.
 
-Current known gaps, so you do not rediscover them: per-entity geometry matching (the vector
-metric compares the union of all features), reference-independent vector predicates such as
-containment, explicit null semantics in attribute comparison, and multi-artifact tasks. They are
-discussed with motivating cases in `docs/candidates/gisagentbench-case-studies.md`.
+The vector evaluator supports union and per-entity geometry matching (`geometry.match`),
+`metric: ignore`, and reference-independent `vector_checks`; table and attribute comparison is
+null-aware; reports break success down by `metadata.failure_modes`. The remaining known gap is
+multi-artifact tasks (one task, several scored outputs); pair tasks instead. Motivating cases are
+in `docs/candidates/gisagentbench-case-studies.md`.
 
 ## How to add a native benchmark task
 
