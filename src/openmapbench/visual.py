@@ -18,6 +18,55 @@ from .taskio import load_task, sha256_file
 IMAGE_SUFFIXES = {".bmp", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp"}
 
 
+# Styles for the execution-audit block, shared by every OpenMapBench HTML report.
+AUDIT_CSS = """\
+    .audit { margin-top: 16px; border: 1px solid #cbd5e1; border-radius: 10px;
+              background: #f8fafc; }
+    .audit > summary { display: flex; justify-content: space-between; gap: 16px;
+                        cursor: pointer; padding: 13px 14px; font-weight: 700; }
+    .audit-summary { color: #64748b; font-size: .82rem; font-weight: 500; }
+    .audit-body { border-top: 1px solid #dbe2ea; padding: 14px; }
+    .audit-body h3 { margin-top: 18px; }
+    .audit-links { margin: 0; color: #64748b; font-size: .88rem; }
+    .audit-event { margin: 7px 0 7px calc(var(--depth) * 22px); background: white;
+                    border: 1px solid #dbe2ea; border-left: 4px solid #94a3b8;
+                    border-radius: 7px; }
+    .audit-event > summary { display: flex; align-items: center; gap: 8px; cursor: pointer;
+                              padding: 9px 10px; }
+    .sequence { min-width: 2.1em; color: #64748b; font: 650 .78rem ui-monospace, monospace; }
+    .event-kind, .artifact-role { color: #334155; background: #e2e8f0; border-radius: 999px;
+                                  padding: 3px 7px; font-size: .72rem; font-weight: 700; }
+    .event-name { flex: 1; font-weight: 650; }
+    .event-status { color: #475569; font-size: .78rem; }
+    .event-status.completed, .event-status.passed { color: #166534; }
+    .event-status.failed, .event-status.error, .event-status.timed-out { color: #991b1b; }
+    .audit dl, .artifact dl { margin: 0; padding: 0 12px 10px; }
+    .audit-field { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 10px;
+                    padding: 7px 0; border-top: 1px solid #eef2f7; }
+    .audit-field dt { color: #64748b; font-size: .78rem; font-weight: 700;
+                       text-transform: uppercase; }
+    .audit-field dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+    .audit pre { margin: 0; padding: 9px; max-height: 320px; overflow: auto;
+                  white-space: pre-wrap; overflow-wrap: anywhere; background: #0f172a;
+                  color: #e2e8f0; border-radius: 6px; font: .78rem/1.5 ui-monospace, monospace; }
+    .artifact { margin: 7px 0; background: white; border: 1px solid #dbe2ea;
+                 border-radius: 7px; }
+    .artifact > summary { cursor: pointer; padding: 9px 10px; }
+    .artifact-role.candidate { color: #166534; background: #dcfce7; }
+    .artifact-role.intermediate, .artifact-role.working { color: #92400e; background: #fef3c7; }
+    .artifact ul { margin: 0; padding-left: 18px; }
+    .capture-badge { margin-left: 8px; color: #5b21b6; background: #ede9fe; border-radius: 999px;
+                      padding: 3px 7px; font-size: .72rem; font-weight: 700; }
+    .capture-badge.kept { color: #155e75; background: #cffafe; }
+    .capture { margin: 0 0 10px; }
+    .capture-meta { color: #64748b; font-size: .78rem; margin-bottom: 5px; }
+    .capture-note { margin: 0; color: #64748b; font-size: .82rem; }
+    .capture pre { max-height: 460px; }
+    .evidence { color: #64748b; font-size: .82rem; }
+    .audit-notes { color: #475569; font-size: .86rem; }
+"""
+
+
 @dataclass(frozen=True)
 class VisualPair:
     task_id: str
@@ -153,11 +202,13 @@ def _existing_reviews(path: Path) -> dict[tuple[str, str], dict[str, str]]:
         }
 
 
-def _json_block(value: Any) -> str:
+def json_block(value: Any) -> str:
+    """Render a value as escaped, stable JSON for a <pre> block."""
     return html.escape(json.dumps(value, indent=2, ensure_ascii=False, sort_keys=True))
 
 
-def _file_size(value: Any) -> str:
+def format_bytes(value: Any) -> str:
+    """Format a byte count for humans, tolerating a missing or non-integer value."""
     if not isinstance(value, int):
         return "size unavailable"
     if value < 1024:
@@ -258,7 +309,7 @@ def _content_captures_html(artifact: dict[str, Any], run_dir: Path | None) -> st
         meta = " · ".join(
             part
             for part in (
-                _file_size(capture.get("size_bytes")),
+                format_bytes(capture.get("size_bytes")),
                 f"{capture.get('line_count')} lines"
                 if isinstance(capture.get("line_count"), int)
                 else "",
@@ -288,7 +339,8 @@ def _content_captures_html(artifact: dict[str, Any], run_dir: Path | None) -> st
     )
 
 
-def _audit_html(audit: dict[str, Any] | None, manifest_path: str | None) -> str:
+def audit_html(audit: dict[str, Any] | None, manifest_path: str | None) -> str:
+    """Render one run's execution audit: layered timeline, lineage, and preserved content."""
     if not audit:
         return ""
     events = audit.get("events") if isinstance(audit.get("events"), list) else []
@@ -336,25 +388,25 @@ def _audit_html(audit: dict[str, Any] | None, manifest_path: str | None) -> str:
             if parameters:
                 rows.append(
                     '<div class="audit-field"><dt>Tool parameters</dt>'
-                    f"<dd><pre>{_json_block(parameters)}</pre></dd></div>"
+                    f"<dd><pre>{json_block(parameters)}</pre></dd></div>"
                 )
         parameters = event.get("parameters")
         if parameters:
             rows.append(
                 '<div class="audit-field"><dt>Parameters</dt>'
-                f"<dd><pre>{_json_block(parameters)}</pre></dd></div>"
+                f"<dd><pre>{json_block(parameters)}</pre></dd></div>"
             )
         result = event.get("result")
         if result and any(value is not None for value in result.values()):
             rows.append(
                 '<div class="audit-field"><dt>Result</dt>'
-                f"<dd><pre>{_json_block(result)}</pre></dd></div>"
+                f"<dd><pre>{json_block(result)}</pre></dd></div>"
             )
         details = event.get("details")
         if details:
             rows.append(
                 '<div class="audit-field"><dt>Details</dt>'
-                f"<dd><pre>{_json_block(details)}</pre></dd></div>"
+                f"<dd><pre>{json_block(details)}</pre></dd></div>"
             )
         source_lines = event.get("source_lines") or []
         timing = " → ".join(
@@ -425,7 +477,7 @@ def _audit_html(audit: dict[str, Any] | None, manifest_path: str | None) -> str:
         checksum = str(artifact.get("sha256") or "not available")
         metadata = artifact.get("metadata")
         metadata_html = (
-            f'<div class="audit-field"><dt>Metadata</dt><dd><pre>{_json_block(metadata)}</pre></dd></div>'
+            f'<div class="audit-field"><dt>Metadata</dt><dd><pre>{json_block(metadata)}</pre></dd></div>'
             if metadata
             else ""
         )
@@ -447,7 +499,7 @@ def _audit_html(audit: dict[str, Any] | None, manifest_path: str | None) -> str:
               <dl>
                 <div class="audit-field"><dt>Path</dt><dd>{file_link}</dd></div>
                 <div class="audit-field"><dt>At finish</dt><dd>{finish_note} ·
-                  {_file_size(artifact.get('size_bytes'))}</dd></div>
+                  {format_bytes(artifact.get('size_bytes'))}</dd></div>
                 <div class="audit-field"><dt>SHA-256</dt><dd><code>{html.escape(checksum)}</code></dd></div>
                 <div class="audit-field"><dt>Lineage</dt><dd><ul>{''.join(lineage_items) or '<li>None declared</li>'}</ul></dd></div>
                 {captures_html}
@@ -473,7 +525,7 @@ def _audit_html(audit: dict[str, Any] | None, manifest_path: str | None) -> str:
           <h3>Preserved file content</h3>
           <p class="audit-links">{content_store.get('file_count', 0)} file(s),
             {content_store.get('version_count', 0)} version(s),
-            {_file_size(content_store.get('total_bytes'))} stored under
+            {format_bytes(content_store.get('total_bytes'))} stored under
             <code>{html.escape(str(content_store.get('path') or ''))}/</code> inside the run
             directory. Files the agent deleted before exiting are still readable here.</p>
           <ul class="audit-notes">{skipped_items or '<li>Nothing was skipped.</li>'}</ul>
@@ -518,7 +570,7 @@ def _write_html(report: dict[str, Any], output: Path) -> None:
         run_id = html.escape(item.get("run_id") or "direct GABench output")
         review_result = html.escape(item["manual_review_result"])
         review_class = _slug(item["manual_review_result"])
-        audit = _audit_html(item.get("audit"), item.get("run_manifest_path"))
+        audit = audit_html(item.get("audit"), item.get("run_manifest_path"))
         cards.append(
             f"""
             <article class="card">
@@ -580,50 +632,7 @@ def _write_html(report: dict[str, Any], output: Path) -> None:
     .review.pass {{ color: #166534; background: #dcfce7; }}
     .review.fail {{ color: #991b1b; background: #fee2e2; }}
     .meta {{ color: #64748b; font-size: .9rem; margin-bottom: 0; }}
-    .audit {{ margin-top: 16px; border: 1px solid #cbd5e1; border-radius: 10px;
-              background: #f8fafc; }}
-    .audit > summary {{ display: flex; justify-content: space-between; gap: 16px;
-                        cursor: pointer; padding: 13px 14px; font-weight: 700; }}
-    .audit-summary {{ color: #64748b; font-size: .82rem; font-weight: 500; }}
-    .audit-body {{ border-top: 1px solid #dbe2ea; padding: 14px; }}
-    .audit-body h3 {{ margin-top: 18px; }}
-    .audit-links {{ margin: 0; color: #64748b; font-size: .88rem; }}
-    .audit-event {{ margin: 7px 0 7px calc(var(--depth) * 22px); background: white;
-                    border: 1px solid #dbe2ea; border-left: 4px solid #94a3b8;
-                    border-radius: 7px; }}
-    .audit-event > summary {{ display: flex; align-items: center; gap: 8px; cursor: pointer;
-                              padding: 9px 10px; }}
-    .sequence {{ min-width: 2.1em; color: #64748b; font: 650 .78rem ui-monospace, monospace; }}
-    .event-kind, .artifact-role {{ color: #334155; background: #e2e8f0; border-radius: 999px;
-                                  padding: 3px 7px; font-size: .72rem; font-weight: 700; }}
-    .event-name {{ flex: 1; font-weight: 650; }}
-    .event-status {{ color: #475569; font-size: .78rem; }}
-    .event-status.completed, .event-status.passed {{ color: #166534; }}
-    .event-status.failed, .event-status.error, .event-status.timed-out {{ color: #991b1b; }}
-    .audit dl, .artifact dl {{ margin: 0; padding: 0 12px 10px; }}
-    .audit-field {{ display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 10px;
-                    padding: 7px 0; border-top: 1px solid #eef2f7; }}
-    .audit-field dt {{ color: #64748b; font-size: .78rem; font-weight: 700;
-                       text-transform: uppercase; }}
-    .audit-field dd {{ margin: 0; min-width: 0; overflow-wrap: anywhere; }}
-    .audit pre {{ margin: 0; padding: 9px; max-height: 320px; overflow: auto;
-                  white-space: pre-wrap; overflow-wrap: anywhere; background: #0f172a;
-                  color: #e2e8f0; border-radius: 6px; font: .78rem/1.5 ui-monospace, monospace; }}
-    .artifact {{ margin: 7px 0; background: white; border: 1px solid #dbe2ea;
-                 border-radius: 7px; }}
-    .artifact > summary {{ cursor: pointer; padding: 9px 10px; }}
-    .artifact-role.candidate {{ color: #166534; background: #dcfce7; }}
-    .artifact-role.intermediate, .artifact-role.working {{ color: #92400e; background: #fef3c7; }}
-    .artifact ul {{ margin: 0; padding-left: 18px; }}
-    .capture-badge {{ margin-left: 8px; color: #5b21b6; background: #ede9fe; border-radius: 999px;
-                      padding: 3px 7px; font-size: .72rem; font-weight: 700; }}
-    .capture-badge.kept {{ color: #155e75; background: #cffafe; }}
-    .capture {{ margin: 0 0 10px; }}
-    .capture-meta {{ color: #64748b; font-size: .78rem; margin-bottom: 5px; }}
-    .capture-note {{ margin: 0; color: #64748b; font-size: .82rem; }}
-    .capture pre {{ max-height: 460px; }}
-    .evidence {{ color: #64748b; font-size: .82rem; }}
-    .audit-notes {{ color: #475569; font-size: .86rem; }}
+{AUDIT_CSS}
     code {{ color: #475569; }}
     a {{ color: #075985; }}
   </style>

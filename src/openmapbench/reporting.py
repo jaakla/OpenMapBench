@@ -141,14 +141,23 @@ def _usage_summary(manifests: list[RunManifest]) -> dict[str, Any]:
     }
 
 
-def aggregate_manifests(run_root: Path) -> dict[str, Any]:
-    manifests: list[RunManifest] = []
+def load_manifests(run_root: Path) -> tuple[list[tuple[Path, RunManifest]], list[dict[str, str]]]:
+    """Load every run manifest under a run root, reporting unreadable ones instead of raising."""
+    loaded: list[tuple[Path, RunManifest]] = []
     invalid: list[dict[str, str]] = []
     for path in sorted(run_root.rglob("manifest.json")):
         try:
-            manifests.append(RunManifest.model_validate_json(path.read_text(encoding="utf-8")))
+            loaded.append(
+                (path, RunManifest.model_validate_json(path.read_text(encoding="utf-8")))
+            )
         except (OSError, ValidationError) as exc:
             invalid.append({"path": str(path), "error": f"{type(exc).__name__}: {exc}"})
+    return loaded, invalid
+
+
+def aggregate_manifests(run_root: Path) -> dict[str, Any]:
+    loaded, invalid = load_manifests(run_root)
+    manifests = [manifest for _, manifest in loaded]
     passed = sum(manifest.status == RunStatus.PASSED for manifest in manifests)
     attempted = len(manifests)
     needs_review = sum(manifest.status == RunStatus.NEEDS_REVIEW for manifest in manifests)
