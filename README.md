@@ -100,6 +100,7 @@ recast from the GISAgentBench case studies onto Estonian open data.
 | `gab-sosa-001` | 3 km inward inset of Saare maakond, exploded to single parts | vector polygons | geometry topology, multipart handling |
 | `gab-sjg-002` | One guaranteed-interior point per Estonian municipality, with projected coordinates | vector points | CRS misalignment, contract literalism |
 | `gab-spa-001` | Distinct parks per cell of a pinned 1 km grid over Tallinn | vector polygons | boundary ambiguity, multipart handling, wrong tool substitution |
+| `gab-spa-002` | Nearest-hospital service areas inside 1 km, clipped to Tallinn | vector polygons | wrong tool substitution, geometry topology |
 
 Run one with its bundled reference solver to see the whole loop:
 

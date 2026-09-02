@@ -380,6 +380,10 @@ which is the substitution error the paper reports.
 
 ### gab-spa-002 — Voronoi-clipped 1 km hospital service areas
 
+**Implemented** in `benchmark/tasks/gab-spa-002/` with 16 clustered OpenStreetMap hospitals in
+Tallinn, scored per hospital with `geometry: {metric: iou, match: entity}` at 0.97 as the draft
+anticipated; the contract there supersedes the draft below.
+
 Source: `sf_bay_voronoi_clipped_hospital_buffers_1_km` (Spatial Pattern Analysis, failure, 1/6;
 a composite clip-buffers-to-containing-polygons tool replaced the Voronoi step).
 

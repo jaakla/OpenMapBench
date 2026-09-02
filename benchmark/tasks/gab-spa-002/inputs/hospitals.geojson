@@ -1,0 +1,24 @@
+{
+"type": "FeatureCollection",
+"name": "hospitals",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::3301" } },
+"xy_coordinate_resolution": 0.01,
+"features": [
+{ "type": "Feature", "properties": { "hosp_fid": "w26856083", "name": "LTK nakkuskliinik" }, "geometry": { "type": "Point", "coordinates": [ 539417.26, 6588262.59 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w26898434", "name": "Kesklinna Lastepolikliinik" }, "geometry": { "type": "Point", "coordinates": [ 542912.73, 6588092.65 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w394700895", "name": "Ida-Tallinna Keskhaigla" }, "geometry": { "type": "Point", "coordinates": [ 542920.35, 6587916.19 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w427526211", "name": "Pelgulinna Sünnitusmaja" }, "geometry": { "type": "Point", "coordinates": [ 540237.66, 6588891.62 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w427526212", "name": "Lääne-Tallinna Keskhaigla" }, "geometry": { "type": "Point", "coordinates": [ 539350.9, 6588354.01 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w427526213", "name": "Pelgulinna Haigla" }, "geometry": { "type": "Point", "coordinates": [ 540519.08, 6588914.15 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w427526214", "name": "Põhja-Eesti Regionaalhaigla psühhiaatriakliinik" }, "geometry": { "type": "Point", "coordinates": [ 539635.66, 6588507.64 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w427539128", "name": "Põhja-Eesti Regionaalhaigla" }, "geometry": { "type": "Point", "coordinates": [ 539845.81, 6584714.45 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w427539132", "name": "Tallinna Lastehaigla" }, "geometry": { "type": "Point", "coordinates": [ 539931.01, 6584561.5 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w782833340", "name": "Ida-Tallinna Keskhaigla Järve üksus" }, "geometry": { "type": "Point", "coordinates": [ 540569.29, 6584414.4 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w808499654", "name": "Magdaleena haigla" }, "geometry": { "type": "Point", "coordinates": [ 541919.59, 6586781.49 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w810780801", "name": "Wismari Haigla" }, "geometry": { "type": "Point", "coordinates": [ 541559.02, 6588476.56 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w868368870", "name": null }, "geometry": { "type": "Point", "coordinates": [ 538629.47, 6581650.28 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w868368873", "name": null }, "geometry": { "type": "Point", "coordinates": [ 538821.15, 6581814.0 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w868368898", "name": "Tallinna Diakooniahaigla" }, "geometry": { "type": "Point", "coordinates": [ 538640.88, 6581824.16 ] } },
+{ "type": "Feature", "properties": { "hosp_fid": "w1168985329", "name": "Elora Hiiu Haigla" }, "geometry": { "type": "Point", "coordinates": [ 537753.99, 6582587.2 ] } }
+]
+}

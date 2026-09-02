@@ -1,0 +1,87 @@
+schema_version: "0.1"
+id: gab-spa-002
+title: Voronoi-clipped 1 km hospital service areas
+category: vector
+prompt: >
+  inputs/hospitals.geojson holds 16 hospitals in Tallinn and inputs/boundary.geojson the
+  Tallinn municipality polygon, both in EPSG:3301. Produce one service area per hospital:
+  the part of the municipality that is within 1000 m of that hospital **and** closer to it
+  than to any other hospital in the layer. Every hospital in this layer has a neighbour
+  within 2000 m, so no service area is simply a full circle.
+
+  Write the 16 service areas to hospital_cells.gpkg in EPSG:3301 with the fields hosp_fid
+  (copied from the input), name, the integer buffer_rad set to 1000, and area_m2, the area
+  of the written geometry in square metres. One feature per hospital, no empty geometries.
+
+inputs:
+  - path: inputs/hospitals.geojson
+    role: hospitals
+    source: "OpenStreetMap via Overpass API; nwr[amenity=hospital] in bbox 59.33,24.52,59.62,24.96, restricted to the Tallinn municipality polygon"
+    as_of: "2026-09-02"
+    checksum: sha256:d800055246d665310c0587b3bee55ebe9a2f47739ebb719147ae37ae3be92760
+    license: ODbL-1.0
+  - path: inputs/boundary.geojson
+    role: boundary
+    source: "Maa-amet Haldus- ja asustusjaotus, omavalitsus layer (https://geoportaal.maaamet.ee/docs/haldus_asustus/omavalitsus_shp.zip), Tallinn only, generalised at 50 m"
+    as_of: "2024-12-01"
+    checksum: sha256:fe817813695802850146eea2b479b9e97d3fc6b56a8f5732b4c206448f5dd534
+    license: "Maa-amet open data (CC BY 4.0 equivalent, attribution: Maa-amet)"
+
+output:
+  path: hospital_cells.gpkg
+  kind: vector
+  geometry_type: Polygon
+  crs: EPSG:3301
+  required_fields: [hosp_fid, name, buffer_rad, area_m2]
+
+evaluation:
+  strict:
+    crs: exact
+    feature_count: exact
+    geometry:
+      metric: iou
+      match: entity
+      key: hosp_fid
+      tolerance: 0.97
+      require_valid: true
+    attributes:
+      key: hosp_fid
+      columns: [hosp_fid, name, buffer_rad, area_m2]
+      numeric_tolerance:
+        default: {absolute: 0, relative: 0}
+        area_m2: {absolute: 0, relative: 0.03}
+    vector_checks:
+      - {type: unique, field: hosp_fid}
+      - {type: field_range, field: buffer_rad, min: 1000, max: 1000}
+      - {type: field_equals_measure, field: area_m2, measure: area, absolute: 1.0, relative: 0.001}
+
+metadata:
+  difficulty: hard
+  family: spatial-pattern-analysis
+  failure_modes: [wrong_tool_substitution, geometry_topology, boundary_ambiguity]
+  skills: [voronoi, buffer, overlay, per-entity-attributes]
+  source_case: "GISAgentBench (arXiv:2608.01645) case sf_bay_voronoi_clipped_hospital_buffers_1_km, recast onto Tallinn hospitals"
+  tolerance_rationale: >
+    Geometry is matched per hospital rather than over the union, because the union of the
+    service areas is almost the same set whether or not the nearest-hospital partition
+    happened; only per-entity matching can see the substitution the source case reports.
+    Measured against the reference (16 segments per quarter circle), a coarser circle costs
+    at most: 8 segments IoU 0.996, the QGIS default of 5 segments IoU 0.987, 4 segments IoU
+    0.978, with area differences of 0.4 %, 1.3 % and 2.2 %. Plain 1000 m circles clipped to
+    the municipality, the composite-tool substitution, score IoU 0.165 to 0.907 per hospital
+    with area errors of 10 % to 508 %. An IoU threshold of 0.97 and an area_m2 tolerance of
+    3 % therefore accept every plausible circle segmentation and reject the substitution on
+    every one of the 16 hospitals. area_m2 is additionally checked against the area of the
+    geometry the agent actually wrote, at 0.1 %, so a correct-looking column computed in the
+    wrong CRS fails on its own.
+  reference_method: >
+    tools/solve.py builds the partition with shapely's Voronoi polygons and independently by
+    clipping each circle with one perpendicular-bisector half-plane per competing hospital
+    within 2000 m, which is the definition rather than an implementation of a Voronoi cell.
+    The two agree to a relative symmetric difference below 1e-9 on all 16 hospitals; the
+    script refuses to write a reference otherwise.
+  scoring_caveat: >
+    Clipping to the municipality boundary changes only 2 of the 16 service areas, by 0.4 %
+    and 5.4 %. The larger one fails both the IoU and the area check if the boundary is
+    ignored, so the step is scored, but on this data it is a thin margin rather than a
+    dominant part of the task.
