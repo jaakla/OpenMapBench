@@ -236,7 +236,10 @@ def run_task(
     agent_cwd: Path | None = None,
     verbose: bool = False,
 ) -> tuple[RunManifest, Path]:
-    """Execute an arbitrary agent command, evaluate its artifact, and always write a manifest."""
+    """Execute an arbitrary agent command, evaluate its artifact, and always write a manifest.
+
+    The agent runs from ``<run_dir>/workspace`` unless ``agent_cwd`` is given.
+    """
     task_file = task_file.resolve()
     reference = reference.resolve()
     spec = load_task(task_file)
@@ -245,6 +248,8 @@ def run_task(
     run_dir = (run_root / run_id).resolve()
     output_dir = run_dir / "artifacts"
     output_dir.mkdir(parents=True, exist_ok=False)
+    workspace_dir = run_dir / "workspace"
+    workspace_dir.mkdir()
     candidate = spec.resolve_output_path(output_dir)
     candidate.parent.mkdir(parents=True, exist_ok=True)
     stdout_path = run_dir / "agent.stdout.log"
@@ -257,6 +262,7 @@ def run_task(
         "output_dir": str(output_dir),
         "output_path": str(candidate),
         "run_dir": str(run_dir),
+        "workspace_dir": str(workspace_dir),
     }
     command = _render_command(agent_command, paths)
     environment = os.environ.copy()
@@ -267,6 +273,7 @@ def run_task(
             "OPENMAPBENCH_OUTPUT_DIR": paths["output_dir"],
             "OPENMAPBENCH_OUTPUT_PATH": paths["output_path"],
             "OPENMAPBENCH_RUN_DIR": paths["run_dir"],
+            "OPENMAPBENCH_WORKSPACE_DIR": paths["workspace_dir"],
             "OPENMAPBENCH_AUDIT_PATH": str(agent_audit_path),
         }
     )
@@ -283,7 +290,9 @@ def run_task(
     stderr = ""
     evaluation_started: datetime | None = None
     evaluation_finished: datetime | None = None
-    execution_cwd = agent_cwd.resolve() if agent_cwd else task_file.parent
+    # Scratch files an agent writes to its working directory land inside the isolated run
+    # directory by default, so they are inventoried by the audit and never leak into the project.
+    execution_cwd = agent_cwd.resolve() if agent_cwd else workspace_dir
     capture_config = CaptureConfig.from_environment()
     content_capture = (
         ContentCapture(

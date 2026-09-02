@@ -57,6 +57,47 @@ output:
     assert report["strict_success_rate"] == 0.5
 
 
+def test_runner_defaults_agent_cwd_to_run_workspace(tmp_path: Path) -> None:
+    task = tmp_path / "task.yaml"
+    task.write_text(
+        """
+id: workspace-demo
+title: Workspace demo
+category: scalar
+prompt: Write 42.
+output:
+  path: result.txt
+  kind: scalar
+""".strip(),
+        encoding="utf-8",
+    )
+    reference = tmp_path / "reference.txt"
+    reference.write_text("42\n", encoding="utf-8")
+    solver = tmp_path / "solver.py"
+    solver.write_text(
+        "import os, pathlib\n"
+        "pathlib.Path('scratch.py').write_text('helper')\n"
+        "assert pathlib.Path.cwd() == pathlib.Path(os.environ['OPENMAPBENCH_WORKSPACE_DIR'])\n"
+        "pathlib.Path(os.environ['OPENMAPBENCH_OUTPUT_PATH']).write_text('42\\n')\n",
+        encoding="utf-8",
+    )
+    command = f"{shlex.quote(sys.executable)} {shlex.quote(str(solver))} {{workspace_dir}}"
+
+    manifest, manifest_path = run_task(task, reference, command, tmp_path / "runs")
+
+    assert manifest.status == RunStatus.PASSED
+    run_dir = manifest_path.parent
+    workspace = run_dir / "workspace"
+    assert (workspace / "scratch.py").read_text(encoding="utf-8") == "helper"
+    assert not (tmp_path / "scratch.py").exists()
+    assert manifest.command[-1] == str(workspace)
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    first_event = payload["audit"]["events"][0]
+    assert first_event["parameters"]["cwd"] == str(workspace)
+    inventoried = {artifact["path"] for artifact in payload["audit"]["artifacts"]}
+    assert str(workspace / "scratch.py") in inventoried
+
+
 def test_run_cli_verbose_short_flag_streams_readable_progress(tmp_path: Path) -> None:
     task = tmp_path / "task.yaml"
     task.write_text(

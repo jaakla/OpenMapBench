@@ -57,7 +57,9 @@ aggregate JSON and Markdown reports, a batch manifest, and the visual-review gal
 checks that generated task contracts, inputs, references, and recorded reference checksums still
 match the imported manifest. Missing or invalid entries are reported as skipped, the remaining
 tasks continue, and the final process status is nonzero. Use `--batch-id NAME` for a stable folder
-name in automation, and `--agent-cwd PATH` if the agent must run from another project directory.
+name in automation. Each task's agent runs from its own `<run_dir>/workspace/` folder so scratch
+scripts stay inside the run; pass `--agent-cwd PATH` only if the agent must run from a specific
+project directory.
 
 The same command can be provided through `OPENMAPBENCH_AGENT_COMMAND`. Agent commands are parsed
 without a shell; wrap shell pipelines in a dedicated executable script.

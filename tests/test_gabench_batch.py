@@ -201,3 +201,10 @@ def test_repository_batch_script_has_runnable_help() -> None:
     assert result.returncode == 0
     assert ".openmapbench/gabench/manifest.json" in result.stdout
     assert "--agent-command" in result.stdout
+
+
+def test_batch_parser_defaults_agent_cwd_to_per_run_workspace() -> None:
+    from openmapbench.gabench_batch import build_parser
+
+    args = build_parser().parse_args(["--agent-command", "true"])
+    assert args.agent_cwd is None

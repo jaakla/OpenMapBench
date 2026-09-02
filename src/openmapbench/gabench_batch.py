@@ -279,8 +279,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--agent-cwd",
         type=Path,
-        default=Path.cwd(),
-        help="Agent working directory (default: current directory)",
+        default=None,
+        help=(
+            "Agent working directory. By default each task runs from its own "
+            "<run_dir>/workspace so agent scratch files stay inside the run."
+        ),
     )
     parser.add_argument("--agent-name", help="Agent name recorded in run manifests")
     parser.add_argument("--model", help="Model recorded in run manifests")
@@ -302,7 +305,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.error("--agent-command or OPENMAPBENCH_AGENT_COMMAND is required")
     if not args.manifest.is_file():
         parser.error(f"manifest does not exist: {args.manifest}")
-    if not args.agent_cwd.is_dir():
+    if args.agent_cwd is not None and not args.agent_cwd.is_dir():
         parser.error(f"agent working directory does not exist: {args.agent_cwd}")
     agent = {
         key: value

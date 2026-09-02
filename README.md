@@ -140,15 +140,22 @@ placeholders:
 
 - `{task_file}` and `{task_dir}`;
 - `{output_dir}` and `{output_path}`;
-- `{run_dir}`.
+- `{run_dir}` and `{workspace_dir}`.
 
 The same values are exposed as `OPENMAPBENCH_TASK_FILE`, `OPENMAPBENCH_TASK_DIR`,
-`OPENMAPBENCH_OUTPUT_DIR`, `OPENMAPBENCH_OUTPUT_PATH`, and `OPENMAPBENCH_RUN_DIR`; the optional
+`OPENMAPBENCH_OUTPUT_DIR`, `OPENMAPBENCH_OUTPUT_PATH`, `OPENMAPBENCH_RUN_DIR`, and
+`OPENMAPBENCH_WORKSPACE_DIR`; the optional
 agent audit stream is exposed as `OPENMAPBENCH_AUDIT_PATH`. This keeps the
 core independent of model vendors: a Codex adapter, Claude Code adapter, container wrapper, MCP
 client, or local script can use the same interface. Useful metadata can be recorded with
 `--agent-name`, `--model`, repeated `--skill`, and repeated
 `--tool` flags. Use a script wrapper when an agent needs pipes, redirects, or other shell syntax.
+
+The agent process runs from `<run_dir>/workspace/` unless `--agent-cwd` is given. Helper scripts
+and other scratch files an agent writes to its working directory therefore stay inside the
+gitignored run directory and are inventoried by the audit, instead of accumulating in the project
+root. Pass `--agent-cwd .` only when the agent must see project-level instructions or skills from
+the repository.
 Pass `-v`/`--verbose` to show runner stages and a live, readable summary of agent commands, tool
 calls, file changes, ordinary stdout, and stderr while the same lossless logs are retained.
 

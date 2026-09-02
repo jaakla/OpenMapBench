@@ -197,6 +197,10 @@ class ContentCapture:
         self._start_epoch = started_at.timestamp()
         self._exempt_paths = {path.resolve() for path in exempt_paths or []}
         self._exempt_dirs = [self.run_dir, *(path.resolve() for path in exempt_dirs or [])]
+        # The runner places the agent's working directory inside the run directory by default.
+        # Files there are transient agent work, not runner output, so they stay capturable even
+        # though the rest of the run directory is exempt.
+        self._capturable_cwd = _within(self.execution_cwd, self.run_dir)
         self._lock = threading.RLock()
         self._versions: dict[str, dict[str, _Version]] = {}
         self._skipped: dict[tuple[str, str], SkippedContentCapture] = {}
@@ -277,7 +281,7 @@ class ContentCapture:
                         if entry.name in SKIP_DIRECTORY_NAMES:
                             continue
                         child = Path(entry.path)
-                        if any(_within(child, exempt) for exempt in self._exempt_dirs):
+                        if self._in_exempt_dir(child):
                             continue
                         stack.append((child, depth + 1))
                         continue
@@ -423,10 +427,15 @@ class ContentCapture:
         with self._lock:  # re-entrant: capture() already holds it on the budget path
             self._skipped.setdefault((str(path), reason), record)
 
+    def _in_exempt_dir(self, path: Path) -> bool:
+        if self._capturable_cwd and _within(path, self.execution_cwd):
+            return path == self.store_dir or _within(path, self.store_dir)
+        return any(_within(path, exempt) for exempt in self._exempt_dirs)
+
     def _eligible(self, path: Path) -> bool:
         if path in self._exempt_paths:
             return False
-        if any(_within(path, exempt) for exempt in self._exempt_dirs):
+        if self._in_exempt_dir(path):
             return False
         if SKIP_DIRECTORY_NAMES.intersection(path.parts[:-1]):
             return False
@@ -471,7 +480,7 @@ class ContentCapture:
             policy["enabled"] = self.config.enabled
             policy["exempt"] = (
                 "task file, declared inputs, reference, and everything already kept "
-                "inside the run directory"
+                "inside the run directory except the agent workspace"
             )
             if self._sweep_truncated:
                 policy["sweep_truncated"] = True

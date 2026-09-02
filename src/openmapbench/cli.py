@@ -64,7 +64,14 @@ def run(
     model: Annotated[str | None, typer.Option()] = None,
     skill: Annotated[list[str] | None, typer.Option()] = None,
     tool: Annotated[list[str] | None, typer.Option()] = None,
-    agent_cwd: Annotated[Path | None, typer.Option(exists=True, file_okay=False)] = None,
+    agent_cwd: Annotated[
+        Path | None,
+        typer.Option(
+            exists=True,
+            file_okay=False,
+            help="Agent working directory (default: the run's own workspace/ folder).",
+        ),
+    ] = None,
     verbose: Annotated[
         bool,
         typer.Option(

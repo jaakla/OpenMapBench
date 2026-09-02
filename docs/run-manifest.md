@@ -66,7 +66,8 @@ produced:
 Supported event fields are `event_id`, `parent_event_id`, `type`/`kind`, `name`, `status`,
 `command`, `tool`, `parameters`, `result`, `details`, `started_at`, `finished_at`, and `artifacts`.
 An artifact supports `artifact_id`, `path`, `role`, `produced_by`, `derived_from`, and `metadata`.
-Paths are resolved relative to the agent working directory.
+Paths are resolved relative to the agent working directory, which defaults to the run's own
+`workspace/` folder. Files left there are inventoried as intermediate artifacts.
 
 ### Preserved content of transient files
 
@@ -87,7 +88,8 @@ same bytes only append to that version's `observations`. Every version records w
 last seen, how it was observed, and which event was running at the time.
 
 Nothing is duplicated needlessly. The task file, declared inputs, the reference, and everything
-already kept inside the run directory are exempt, and only files whose modification time falls
+already kept inside the run directory are exempt, except the agent's `workspace/` folder, whose
+files are transient agent work rather than runner output. Only files whose modification time falls
 inside the run are considered—reading an unchanged project file copies nothing.
 
 `audit.content_store` indexes the store and lists what was deliberately left out, so a reviewer can
