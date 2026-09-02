@@ -49,3 +49,7 @@ Report strict success, category breakdown, cost, and failure taxonomy.
 
 ## Issue 8 — Native OpenMapBench v0 set
 Add 30–50 verified tasks emphasizing real GIS failure modes and reproducibility.
+
+Candidate sources: ten tasks reinterpreted from the GISAgentBench case studies (arXiv:2608.01645)
+are drafted with contracts, tolerance rationale, and evaluator gaps in
+[docs/candidates/gisagentbench-case-studies.md](docs/candidates/gisagentbench-case-studies.md).
