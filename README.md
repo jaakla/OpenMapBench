@@ -379,6 +379,9 @@ keeping deterministic artifact checks separate. See
 
 ## Development
 
+Coding agents and contributors should read [AGENTS.md](AGENTS.md) for the repository map,
+commands, conventions, and the invariants that must not be broken.
+
 ```bash
 uv sync --no-editable --extra geo --extra dev
 uv run --no-sync ruff check .
