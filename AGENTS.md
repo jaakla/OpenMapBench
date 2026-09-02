@@ -36,6 +36,7 @@ src/openmapbench/
 scripts/run_gabench_all.py   Thin entry point for gabench_batch.main
 adapters/gabench/README.md   How the GABench bridge works and its license boundary
 benchmark/examples/          Tiny runnable example tasks (sum-values, buffer-schools)
+benchmark/tasks/<id>/        Native tasks: task.yaml, inputs/ (+README provenance), reference/, tools/
 docs/                        design, task-contract, scoring, run-manifest, candidates/
 tests/                       pytest suite; every evaluator and runner path has a fixture test
 runs/, visual-reviews/, .openmapbench/, report.*   Local outputs, gitignored, never commit

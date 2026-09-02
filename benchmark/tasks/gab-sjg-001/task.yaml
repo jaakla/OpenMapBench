@@ -1,0 +1,74 @@
+schema_version: "0.1"
+id: gab-sjg-001
+title: Count destinations within one mile of each bus stop
+category: vector
+prompt: >
+  For every public transport stop in Tartu (inputs/origins.geojson), count how many
+  school and kindergarten destinations (inputs/destinations.geojson) lie within 1 mile of
+  it. Both inputs are delivered in EPSG:4326. Measure distances as planar distances in
+  EPSG:3301 (Estonian Coordinate System of 1997), using 1 mile = 1609.344 m; a destination
+  exactly at that distance counts. Every destination counts for every stop it is within
+  range of, and a stop with no destination in range has a count of 0.
+
+  Write the stops as points in EPSG:3301 to stops_with_counts.gpkg. Keep every original
+  stop attribute (stop_id, name, shelter) and add an integer field dest_cnt_1mi with the
+  count. The output must contain exactly one feature per input stop.
+
+inputs:
+  - path: inputs/origins.geojson
+    role: origins
+    source: "OpenStreetMap via Overpass API; node[highway=bus_stop] in bbox 58.33,26.66,58.42,26.80"
+    as_of: "2026-09-02"
+    checksum: sha256:b29fda2ff85ac8a19f2e000a1480170e56c6fc8fff18c01599dbe5d58bc5f077
+    license: ODbL-1.0
+  - path: inputs/destinations.geojson
+    role: destinations
+    source: "OpenStreetMap via Overpass API; nwr[amenity~school|kindergarten] in the same bbox, plus 3 synthetic probes (see inputs/README.md)"
+    as_of: "2026-09-02"
+    checksum: sha256:7e92e50c9546d4d141b353272608235ffd7b589a17546c36f4f37ad0135c896f
+    license: ODbL-1.0
+
+output:
+  path: stops_with_counts.gpkg
+  kind: vector
+  geometry_type: Point
+  crs: EPSG:3301
+  required_fields: [stop_id, name, shelter, dest_cnt_1mi]
+
+evaluation:
+  strict:
+    crs: exact
+    feature_count: exact
+    geometry:
+      metric: hausdorff_distance
+      tolerance: 0.5
+      comparison_crs: EPSG:3301
+      require_valid: true
+    attributes:
+      key: stop_id
+      columns: [stop_id, name, shelter, dest_cnt_1mi]
+      numeric_tolerance:
+        default: {absolute: 0, relative: 0}
+    vector_checks:
+      - {type: count_per_input, input_role: origins, key: stop_id, count: 1}
+      - {type: field_range, field: dest_cnt_1mi, min: 0}
+
+metadata:
+  difficulty: easy
+  family: spatial-joining-and-geocoding
+  failure_modes: [unit_mismatch, crs_misalignment, boundary_ambiguity]
+  skills: [crs, reprojection, distance-join, aggregation]
+  source_case: "GISAgentBench (arXiv:2608.01645) case I.1, counting_destinations_within_one_mile_of_origins, recast onto Tartu"
+  tolerance_rationale: >
+    Counts are integers and compared exactly. Hausdorff 0.5 m on the point set absorbs
+    datum and rounding noise between EPSG:4326 input coordinates and EPSG:3301 output while
+    rejecting any output left unprojected or shifted. Real stop-destination pairs lie as
+    close as 0.12 m to the threshold and three synthetic probes sit at 1600.5, 1605.0 and
+    1609.7 m from stop 2320090479, so a 1600 m, 1609 m, 1610 m or 1.6 km threshold, a
+    spherical (haversine) distance, or a coarsely segmented buffer polygon each change
+    several counts (see inputs/README.md for the measured numbers). Exact distance joins
+    are the expected method; buffer polygons pass only when finely segmented.
+  reference_method: >
+    tools/solve.py computes the counts with a GeoPandas dwithin spatial join and,
+    independently, with a pyproj transform plus a NumPy all-pairs distance matrix, and
+    writes the reference only when both agree on every stop.

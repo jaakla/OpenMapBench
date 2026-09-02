@@ -88,6 +88,27 @@ The process exits nonzero for an agent error, missing artifact, evaluator error,
 evaluation failure. An image artifact awaiting manual review exits successfully with status
 `needs_review`. The manifest is always written, so every run remains auditable.
 
+## Native benchmark tasks
+
+Native tasks live under `benchmark/tasks/<id>/` with a `task.yaml`, frozen `inputs/` and their
+provenance README, a `reference/` artifact, and the `tools/` scripts that built both. The first
+one, `gab-sjg-001`, counts school and kindergarten destinations within one mile of every Tartu
+bus stop from OpenStreetMap data delivered in EPSG:4326. Run it with the bundled reference solver
+to see the whole loop:
+
+```bash
+openmapbench run benchmark/tasks/gab-sjg-001/task.yaml \
+  --reference benchmark/tasks/gab-sjg-001/reference/stops_with_counts.gpkg \
+  --agent-command ".venv/bin/python {task_dir}/tools/solve.py" \
+  --agent-cwd . \
+  --run-root runs
+```
+
+Every native task is checked in CI: its inputs must match their checksums and carry source,
+license, and acquisition date, and its reference must pass its own strict contract. Candidate
+tasks and the rationale behind them are in
+[docs/candidates/gisagentbench-case-studies.md](docs/candidates/gisagentbench-case-studies.md).
+
 ## Generic task contract
 
 Every task is a YAML file. Inputs may be task-relative paths for native tasks or absolute local

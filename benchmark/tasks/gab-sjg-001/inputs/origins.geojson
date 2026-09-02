@@ -1,0 +1,6650 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 322943596,
+    "name": "Raudtee II",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7074396,
+     58.3546246
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 322943600,
+    "name": "Tamme puiestee",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6961212,
+     58.3541659
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 324808034,
+    "name": "Kvissentali tee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7082289,
+     58.4063374
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 324808035,
+    "name": "Põllu",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7103909,
+     58.3987426
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 330365805,
+    "name": "Põllu",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7098942,
+     58.3983875
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 402116661,
+    "name": "Kasteheina",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.787751,
+     58.3492912
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 498740693,
+    "name": "Rebase",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7417973,
+     58.3692093
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 576250006,
+    "name": "Teaduspark",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.679037,
+     58.3549662
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 961806323,
+    "name": "Vene",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7268154,
+     58.3866076
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 961806325,
+    "name": "Orava",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7302906,
+     58.3915195
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 961806331,
+    "name": "Peetri kirik",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7277777,
+     58.3898391
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 961806332,
+    "name": "Vene",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7263476,
+     58.3858031
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 961806334,
+    "name": "Peetri kirik",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7279973,
+     58.3898726
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 961806337,
+    "name": "Linnamuuseum",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7281049,
+     58.3825017
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 961806340,
+    "name": "Peetri",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7291085,
+     58.3900206
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 961806343,
+    "name": "Atlantis",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7287503,
+     58.3813003
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277677,
+    "name": "Lootuse",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7216049,
+     58.3709044
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277680,
+    "name": "Riiamäe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7218226,
+     58.3738455
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277695,
+    "name": "Muru",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7171693,
+     58.3995836
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277697,
+    "name": "Kruusamäe",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7239683,
+     58.3982606
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277699,
+    "name": "Riiamäe",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7228541,
+     58.3728905
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277712,
+    "name": "Aiandi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7160181,
+     58.3944753
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277714,
+    "name": "Risti",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7216441,
+     58.3921416
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277716,
+    "name": "Kesklinn VI",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7266199,
+     58.3769382
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277721,
+    "name": "Lootuse",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7215795,
+     58.3693815
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277734,
+    "name": "Kastani",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7211084,
+     58.3648069
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277736,
+    "name": "Raadi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7309285,
+     58.3966309
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277739,
+    "name": "Kesklinn I",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7268796,
+     58.3768066
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277749,
+    "name": "Kabeli",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7213575,
+     58.3592394
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277753,
+    "name": "Kastani",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7215031,
+     58.3656959
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 962277755,
+    "name": "Rahu",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7219465,
+     58.3584203
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 974802416,
+    "name": "Roopa",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6976573,
+     58.348742
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1124873832,
+    "name": "Müta",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7029701,
+     58.417453
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1319231654,
+    "name": "Annemõisa",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7778696,
+     58.3767432
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1614025624,
+    "name": "Anne",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7518323,
+     58.3781063
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1614052287,
+    "name": "Maarjamõisa",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7016727,
+     58.3696576
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1614052291,
+    "name": "Maarjamõisa",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7017021,
+     58.3699463
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1665805758,
+    "name": "Kasarmu",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7362392,
+     58.3868257
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1665805759,
+    "name": "Kasarmu",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7360799,
+     58.3869927
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1665805760,
+    "name": "Puiestee",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7429711,
+     58.3845766
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1680571663,
+    "name": "Pepleri",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7180227,
+     58.3755569
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1721789074,
+    "name": "Puusepa",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7036494,
+     58.3666995
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1925860394,
+    "name": "Lai",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7189791,
+     58.3833342
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1925860395,
+    "name": "Raeplats",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7248442,
+     58.3812127
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1925878243,
+    "name": "Kreutzwaldi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7005548,
+     58.3856376
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1925878250,
+    "name": "Maaülikool",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.696583,
+     58.3873292
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1925878254,
+    "name": "Hurda",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7096416,
+     58.3835351
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1925878258,
+    "name": "Hurda",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7088142,
+     58.3836822
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1925878259,
+    "name": "Kreutzwaldi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7016837,
+     58.3855372
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1927527461,
+    "name": "Kesklinn IV",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.728014,
+     58.3776517
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1927527468,
+    "name": "Vabaduse puiestee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7273211,
+     58.3790838
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1927527475,
+    "name": "Raeplats",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7257697,
+     58.3797361
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1927565795,
+    "name": "Aura veekeskus",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7331146,
+     58.3757021
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1927565799,
+    "name": "Soola I",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7300229,
+     58.3771665
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1927617015,
+    "name": "Lõunakeskus",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.673266,
+     58.3587982
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1935088518,
+    "name": "Kivilinna",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.763972,
+     58.3801698
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1935163418,
+    "name": "Annemõisa",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7760473,
+     58.3784986
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1935163630,
+    "name": "Lohkva",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7954332,
+     58.3731382
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1935163675,
+    "name": "Aiandi tee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7852377,
+     58.3753136
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1935190407,
+    "name": "Prisma",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7788152,
+     58.3761181
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 1952425364,
+    "name": "Tehase",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7339506,
+     58.3614426
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2138684177,
+    "name": "Rahumäe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7733522,
+     58.3790257
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2151083388,
+    "name": "Anne",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7507006,
+     58.3771328
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2167298325,
+    "name": "Pauluse",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.716353,
+     58.3715672
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2167298327,
+    "name": "Pauluse",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7156191,
+     58.3710286
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2189631015,
+    "name": "Narvamäe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7304373,
+     58.3888973
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2189631018,
+    "name": "Narvamäe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7303504,
+     58.3890228
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2260449963,
+    "name": "Kesklinn II",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7279941,
+     58.3772823
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645135,
+    "name": "Arhitekti",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6832857,
+     58.3681576
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645139,
+    "name": "Arhitekti",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6827445,
+     58.3682263
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645140,
+    "name": "Eerika",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6742607,
+     58.3660917
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645143,
+    "name": "Haigla",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6775947,
+     58.3635768
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645144,
+    "name": "Haigla",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6779099,
+     58.3633876
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645145,
+    "name": "Kesk-Kaar",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7040977,
+     58.3658381
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645146,
+    "name": "Kaare",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7032847,
+     58.366238
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645147,
+    "name": "Kaare",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.704397,
+     58.3664975
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645148,
+    "name": "Kannikese",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6835468,
+     58.3767378
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645149,
+    "name": "Kannikese",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6837894,
+     58.3769972
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645150,
+    "name": "Kaubajaam",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7075033,
+     58.3697773
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645151,
+    "name": "Ilmatsalu",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6904165,
+     58.3767386
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645152,
+    "name": "Ilmatsalu",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.688927,
+     58.3771702
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645153,
+    "name": "Lembitu",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7106944,
+     58.3693307
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645154,
+    "name": "Lõuna",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.697142,
+     58.3748009
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645155,
+    "name": "Lõuna",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6973247,
+     58.374885
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645156,
+    "name": "Maarjamõisa haigla",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6981497,
+     58.3693656
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645157,
+    "name": "Maarjamõisa haigla",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6981506,
+     58.3699871
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645158,
+    "name": "Nisu",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6857149,
+     58.3727069
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645159,
+    "name": "Nisu",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.685403,
+     58.3730902
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645160,
+    "name": "Nooruse",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6953106,
+     58.3664491
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645161,
+    "name": "Polikliiniku",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7033398,
+     58.3683518
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645162,
+    "name": "Raja",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6900664,
+     58.3612975
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645163,
+    "name": "Raja",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6914177,
+     58.361722
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645164,
+    "name": "Ravila",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6898271,
+     58.3698751
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645165,
+    "name": "Ravila",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6892447,
+     58.3698166
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645166,
+    "name": "Riia ring",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6840584,
+     58.3585677
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645167,
+    "name": "Riia ring",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.684993,
+     58.3586861
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645168,
+    "name": "Soinaste III",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6986395,
+     58.3636331
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645169,
+    "name": "Soinaste II",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6974634,
+     58.3639098
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645170,
+    "name": "Soinaste I",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6989838,
+     58.3642521
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645171,
+    "name": "Tehnoloogiainstituut",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6947445,
+     58.3666269
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645172,
+    "name": "Tervishoiu",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7000147,
+     58.3724115
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645173,
+    "name": "Tervishoiu",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6998053,
+     58.3730798
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645174,
+    "name": "Tulbi",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6937146,
+     58.3712465
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645175,
+    "name": "Tulbi",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6945527,
+     58.371354
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645176,
+    "name": "Viljandi maantee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6907033,
+     58.369766
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645177,
+    "name": "Visa Hall",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6836523,
+     58.3785179
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2317645178,
+    "name": "Visa Hall",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6840667,
+     58.378838
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793394,
+    "name": "FI",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6809819,
+     58.3533458
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793400,
+    "name": "FI",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6808666,
+     58.3535094
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793409,
+    "name": "Kopli",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7098512,
+     58.348563
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793424,
+    "name": "Kraavi",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7074213,
+     58.3535157
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793436,
+    "name": "Kraavi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7082424,
+     58.3537666
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793441,
+    "name": "Kungla",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.713459,
+     58.3602814
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793458,
+    "name": "Kungla",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7130147,
+     58.3605436
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793466,
+    "name": "Käo",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7040093,
+     58.3577501
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793477,
+    "name": "Lemmatsi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7028311,
+     58.3592341
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793487,
+    "name": "Lõunakeskus",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6730184,
+     58.3588712
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793508,
+    "name": "Lõunakeskus",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6724726,
+     58.3588894
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793517,
+    "name": "Mesika",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7070939,
+     58.3501817
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793540,
+    "name": "Raudtee III",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7070547,
+     58.3546998
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793546,
+    "name": "Raudtee I",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7076156,
+     58.3550411
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793550,
+    "name": "Raudtee IV",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7075884,
+     58.3552408
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793554,
+    "name": "Suur kaar",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7135348,
+     58.3576166
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793558,
+    "name": "Suur kaar",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7139941,
+     58.3577348
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793585,
+    "name": "Tamme kool",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.706982,
+     58.3635535
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793594,
+    "name": "Tamme kool",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7066511,
+     58.3640526
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793599,
+    "name": "Tamme puiestee",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.696995,
+     58.3541183
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793606,
+    "name": "Teaduspark",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.679648,
+     58.3550745
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318793616,
+    "name": "Televisiooni",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7018363,
+     58.3611817
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318848924,
+    "name": "Jänese",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7316393,
+     58.3922274
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318848931,
+    "name": "Killustiku",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7333093,
+     58.3979071
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318848936,
+    "name": "Kruusamäe",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7245735,
+     58.39824
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318848947,
+    "name": "Kummeli",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7194117,
+     58.4010993
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318848952,
+    "name": "Kvissentali",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6959927,
+     58.4063324
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318848974,
+    "name": "Meltsiveski",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7246066,
+     58.3868566
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318848983,
+    "name": "Muru",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7169385,
+     58.3998942
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318848987,
+    "name": "Mõisapargi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7278056,
+     58.400755
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318848992,
+    "name": "Nurme",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7180045,
+     58.3932774
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318848999,
+    "name": "Raadi",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7324521,
+     58.3963503
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318849013,
+    "name": "Risti",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.722083,
+     58.3918598
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318849020,
+    "name": "Salvest",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.70896,
+     58.3984888
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318849027,
+    "name": "Salvest",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.708953,
+     58.3989991
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318849031,
+    "name": "Vahi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7084694,
+     58.4043232
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926793,
+    "name": "Annelinna gümnaasium",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7695711,
+     58.3755389
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926803,
+    "name": "Annelinna gümnaasium",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7704271,
+     58.3758908
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926808,
+    "name": "Annelinna keskus",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.767455,
+     58.3694996
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926811,
+    "name": "Annelinna keskus",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7667133,
+     58.3704592
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926812,
+    "name": "Eeden",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7513158,
+     58.3738099
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926813,
+    "name": "Eeden",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7523691,
+     58.3738156
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926814,
+    "name": "Ihaste tee I",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7586065,
+     58.3649179
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926815,
+    "name": "Ihaste tee I",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7588479,
+     58.3651398
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926817,
+    "name": "Ihaste tee II",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7595681,
+     58.3600665
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926822,
+    "name": "Ihaste tee II",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.759778,
+     58.3611211
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926831,
+    "name": "Ihaste",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7796387,
+     58.3448335
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926836,
+    "name": "Ihaste",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7793832,
+     58.344956
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926840,
+    "name": "Jaama",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7403483,
+     58.3839189
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926845,
+    "name": "Kalda tee",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7595837,
+     58.3720633
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926848,
+    "name": "Kalda tee",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7576518,
+     58.3725366
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926852,
+    "name": "Kanali",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7458588,
+     58.3758308
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926856,
+    "name": "Kanali",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7445491,
+     58.3767454
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926859,
+    "name": "Kasteheina",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7874262,
+     58.3492747
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926864,
+    "name": "Kaunase puiestee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7665641,
+     58.3715407
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926868,
+    "name": "Kaunase puiestee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7638914,
+     58.3716708
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926876,
+    "name": "Kivilinna",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7639758,
+     58.3799576
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926881,
+    "name": "Kraavikalda",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.773329,
+     58.347152
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926885,
+    "name": "Kraavikalda",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7729761,
+     58.3471772
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926889,
+    "name": "Lammi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7776958,
+     58.3593524
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926893,
+    "name": "Lammi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7779052,
+     58.3595484
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926897,
+    "name": "Lao",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7981283,
+     58.3683511
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926901,
+    "name": "Lao",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7983738,
+     58.3687817
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926905,
+    "name": "Lohkva katlamaja",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7913316,
+     58.3704249
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926909,
+    "name": "Luha",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7535936,
+     58.3722174
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926913,
+    "name": "Lõkketule",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.782887,
+     58.3460447
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926922,
+    "name": "Lõkketule",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7826673,
+     58.3460674
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926926,
+    "name": "Akvarelli",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7967491,
+     58.3597478
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926930,
+    "name": "Männimetsa",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7665384,
+     58.3531261
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926934,
+    "name": "Männimetsa",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7662264,
+     58.3533496
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926938,
+    "name": "Mõisavahe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7751063,
+     58.3692782
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926946,
+    "name": "Mõisavahe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7752834,
+     58.3695213
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926950,
+    "name": "Triigi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.78879,
+     58.3549683
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926954,
+    "name": "Triigi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7890433,
+     58.355993
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926958,
+    "name": "Nõlvaku",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7801636,
+     58.3721819
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926968,
+    "name": "Nõlvaku",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7803687,
+     58.3727665
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926971,
+    "name": "Paju",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7468636,
+     58.3823162
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926976,
+    "name": "Pallase puiestee",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7842515,
+     58.3587531
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926981,
+    "name": "Pallase puiestee",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7828216,
+     58.358901
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926985,
+    "name": "Pikk",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7378441,
+     58.3803673
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926991,
+    "name": "Pikk",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7370053,
+     58.3811453
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318926996,
+    "name": "Raatuse",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7324043,
+     58.3823181
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318927001,
+    "name": "Rahumäe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7704682,
+     58.3786264
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318927005,
+    "name": "Männi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7533815,
+     58.3806155
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318927015,
+    "name": "Sõpruse puiestee",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7551618,
+     58.380667
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318927018,
+    "name": "Sõpruse puiestee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7524909,
+     58.381257
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2318927022,
+    "name": "Uus-Veeriku",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7943318,
+     58.356598
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090451,
+    "name": "Aardla",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7227419,
+     58.3547052
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090452,
+    "name": "Aardla",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7230317,
+     58.3549244
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090453,
+    "name": "Aida",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7368342,
+     58.3732066
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090454,
+    "name": "Alasi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7172494,
+     58.3478106
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090455,
+    "name": "Alasi",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7171176,
+     58.3479771
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090456,
+    "name": "Autokeskus",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7170062,
+     58.3551072
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090457,
+    "name": "Autokeskus",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7194083,
+     58.3553561
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090458,
+    "name": "E-Kaubamaja",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7307585,
+     58.3584962
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090459,
+    "name": "E-Kaubamaja",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.73098,
+     58.3590676
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090460,
+    "name": "Eha",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7277392,
+     58.369868
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090461,
+    "name": "Turu ring",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7371664,
+     58.3430715
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090463,
+    "name": "Jõe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.739348,
+     58.3705273
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090464,
+    "name": "Karete",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.723473,
+     58.3491071
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090465,
+    "name": "Karete",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7231691,
+     58.3500854
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090466,
+    "name": "Karlova kool",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7329615,
+     58.3717568
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090467,
+    "name": "Kesklinn III",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7284262,
+     58.3775381
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090468,
+    "name": "Kuu",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7362975,
+     58.3665868
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090469,
+    "name": "Külmhoone",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7196921,
+     58.3675279
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090470,
+    "name": "Linda",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7296265,
+     58.3669894
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090471,
+    "name": "Pepleri",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7193761,
+     58.373961
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090472,
+    "name": "Purde",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7305382,
+     58.3634634
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090473,
+    "name": "Raua",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7364613,
+     58.3639632
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090474,
+    "name": "Rebase",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7406615,
+     58.3674171
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090475,
+    "name": "Riia",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7160385,
+     58.3699397
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090476,
+    "name": "Ringtee II",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7157576,
+     58.3423119
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090477,
+    "name": "Võru ring",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7154999,
+     58.3445878
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090478,
+    "name": "Ropkamõisa",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7272173,
+     58.3556376
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090479,
+    "name": "Ropkamõisa",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7289,
+     58.3558385
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090480,
+    "name": "Salemi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7344011,
+     58.3686599
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090481,
+    "name": "Silla II",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7362443,
+     58.3688133
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090482,
+    "name": "Sepa turg",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7408472,
+     58.3494027
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090483,
+    "name": "Sepa turg",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7411752,
+     58.349823
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090484,
+    "name": "Silla I",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7401945,
+     58.369131
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090485,
+    "name": "Silla",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7377077,
+     58.3690216
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090486,
+    "name": "Vallikraavi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7149401,
+     58.3765615
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090487,
+    "name": "Vallikraavi",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7145002,
+     58.3766217
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090488,
+    "name": "Tähe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7299625,
+     58.3427375
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090489,
+    "name": "Tähe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7296617,
+     58.3430983
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090490,
+    "name": "Soola",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7302761,
+     58.3774534
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090491,
+    "name": "Sõbra",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7350841,
+     58.3644727
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090492,
+    "name": "Jalaka",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7235698,
+     58.3428304
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090493,
+    "name": "Jalaka",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7237143,
+     58.3431506
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090494,
+    "name": "Tarmeko",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7400273,
+     58.3640783
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090495,
+    "name": "Tarmeko",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7405163,
+     58.365149
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090496,
+    "name": "Teguri",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7359811,
+     58.3588799
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090497,
+    "name": "Tehase",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7348283,
+     58.3613215
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090498,
+    "name": "Tref",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7403547,
+     58.3608103
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090499,
+    "name": "Tref",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7405282,
+     58.3611957
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090500,
+    "name": "Turu",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7337443,
+     58.3780325
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090501,
+    "name": "Alevi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7305488,
+     58.3620265
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090502,
+    "name": "Vaba",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7344637,
+     58.3656735
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090503,
+    "name": "Vangla",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.74091,
+     58.3452514
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320090504,
+    "name": "Vangla",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7413316,
+     58.3452932
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315408,
+    "name": "Betooni",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6916334,
+     58.3835815
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315410,
+    "name": "Betooni",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6912677,
+     58.3836291
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315411,
+    "name": "Metsamaja",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6911714,
+     58.3935904
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315414,
+    "name": "Herne",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7148016,
+     58.3860332
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315415,
+    "name": "Hiie",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6966275,
+     58.3829348
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315416,
+    "name": "Hiie",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6966889,
+     58.3831604
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315417,
+    "name": "J. V. Jannseni",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6949396,
+     58.3811672
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315419,
+    "name": "J. V. Jannseni",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6940009,
+     58.3819566
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315420,
+    "name": "Kaubabaas",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6805955,
+     58.3857275
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315421,
+    "name": "Kloostri",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7165633,
+     58.3841027
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315423,
+    "name": "Kroonuaia",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7194343,
+     58.3851065
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315426,
+    "name": "Kuperjanovi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7105048,
+     58.375943
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315434,
+    "name": "Kuperjanovi",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7103582,
+     58.3760444
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315435,
+    "name": "Laululava",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7046718,
+     58.3892366
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315439,
+    "name": "Näituse",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7079614,
+     58.3789163
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315440,
+    "name": "Palmihoone",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7233854,
+     58.3836633
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315441,
+    "name": "Palmihoone",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7229275,
+     58.3852074
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315443,
+    "name": "Piiri",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7082935,
+     58.3885436
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315444,
+    "name": "Raudteejaam",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7071639,
+     58.3737237
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315446,
+    "name": "Raudteejaam",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7068364,
+     58.3739339
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315449,
+    "name": "Taara pst.",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7035641,
+     58.3814169
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315450,
+    "name": "Taara pst.",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7026884,
+     58.3815992
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315452,
+    "name": "Tartu Maja IV",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6854735,
+     58.3818335
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315453,
+    "name": "Tartu Maja III",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6856778,
+     58.3820615
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315455,
+    "name": "Tartu Maja II",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6837213,
+     58.382267
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315456,
+    "name": "Tartu Maja I",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6833754,
+     58.3827969
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315457,
+    "name": "Tartu Näitused",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6943274,
+     58.3888503
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315459,
+    "name": "Tartu Näitused",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6944358,
+     58.3891752
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315460,
+    "name": "Tuglase",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6946508,
+     58.3862201
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315462,
+    "name": "Tuglase",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.695003,
+     58.3861998
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315463,
+    "name": "Vaksali",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7026573,
+     58.3768567
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315465,
+    "name": "Vaksali",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7018379,
+     58.3772684
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2320315466,
+    "name": "Zoomeedikum",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.687371,
+     58.3930963
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2407743224,
+    "name": "Sopaku",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7624522,
+     58.4172952
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2548891560,
+    "name": "Turu ring",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7379723,
+     58.342772
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2558853638,
+    "name": "Tartu bussijaam",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.731908,
+     58.3777919
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2558853667,
+    "name": "Tartu bussijaam",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7318676,
+     58.3780294
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2558853675,
+    "name": "Tartu bussijaam",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7319123,
+     58.3780775
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2558853681,
+    "name": "Tartu bussijaam",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7320524,
+     58.3781269
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2558853686,
+    "name": "Tartu bussijaam",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7317683,
+     58.378154
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2558853700,
+    "name": "Tartu bussijaam",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7321182,
+     58.3781727
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2558853709,
+    "name": "Tartu bussijaam",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7322224,
+     58.3782223
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2558853714,
+    "name": "Tartu bussijaam",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7319509,
+     58.3782462
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2558853727,
+    "name": "Tartu bussijaam",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7323217,
+     58.3782693
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2558853739,
+    "name": "Tartu bussijaam",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7324615,
+     58.3783246
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2558853746,
+    "name": "Tartu bussijaam",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7321486,
+     58.3783436
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2673039297,
+    "name": "Muide",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6698527,
+     58.4053283
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2673039300,
+    "name": "Muide",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6704536,
+     58.4053962
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2946313611,
+    "name": "Sopaku",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7649096,
+     58.4179365
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2976952710,
+    "name": "Kesa",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7046534,
+     58.348531
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2977428673,
+    "name": "Postimaja",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7145961,
+     58.3453616
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2977428674,
+    "name": "Postimaja",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7149064,
+     58.3452257
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2977428675,
+    "name": "Ringtee I",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7148681,
+     58.3417454
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2977428676,
+    "name": "Ringtee",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7159962,
+     58.3414935
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 2977501662,
+    "name": "Metsamaja",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6922778,
+     58.3917608
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3414505944,
+    "name": "Optika",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6738587,
+     58.3556007
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3681358114,
+    "name": "Kandiküla",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6705503,
+     58.3792169
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3681358115,
+    "name": "Kandiküla",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6699064,
+     58.3793778
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3684592148,
+    "name": "Nõmmiku",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7003161,
+     58.4195556
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3684592164,
+    "name": "Vorbuse tee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6839552,
+     58.3998649
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3684592165,
+    "name": "Vorbuse tee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6828846,
+     58.4009417
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3686155941,
+    "name": "Pärna",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7417499,
+     58.4036721
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3686155942,
+    "name": "Pärna",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7418788,
+     58.403558
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3686155947,
+    "name": "Kõrveküla",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7626082,
+     58.4196069
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3686155948,
+    "name": "Kõrveküla",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7622379,
+     58.4198924
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3686155951,
+    "name": "Musta tee",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7375714,
+     58.4140296
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3686155952,
+    "name": "Musta tee",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7402051,
+     58.41419
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3686155953,
+    "name": "Mõisavärava",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7397832,
+     58.401039
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3686155954,
+    "name": "Mõisavärava",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7416955,
+     58.4019723
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3698259169,
+    "name": "Viadukti",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7626549,
+     58.3546972
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3699024718,
+    "name": "Eerika",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6751589,
+     58.36617
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3720418567,
+    "name": "Aiandi tee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7832502,
+     58.3763408
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3720418579,
+    "name": "Lohkva",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7965664,
+     58.3731674
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3720418593,
+    "name": "Salu tee",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7794902,
+     58.3824708
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3833080484,
+    "name": "Viadukti",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7648769,
+     58.3562831
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 3833080491,
+    "name": "Lammi ring",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7713658,
+     58.3617229
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4069866349,
+    "name": "Jaama",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7402426,
+     58.3840908
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4069866350,
+    "name": "Lammi ring",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7692151,
+     58.3642804
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4069866351,
+    "name": "Paju",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7458509,
+     58.38262
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4069866352,
+    "name": "Tööstuse",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7313705,
+     58.3435147
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4635343442,
+    "name": "Puupilli",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7984797,
+     58.3657227
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4635343471,
+    "name": "Kaupmehe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7457062,
+     58.4071869
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4635343472,
+    "name": "Kaupmehe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7462103,
+     58.40742
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4635343481,
+    "name": "Ülevälja",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7015946,
+     58.3395263
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4635343482,
+    "name": "Ülevälja",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7017321,
+     58.338712
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4635343483,
+    "name": "Rehe",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7047412,
+     58.3341803
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4635343484,
+    "name": "Rehe",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7059108,
+     58.333006
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4635343514,
+    "name": "Aianduse",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7187442,
+     58.3513379
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4635343516,
+    "name": "Vahi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7212875,
+     58.4116372
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4635343633,
+    "name": "Aianduse",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7177342,
+     58.3503351
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4635343636,
+    "name": "Vana-Linnavere",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.717337,
+     58.3336252
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4635343637,
+    "name": "Vana-Linnavere",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7169737,
+     58.333891
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 4635343685,
+    "name": "Vahi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7158063,
+     58.4111055
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 5531925603,
+    "name": "ERM",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7457326,
+     58.3935795
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 5531925604,
+    "name": "ERM",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7447999,
+     58.3940997
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 5577214568,
+    "name": "Aardla",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7210693,
+     58.3545052
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6126993468,
+    "name": "Näituse",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7086351,
+     58.3789466
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6583859701,
+    "name": "Kesklinn V",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7275855,
+     58.3774412
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6583859702,
+    "name": "Soola II",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7306928,
+     58.3768157
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6583898426,
+    "name": "Vabadussild",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7235628,
+     58.3835391
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6583964007,
+    "name": "Linnupargi",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7625651,
+     58.366266
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6583964008,
+    "name": "Linnupargi",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7613329,
+     58.3667018
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584010314,
+    "name": "Killustiku",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7340916,
+     58.3973962
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584010315,
+    "name": "Mõisapargi",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7293025,
+     58.3998897
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584010316,
+    "name": "Melissi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7222235,
+     58.4018508
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584010317,
+    "name": "Melissi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7213323,
+     58.4019052
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584010336,
+    "name": "Sinepi",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7162397,
+     58.4027003
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584010337,
+    "name": "Sinepi",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.716056,
+     58.4026184
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584041592,
+    "name": "Kroonuaia",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7193384,
+     58.3859667
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584041593,
+    "name": "Herne",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7141533,
+     58.3861984
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584041602,
+    "name": "Piiri",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.708907,
+     58.3882036
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584041603,
+    "name": "Laululava",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.704963,
+     58.3889719
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584062418,
+    "name": "Eha",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7275338,
+     58.3703311
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584062421,
+    "name": "Lille",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7251173,
+     58.3736248
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584064397,
+    "name": "Kaubabaas",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6804991,
+     58.3854322
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584064398,
+    "name": "Puidu",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6793711,
+     58.3909238
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584064399,
+    "name": "Puidu",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6801128,
+     58.391119
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584083299,
+    "name": "Kummeli",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7209548,
+     58.4012373
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584083300,
+    "name": "Välja",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7143091,
+     58.4000118
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584083301,
+    "name": "Välja",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7144065,
+     58.4001699
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584098904,
+    "name": "Saekoja",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.734586,
+     58.3634738
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584103567,
+    "name": "Lohkva katlamaja",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7926883,
+     58.3702789
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584103568,
+    "name": "Puupilli",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7985597,
+     58.3672224
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584103569,
+    "name": "Akvarelli",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7965166,
+     58.3593487
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584105080,
+    "name": "Mileedi",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6751688,
+     58.3632284
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584105081,
+    "name": "Mileedi",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6748487,
+     58.3628433
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584115664,
+    "name": "Teguri",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7213064,
+     58.3617637
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584115665,
+    "name": "Teguri",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7212099,
+     58.3609448
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 6584115666,
+    "name": "Forseliuse",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7300848,
+     58.3589
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 7040886357,
+    "name": "Roheline park",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6853146,
+     58.3965103
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9495188093,
+    "name": "Raadiraja",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7543866,
+     58.3951185
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9495188094,
+    "name": "Raadiraja",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7553874,
+     58.3953861
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9807552847,
+    "name": "Raatuse",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7325182,
+     58.3824762
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9807552851,
+    "name": "Optika",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6729475,
+     58.3561132
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9808519501,
+    "name": "Kesa",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7041869,
+     58.3486024
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9808519503,
+    "name": "Kopli",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7100511,
+     58.348632
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9808519505,
+    "name": "Mesika",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7074682,
+     58.3500901
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9808560326,
+    "name": "Kesklinn",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7277159,
+     58.3771702
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9808601056,
+    "name": "Uus-Veeriku",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7924555,
+     58.3549165
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9808799648,
+    "name": "Ropka tee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7406255,
+     58.354622
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9808799649,
+    "name": "Ropka tee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7409025,
+     58.3561499
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9808799652,
+    "name": "Nõlvakaare",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7518234,
+     58.4063152
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9808799653,
+    "name": "Nõlvakaare",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7510272,
+     58.4066866
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9808799656,
+    "name": "Roosi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7394275,
+     58.3898226
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9808799657,
+    "name": "Roosi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7383283,
+     58.3892691
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9809164517,
+    "name": "AHHAA",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7335931,
+     58.3769502
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9809261486,
+    "name": "Eesti Rahva Muuseum",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7426912,
+     58.3955408
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9954258727,
+    "name": "Kvartsi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6881438,
+     58.3518562
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 9954258728,
+    "name": "Kvartsi",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6886322,
+     58.3511658
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 10282896132,
+    "name": "Klaose",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.703857,
+     58.4063846
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 11097085698,
+    "name": "Erminurme",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7537915,
+     58.40029
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 11097085699,
+    "name": "Erminurme",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7546104,
+     58.3995088
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 12032130552,
+    "name": "Viljandi maantee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6910009,
+     58.3697449
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 12122524544,
+    "name": "Vahi tööstuspark",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.721631,
+     58.4176459
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 12122524545,
+    "name": "Savioja",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7254775,
+     58.4159686
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 12122524546,
+    "name": "Savioja",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7252454,
+     58.4157219
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 12122524547,
+    "name": "Savimäe",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7190529,
+     58.4140534
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 12122524548,
+    "name": "Savimäe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7189821,
+     58.4141503
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 12122524549,
+    "name": "Vahipargi",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7178001,
+     58.4125737
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 12122524550,
+    "name": "Vahipargi",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7180625,
+     58.4124244
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 12122524551,
+    "name": "Mõisa puiestee",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7210768,
+     58.4066691
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 12122524552,
+    "name": "Mõisa puiestee",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7207895,
+     58.4070072
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 12136128287,
+    "name": "Zoomeedikum (lõpp-peatus)",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6873781,
+     58.3932715
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 12925776743,
+    "name": "Päevakivi",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.688067,
+     58.3485597
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 12925776745,
+    "name": "Päevakivi",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6866544,
+     58.3475455
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13179113988,
+    "name": "Roheline park",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6852215,
+     58.3965995
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13249615064,
+    "name": "Turu",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7339892,
+     58.3779236
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13529028100,
+    "name": "Liiva",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7251616,
+     58.3908854
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13534013811,
+    "name": "Hotell Sophia",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.678987,
+     58.3567225
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13534096009,
+    "name": "Soojuse tee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7849353,
+     58.3709795
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13534096019,
+    "name": "Soojuse tee",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.78525,
+     58.3710578
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13534257096,
+    "name": "Lammimõisa",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7680706,
+     58.3663689
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13534257097,
+    "name": "Lammimõisa",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7686727,
+     58.3671883
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13534284545,
+    "name": "Varsa",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7679254,
+     58.3499425
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13534284547,
+    "name": "Varsa",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7675989,
+     58.3508404
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13534284670,
+    "name": "Nõlva",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6608887,
+     58.3374863
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13534284672,
+    "name": "Nõlva",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6603858,
+     58.3377738
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13585297722,
+    "name": "Tüve",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7567142,
+     58.384922
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13585297725,
+    "name": "Tüve",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7570813,
+     58.3849938
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13585297730,
+    "name": "Lehe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7583766,
+     58.3867731
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13585297734,
+    "name": "Lehe",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7586934,
+     58.3867864
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13585604586,
+    "name": "Saariku",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6647551,
+     58.3459013
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13585604592,
+    "name": "Saariku",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6662734,
+     58.3461381
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13586343570,
+    "name": "Kuuse",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6741696,
+     58.3304004
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13586343572,
+    "name": "Kuuse",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6740143,
+     58.3302346
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13638555428,
+    "name": "Klaose",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7029727,
+     58.4064614
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13638555430,
+    "name": "Kvissentali",
+    "shelter": null
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6959764,
+     58.4064234
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13638555436,
+    "name": "Kvissentali tee",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7084625,
+     58.4063677
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13717243503,
+    "name": "Raudteejaam IV",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7079595,
+     58.3735965
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13717243508,
+    "name": "Raudteejaam III",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7078511,
+     58.3734511
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13717243509,
+    "name": "Raudteejaam",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7067513,
+     58.3739845
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13724965192,
+    "name": "Aida",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7370858,
+     58.3732976
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13732374702,
+    "name": "Linda",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7297573,
+     58.3670325
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13837770803,
+    "name": "KROONUAIA",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7193409,
+     58.3859625
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13837775701,
+    "name": "KROONUAIA",
+    "shelter": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7193275,
+     58.3850373
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "stop_id": 13924382580,
+    "name": "Riia",
+    "shelter": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7161843,
+     58.3698634
+    ]
+   }
+  }
+ ]
+}

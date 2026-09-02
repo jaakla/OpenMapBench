@@ -87,6 +87,9 @@ Suggested Estonian sources (all open):
 
 ### gab-sjg-001 — Count destinations within one mile of each origin
 
+**Implemented** in `benchmark/tasks/gab-sjg-001/` with frozen OpenStreetMap data for Tartu and
+a cross-checked reference; the contract there supersedes the draft below.
+
 Source: `counting_destinations_within_one_mile_of_origins` (Spatial Joining & Geocoding, success,
 6/6 models).
 

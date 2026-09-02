@@ -53,3 +53,7 @@ Add 30–50 verified tasks emphasizing real GIS failure modes and reproducibilit
 Candidate sources: ten tasks reinterpreted from the GISAgentBench case studies (arXiv:2608.01645)
 are drafted with contracts, tolerance rationale, and evaluator gaps in
 [docs/candidates/gisagentbench-case-studies.md](docs/candidates/gisagentbench-case-studies.md).
+
+Status: the first native task, `benchmark/tasks/gab-sjg-001` (destinations within one mile of
+each Tartu bus stop, OpenStreetMap data, cross-checked reference), is in place and guarded by
+`tests/test_benchmark_tasks.py`, which validates every native task and scores its reference.

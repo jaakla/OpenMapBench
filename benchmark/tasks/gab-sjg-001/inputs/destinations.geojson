@@ -1,0 +1,1429 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "n1314068722",
+    "name": "Lastehoid",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6906476,
+     58.3736997
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "n5115987197",
+    "name": "Tupsiku lasteaed ja lastehoid",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7746222,
+     58.3698984
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "n7214519381",
+    "name": "Tartu Soome Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7139413,
+     58.3775029
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "n10572525769",
+    "name": "Tartu täiskasvanute gümnaasium",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6879336,
+     58.3643207
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "n10633411720",
+    "name": "Hugo Treffneri Gümnaasium",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7205266,
+     58.382278
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "n10739854795",
+    "name": "Tartu Väike Päike Lasteaed",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.711601,
+     58.373512
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "n10760734251",
+    "name": "Tartu Karlova Lasteaed - Tähe maja",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7269216,
+     58.3734202
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "n10769075839",
+    "name": "Lasteaed TäheTerake",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7268377,
+     58.3732228
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "n10769075840",
+    "name": "Lasteaed LõunaTerake",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6730778,
+     58.3574572
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "n10775917592",
+    "name": "Lasteaed Loomelind",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7799887,
+     58.3717981
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "n10777392265",
+    "name": "Tartu Waldorflasteaed Taevasina",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6855189,
+     58.3941571
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "n12382355347",
+    "name": "Lastehoid kaheksajalg",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.716507,
+     58.3740444
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w30190250",
+    "name": "Tartu Lasteaed Tripsik",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7696967,
+     58.3739427
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w30190622",
+    "name": "Tartu Kesklinna Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7160819,
+     58.3830026
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w30190704",
+    "name": "Tartu Lasteaed Kivike",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.733037,
+     58.385065
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w30190778",
+    "name": "Tartu Pärli Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7257977,
+     58.3912413
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w30190851",
+    "name": "Tartu Katoliku Hariduskeskus",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.710508,
+     58.3835289
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w299032673",
+    "name": "Tartu Maarja Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7468419,
+     58.384062
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w436192445",
+    "name": "Tartu Katoliku Hariduskeskus",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7112315,
+     58.381899
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w436192446",
+    "name": "Tartu Katoliku Hariduskeskus",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7111034,
+     58.3823287
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w466057209",
+    "name": "Soinaste Lasteaed Laululind",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7227902,
+     58.3319722
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w651749291",
+    "name": "Tartu Tamme Gümnaasium",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6886083,
+     58.3644006
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w651750181",
+    "name": "Miina Härma Gümnaasium",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7090239,
+     58.3766154
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w651755826",
+    "name": "Tartu Hansa Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7575364,
+     58.376609
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w651755827",
+    "name": "Tartu Descartes'i Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7574622,
+     58.3755426
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w651764594",
+    "name": "Tartu Kivilinna Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7691233,
+     58.3782524
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w651764603",
+    "name": "Tartu Kristjan Jaak Petersoni Gümnaasium",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.771826,
+     58.3759593
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w651764621",
+    "name": "Tartu Annelinna Gümnaasium",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7705763,
+     58.374902
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w655093170",
+    "name": "Tartu Raatuse Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.736075,
+     58.3841725
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w655255193",
+    "name": "Tartu Lasteaed Pääsupesa",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.753085,
+     58.3754462
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w655255201",
+    "name": "Tartu Lasteaed Poku",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7603502,
+     58.3750744
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w655255215",
+    "name": "Tartu Lasteaed Krõll",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7605806,
+     58.3760686
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w655255219",
+    "name": "Tartu Lasteaed Sipsik",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7679646,
+     58.3748097
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w655255254",
+    "name": "Tartu Lasteaed Kelluke",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7687405,
+     58.3766527
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w657939050",
+    "name": "Tartu Tamme Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7054638,
+     58.3632383
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w657956285",
+    "name": "Tartu Lasteaed Hellik",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6844162,
+     58.3523646
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w657960468",
+    "name": "Tartu Variku Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7150408,
+     58.3509149
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w657960488",
+    "name": "Tartu Rakenduslik Kolledž",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7142617,
+     58.3498152
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w658245242",
+    "name": "Tartu Lasteaed Piilupesa",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7293934,
+     58.3575127
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w658245287",
+    "name": "Tartu Pärli Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7160021,
+     58.3527987
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w659335886",
+    "name": "Tartu Jogentaga Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7455618,
+     58.3795057
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w659337317",
+    "name": "Tartu Emajõe Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7229841,
+     58.383715
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w659338882",
+    "name": "Tartu Jaan Poska Gümnaasium",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7194145,
+     58.3754407
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w659338883",
+    "name": "Tartu Herbert Masingu Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7200785,
+     58.3757104
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w659347606",
+    "name": "Tartu Lasteaed Lotte",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7574232,
+     58.383639
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w659350176",
+    "name": "Tartu Lasteaed Mõmmik",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7777167,
+     58.3711052
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w666965151",
+    "name": "Tartu Lasteaed Rukkilill",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7255357,
+     58.3506425
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w673191229",
+    "name": "Tartu Lasteaed Kannike",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.685857,
+     58.3756886
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w673191232",
+    "name": "Tartu Lasteaed Meelespea",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6871999,
+     58.3761861
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w673191233",
+    "name": "Tartu Veeriku Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6861682,
+     58.3744674
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w675828811",
+    "name": "Tartu Maarjamõisa Lasteaed",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6987794,
+     58.3724338
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w675849064",
+    "name": "Tartu Lasteaed Ristikhein",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7360916,
+     58.3559369
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w678711788",
+    "name": "Tartu Forseliuse Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7289969,
+     58.3597343
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w678725140",
+    "name": "Lohkva Lasteaed",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7958589,
+     58.3695371
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w683604262",
+    "name": "Tartu Karlova Lasteaed - Karoliine maja",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7255211,
+     58.3707086
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w683604272",
+    "name": "Tartu Kunstikool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7306045,
+     58.3700283
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w683604279",
+    "name": "Tartu Lasteaed Helika",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7349874,
+     58.370935
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w683604294",
+    "name": "Tartu Karlova Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7336979,
+     58.3717807
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w686129441",
+    "name": "Tartu Karlova Lasteaed - Sassi maja",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.731327,
+     58.3753377
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w687598392",
+    "name": "Tartu Lasteaed Tähtvere",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6933722,
+     58.3847502
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w691733205",
+    "name": "Tartu Mart Reiniku Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7158335,
+     58.3724534
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w692276762",
+    "name": "Tartu Lasteaed Naerumaa",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7160383,
+     58.3760879
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w692276763",
+    "name": "Tartu Lasteaed Naerumaa",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7124717,
+     58.3756592
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w692276766",
+    "name": "Tartu Lasteaed Naerumaa",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7166396,
+     58.3744195
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w694124410",
+    "name": "Tartu Lasteaed Tõruke",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7003477,
+     58.361419
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w694127194",
+    "name": "Tartu Lasteaed Annike",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7437186,
+     58.3807905
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w694129079",
+    "name": "Tartu Lasteaed Klaabumaa Sireli maja",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7213702,
+     58.3932145
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w694288901",
+    "name": "Tartu Lasteaed Midrimaa",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.720325,
+     58.3748251
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w694288902",
+    "name": "Tartu Lasteaed Rõõmupesa",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7211294,
+     58.374615
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w694546908",
+    "name": "Tartu Lasteaed Klaabumaa",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7198318,
+     58.4006848
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w721687755",
+    "name": "Tartu Erakool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7264358,
+     58.3739549
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w726382091",
+    "name": "Tartu Waldorfgümnaasium",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6847929,
+     58.3946993
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w753744926",
+    "name": "Raadi Lasteaed Ripsik",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7384332,
+     58.4025349
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w758178780",
+    "name": "Eerika Laululinnu lasteaed",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6715501,
+     58.3664791
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w766559702",
+    "name": "Tartu Erakool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6725798,
+     58.3572598
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w772744606",
+    "name": "Tartu Rahvusvaheline Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7138492,
+     58.3775737
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w916421239",
+    "name": "Tartu Karlova Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7302075,
+     58.3709957
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w1001561972",
+    "name": "Peamaja",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7774316,
+     58.3803805
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w1038982213",
+    "name": "Tartu Hiie Kool",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6964171,
+     58.3839987
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w1091898029",
+    "name": "Luunja Lasteaed Midrimaa",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7773268,
+     58.3802883
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w1117889262",
+    "name": "Haaslava lasteaed",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.8008537,
+     58.3304418
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w1154552624",
+    "name": "Meie Mängurühm",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7299827,
+     58.3586299
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w1157237046",
+    "name": "Anni Lasteaed",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.6980342,
+     58.3568729
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w1157985349",
+    "name": "Lasteaed Väike Pauline",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.709963,
+     58.3837876
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w1160393552",
+    "name": "Eralasteaed Rüblik",
+    "amenity": "kindergarten",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7252969,
+     58.3520879
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "w1534220151",
+    "name": "SädeTERA",
+    "amenity": "school",
+    "synthetic": "no"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.7185938,
+     58.3920317
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "probe1",
+    "name": "Probe 1 (1600.5 m from stop 2320090479)",
+    "amenity": "school",
+    "synthetic": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.743526362,
+     58.367979902
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "probe2",
+    "name": "Probe 2 (1605.0 m from stop 2320090479)",
+    "amenity": "school",
+    "synthetic": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.74162648,
+     58.343075382
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "dest_id": "probe3",
+    "name": "Probe 3 (1609.7 m from stop 2320090479)",
+    "amenity": "school",
+    "synthetic": "yes"
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     26.701425804,
+     58.356423354
+    ]
+   }
+  }
+ ]
+}
