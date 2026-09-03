@@ -208,6 +208,16 @@ def run_suite(
             )
         ),
     ] = True,
+    repeat: Annotated[
+        int,
+        typer.Option(
+            min=1,
+            help=(
+                "Run the whole suite this many times and report a pass rate per task. One pass "
+                "says whether an agent solved a task once, not how reliably it solves it."
+            ),
+        ),
+    ] = 1,
 ) -> None:
     """Run a whole task suite with one agent and write JSON, Markdown, and HTML reports."""
     if reference_solver and agent_command:
@@ -236,6 +246,7 @@ def run_suite(
         skip_ids=skip or [],
         verify_inputs=verify_inputs,
         isolate_task=isolate_task and not reference_solver,
+        repeat=repeat,
     )
     typer.echo(str(batch_manifest_path))
     raise typer.Exit(code=0 if batch["completed_without_failures"] else 1)

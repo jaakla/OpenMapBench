@@ -422,10 +422,18 @@ def _files_html(manifest: RunManifest, manifest_path: Path) -> str:
 
 
 def _run_card(
-    manifest: RunManifest, manifest_path: Path, visual: dict[str, str] | None = None
+    manifest: RunManifest,
+    manifest_path: Path,
+    visual: dict[str, str] | None = None,
+    attempt: tuple[int, int] | None = None,
 ) -> str:
     spec = _task_spec(manifest.task_file.path)
     contaminated = bool(manifest.integrity and manifest.integrity.contaminated)
+    attempt_badge = (
+        f'<span class="attempt">attempt {attempt[0]} of {attempt[1]}</span>'
+        if attempt and attempt[1] > 1
+        else ""
+    )
     audit = audit_html(
         manifest.audit.model_dump(mode="json") if manifest.audit else None, str(manifest_path)
     )
@@ -458,6 +466,7 @@ def _run_card(
             <div class="card-status">
               <span class="pill {_status_class(status.value)}">{STATUS_TEXT[status]}</span>
               {'<span class="pill contaminated-pill">contaminated</span>' if contaminated else ''}
+              {attempt_badge}
               <span class="run-id" title="run id">{_escape(manifest.run_id)}</span>
             </div>
           </div>
@@ -499,11 +508,19 @@ def _tiles(aggregate: dict[str, Any], batch: dict[str, Any] | None) -> str:
             ),
         ),
         (
-            "Tasks attempted",
+            "Runs attempted"
+            if aggregate.get("distinct_tasks", 0) != aggregate["attempted_tasks"]
+            else "Tasks attempted",
             str(aggregate["attempted_tasks"]),
-            f"{batch['skipped_count']} skipped before running"
-            if batch
-            else "runs found under the run root",
+            (
+                f"{aggregate['distinct_tasks']} tasks x {batch.get('repeat', 1)} attempts"
+                if batch and batch.get("repeat", 1) > 1
+                else (
+                    f"{batch['skipped_count']} skipped before running"
+                    if batch
+                    else "runs found under the run root"
+                )
+            ),
         ),
         (
             "Needs manual review",
@@ -591,6 +608,49 @@ def _breakdown_table(caption: str, data: dict[str, dict[str, Any]]) -> str:
           <thead><tr><th>Group</th><th class="num">Runs</th><th class="num">Scored</th>
             <th class="num">Passed</th><th class="num">Review</th><th>Strict rate</th></tr>
           </thead>
+          <tbody>{"".join(rows)}</tbody>
+        </table>
+      </div>
+    """
+
+
+def _reliability_table(aggregate: dict[str, Any]) -> str:
+    """Per-task pass rate over repeats. Only meaningful once a suite has been run more than once."""
+    by_task = aggregate.get("by_task") or {}
+    if not by_task or not any(stats["runs"] > 1 for stats in by_task.values()):
+        return ""
+    rows: list[str] = []
+    for task_id, stats in sorted(
+        by_task.items(), key=lambda item: (item[1]["pass_rate"] is None, item[1]["pass_rate"])
+    ):
+        rate = stats["pass_rate"]
+        width = 0.0 if rate is None else 100 * rate
+        unstable = rate is not None and 0 < rate < 1
+        statuses = " · ".join(f"{key} x{value}" for key, value in stats["statuses"].items())
+        badge = '<span class="chip unstable-chip">unstable</span>' if unstable else ""
+        rows.append(
+            f'<tr class="{"unstable" if unstable else ""}">'
+            f"<td><code>{_escape(task_id)}</code> {badge}</td>"
+            f"<td class='num'>{stats['runs']}</td>"
+            f"<td class='num'>{stats['passes']}</td>"
+            f"<td class='num'>{stats['contaminated']}</td>"
+            f"<td class='rate'><div class='bar'><span style='width:{width:.2f}%'></span></div>"
+            f"<span>{_percent(rate)}</span></td>"
+            f"<td>{_escape(statuses)}</td></tr>"
+        )
+    note = ""
+    if aggregate.get("unstable_tasks"):
+        note = (
+            '<p class="muted">A task that sometimes passes is not a task the agent can do. '
+            "Unstable tasks are where a single-pass score is least trustworthy.</p>"
+        )
+    return f"""
+      <div class="panel">
+        <h3>Reliability per task across repeats</h3>
+        {note}
+        <table class="breakdown">
+          <thead><tr><th>Task</th><th class="num">Runs</th><th class="num">Passes</th>
+            <th class="num">Contaminated</th><th>Pass rate</th><th>Outcomes</th></tr></thead>
           <tbody>{"".join(rows)}</tbody>
         </table>
       </div>
@@ -800,6 +860,10 @@ REPORT_CSS = """
                         overflow-wrap: anywhere; background: #0f172a; color: #e2e8f0;
                         border-radius: 6px; font: .76rem/1.5 ui-monospace, monospace; }
     .pill.contaminated-pill { color: #831843; background: #fce7f3; }
+    .attempt { color: #475569; background: #e2e8f0; border-radius: 999px; padding: 3px 9px;
+               font-size: .72rem; font-weight: 700; }
+    tr.unstable td { background: #fffbeb; }
+    .chip.unstable-chip { color: #92400e; background: #fde68a; margin-left: 6px; }
     .review-note p { margin: 10px 0; font-size: .9rem; }
     .comparison { display: block; width: 100%; height: auto; border: 1px solid #dbe2ea;
                   border-radius: 8px; }
@@ -879,10 +943,22 @@ def render_html_report(
     total = aggregate["attempted_tasks"]
     ordered = sorted(runs, key=lambda item: (item[1].task_id, item[1].run_id))
     visual = visual or {}
-    cards = "".join(
-        _run_card(manifest, path, visual.get((manifest.task_id, manifest.run_id)))
-        for path, manifest in ordered
-    )
+    totals: dict[str, int] = {}
+    for _, manifest in ordered:
+        totals[manifest.task_id] = totals.get(manifest.task_id, 0) + 1
+    seen: dict[str, int] = {}
+    cards_html: list[str] = []
+    for path, manifest in ordered:
+        seen[manifest.task_id] = seen.get(manifest.task_id, 0) + 1
+        cards_html.append(
+            _run_card(
+                manifest,
+                path,
+                visual.get((manifest.task_id, manifest.run_id)),
+                (seen[manifest.task_id], totals[manifest.task_id]),
+            )
+        )
+    cards = "".join(cards_html)
     links = "".join(
         f' · <a href="{_attribute(path.resolve().as_uri())}">{_escape(label)}</a>'
         for label, path in (extra_links or [])
@@ -900,6 +976,7 @@ def render_html_report(
                     if key != "untagged"
                 },
             ),
+            _reliability_table(aggregate),
             _model_table(aggregate["usage"]),
         ]
     )

@@ -35,7 +35,7 @@ src/openmapbench/
   visual.py        Review sheets and HTML index for map review; AUDIT_CSS, audit_html() are
                    shared with html_report.py
   batch.py         Shared batch plumbing: batch IDs, report writing, status roll-ups
-  benchmark_batch.py   Run every native benchmark task with one agent command
+  benchmark_batch.py   Run every native benchmark task with one agent command, --repeat N
   gabench_batch.py Run every imported GABench task with one agent command
   adapters/gabench.py  Import GABench tasks from an external checkout (no vendoring)
   cli.py           Typer CLI: validate, evaluate, run, run-suite, report, usage-backfill,
@@ -89,7 +89,7 @@ CI runs exactly `ruff check .` and `pytest -q`. Both must pass before a task is 
   keeping older versions loadable, and noting the change in `docs/run-manifest.md`. Adding a task
   field must stay backward compatible within `0.1` or bump it. Batch manifests carry their own
   versions: `0.1` for the native suite bundle, `0.3` for the GABench bundle; the aggregate
-  report is `0.4`.
+  report is `0.5`.
 - No scratch files in the project root. Use the session scratchpad or a run's `workspace/`
   folder.
 

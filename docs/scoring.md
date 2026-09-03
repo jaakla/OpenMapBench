@@ -93,6 +93,18 @@ produced after evaluation, from the artifacts alone, and carry no verdict. A she
 artifact looks like the reference. Neither changes the score, and only artifact kinds with no
 deterministic evaluator produce a row in `review.csv` awaiting a human decision.
 
+## Repeats and reliability
+
+`strict_success_rate` is passes over admissible runs, so it stays correct when the suite is run
+more than once: with the same number of attempts per task, the micro-average over runs and the
+macro-average over tasks coincide.
+
+What repeats add is `by_task`, a pass rate per task, and `unstable_tasks`, the tasks whose rate is
+strictly between 0 and 1. An unstable task is not noise to be smoothed away — it is the honest
+statement that this agent sometimes solves it, and it marks where a single-pass headline is least
+trustworthy. Report the number of attempts alongside any score; a rate from one attempt per task
+is a sample, not a measurement.
+
 ## Contaminated runs
 
 A native task directory contains the answer as well as the question: the reference artifact, the

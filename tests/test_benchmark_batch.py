@@ -275,3 +275,74 @@ def test_repository_suite_script_has_runnable_help() -> None:
     )
     assert result.returncode == 0, result.stderr
     assert "--reference-solver" in result.stdout
+
+
+def test_repeat_runs_the_suite_more_than_once_and_reports_a_pass_rate(tmp_path: Path) -> None:
+    task_root = tmp_path / "tasks"
+    _task(task_root, "demo-pass")
+    _task(task_root, "demo-fail")
+
+    batch, batch_manifest = run_benchmark_batch(
+        task_root,
+        _solver_command(tmp_path),
+        tmp_path / "runs",
+        batch_id="repeat-batch",
+        repeat=3,
+    )
+
+    assert batch["repeat"] == 3
+    assert batch["distinct_task_count"] == 2
+    assert batch["task_count"] == 6
+    assert batch["executed_count"] == 6
+    assert [item["attempt"] for item in batch["results"]] == [1, 1, 2, 2, 3, 3]
+
+    report = json.loads((batch_manifest.parent / "report.json").read_text(encoding="utf-8"))
+    assert report["attempted_tasks"] == 6
+    assert report["distinct_tasks"] == 2
+    assert report["by_task"]["demo-pass"] == {
+        "runs": 3,
+        "admissible_runs": 3,
+        "passes": 3,
+        "pass_rate": 1.0,
+        "contaminated": 0,
+        "statuses": {"passed": 3},
+    }
+    assert report["by_task"]["demo-fail"]["pass_rate"] == 0.0
+    # a deterministic solver is never unstable; that is the point of measuring it
+    assert report["unstable_tasks"] == []
+
+    page = (batch_manifest.parent / "report.html").read_text(encoding="utf-8")
+    assert "Reliability per task across repeats" in page
+    assert "attempt 2 of 3" in page
+    markdown = (batch_manifest.parent / "report.md").read_text(encoding="utf-8")
+    assert "## Reliability per task" in markdown
+    assert "| demo-pass | 3 | 3 | 100% | passed x3 |" in markdown
+
+
+def test_an_unstable_task_is_named(tmp_path: Path) -> None:
+    """A task that passes only sometimes is where a single-pass score misleads most."""
+    task_root = tmp_path / "tasks"
+    _task(task_root, "demo-flaky")
+    counter = tmp_path / "attempts.txt"
+    solver = tmp_path / "flaky.py"
+    solver.write_text(
+        "import os\n"
+        "from pathlib import Path\n"
+        f"counter = Path({str(counter)!r})\n"
+        "seen = int(counter.read_text()) if counter.is_file() else 0\n"
+        "counter.write_text(str(seen + 1))\n"
+        "Path(os.environ['OPENMAPBENCH_OUTPUT_PATH']).write_text('6\\n' if seen % 2 else '7\\n')\n",
+        encoding="utf-8",
+    )
+    command = f"{shlex.quote(sys.executable)} {shlex.quote(str(solver))}"
+
+    batch, batch_manifest = run_benchmark_batch(
+        task_root, command, tmp_path / "runs", batch_id="flaky", repeat=4
+    )
+
+    report = json.loads((batch_manifest.parent / "report.json").read_text(encoding="utf-8"))
+    assert report["by_task"]["demo-flaky"]["pass_rate"] == 0.5
+    assert report["unstable_tasks"] == ["demo-flaky"]
+    assert batch["status_counts"] == {"failed": 2, "passed": 2}
+    page = (batch_manifest.parent / "report.html").read_text(encoding="utf-8")
+    assert "unstable" in page

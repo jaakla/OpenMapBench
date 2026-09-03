@@ -165,6 +165,26 @@ def load_manifests(run_root: Path) -> tuple[list[tuple[Path, RunManifest]], list
     return loaded, invalid
 
 
+def _task_reliability(manifests: list[RunManifest]) -> dict[str, dict[str, Any]]:
+    """Pass rate per task across repeats: a task passed once is not a task solved."""
+    grouped: dict[str, list[RunManifest]] = defaultdict(list)
+    for manifest in manifests:
+        grouped[manifest.task_id].append(manifest)
+    reliability: dict[str, dict[str, Any]] = {}
+    for task_id, items in sorted(grouped.items()):
+        admissible = [item for item in items if not is_contaminated(item)]
+        passes = sum(item.status == RunStatus.PASSED for item in admissible)
+        reliability[task_id] = {
+            "runs": len(items),
+            "admissible_runs": len(admissible),
+            "passes": passes,
+            "pass_rate": passes / len(admissible) if admissible else None,
+            "contaminated": len(items) - len(admissible),
+            "statuses": dict(sorted(Counter(item.status.value for item in items).items())),
+        }
+    return reliability
+
+
 def aggregate_manifests(run_root: Path) -> dict[str, Any]:
     loaded, invalid = load_manifests(run_root)
     manifests = [manifest for _, manifest in loaded]
@@ -174,9 +194,17 @@ def aggregate_manifests(run_root: Path) -> dict[str, Any]:
     attempted = len(manifests)
     needs_review = sum(manifest.status == RunStatus.NEEDS_REVIEW for manifest in admissible)
     strictly_scored = len(admissible) - needs_review
+    by_task = _task_reliability(manifests)
+    unstable = sorted(
+        task_id
+        for task_id, stats in by_task.items()
+        if stats["pass_rate"] is not None and 0 < stats["pass_rate"] < 1
+    )
     return {
-        "schema_version": "0.4",
+        "schema_version": "0.5",
         "attempted_tasks": attempted,
+        "distinct_tasks": len(by_task),
+        "runs_per_task": _token_statistics([stats["runs"] for stats in by_task.values()]),
         "strictly_scored_tasks": strictly_scored,
         "strict_successes": passed,
         "strict_success_rate": passed / strictly_scored if strictly_scored else None,
@@ -186,6 +214,8 @@ def aggregate_manifests(run_root: Path) -> dict[str, Any]:
         "status_counts": dict(
             sorted(Counter(manifest.status.value for manifest in manifests).items())
         ),
+        "by_task": by_task,
+        "unstable_tasks": unstable,
         "by_category": _breakdown(manifests, "category"),
         "by_output_kind": _breakdown(manifests, "output_kind"),
         "by_failure_mode": _tag_breakdown(manifests, "failure_modes"),
@@ -308,6 +338,33 @@ def report_markdown(report: dict[str, Any]) -> str:
                 f"| {mode} | {stats['attempted']} | {stats['strictly_scored']} | "
                 f"{stats['strict_successes']} | "
                 f"{f'{mode_rate:.1%}' if mode_rate is not None else '—'} |"
+            )
+    by_task = report.get("by_task") or {}
+    if any(stats["runs"] > 1 for stats in by_task.values()):
+        lines.extend(
+            [
+                "",
+                "## Reliability per task",
+                "",
+                "| Task | Runs | Passes | Pass rate | Statuses |",
+                "| --- | ---: | ---: | ---: | --- |",
+            ]
+        )
+        for task_id, stats in by_task.items():
+            rate = stats["pass_rate"]
+            statuses = ", ".join(f"{key} x{value}" for key, value in stats["statuses"].items())
+            lines.append(
+                f"| {task_id} | {stats['runs']} | {stats['passes']} | "
+                f"{f'{rate:.0%}' if rate is not None else '—'} | {statuses} |"
+            )
+        if report.get("unstable_tasks"):
+            lines.extend(
+                [
+                    "",
+                    "Unstable across repeats: "
+                    + ", ".join(f"`{task}`" for task in report["unstable_tasks"])
+                    + ". A task that sometimes passes is not a task an agent can do.",
+                ]
             )
     lines.extend(
         [

@@ -179,6 +179,21 @@ These sheets are review aids and never scores. They are rendered after evaluatio
 artifacts alone, and only artifact kinds with no deterministic evaluator — images today — leave a
 row in `visual-review/review.csv` awaiting a human decision.
 
+### Repeats, because one pass is not a measurement
+
+Agents are not deterministic. Running the native suite twice against the same model, same prompt
+and same isolation gave 76.9% and 84.6%, with three of thirteen tasks flipping in each direction.
+A single pass tells you whether an agent solved a task once, not whether it can solve it.
+
+```bash
+uv run --no-sync python scripts/run_benchmark_all.py --agent-command '...' --repeat 5
+```
+
+Attempts go round robin — every task once, then again — so a partial batch still covers the suite
+and any drift in the model service is spread across tasks rather than concentrated in one. The
+reports gain a pass rate per task, and any task that passes only sometimes is named as unstable:
+that is exactly where a single-pass score misleads.
+
 Useful flags: `--task <id>` and `--skip <id>` are repeatable, `--reference-solver` runs each
 task's own `tools/solve.py` as the agent, `--no-isolate-task` hands the agent the original task
 directory instead of a staged copy, and `--no-verify-inputs` runs tasks whose frozen inputs no

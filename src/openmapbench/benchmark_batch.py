@@ -133,8 +133,15 @@ def run_benchmark_batch(
     skip_ids: Sequence[str] | None = None,
     verify_inputs: bool = True,
     isolate_task: bool = True,
+    repeat: int = 1,
 ) -> tuple[dict[str, Any], Path]:
-    """Run every discovered native task with one agent command and write a batch bundle."""
+    """Run every discovered native task with one agent command and write a batch bundle.
+
+    ``repeat`` runs the whole suite that many times. A single pass says whether an agent solved
+    a task once; agents are not deterministic, so a pass rate over repeats is what supports a
+    claim about a model. Attempts go round robin — every task once, then again — so a partial
+    batch still covers the suite and any drift in the model service is spread across tasks.
+    """
     task_root = task_root.resolve()
     if not task_root.is_dir():
         raise ValueError(f"task root does not exist: {task_root}")
@@ -142,6 +149,8 @@ def run_benchmark_batch(
         raise ValueError("agent command must be non-empty")
     if timeout_seconds is not None and timeout_seconds <= 0:
         raise ValueError("timeout must be greater than zero")
+    if repeat < 1:
+        raise ValueError("repeat must be at least one")
     batch_id = resolve_batch_id(batch_id)
 
     tasks, skipped = discover_tasks(
@@ -155,20 +164,32 @@ def run_benchmark_batch(
     visual_dir = batch_dir / "visual-review"
     task_runs_dir.mkdir(parents=True, exist_ok=False)
 
-    total = len(tasks) + len(skipped)
+    total = (len(tasks) * repeat) + len(skipped)
     started = now()
     start_clock = time.monotonic()
     results: list[dict[str, Any]] = []
 
     print(f"OpenMapBench benchmark batch: {batch_id}")
     print(f"Task root: {task_root}")
-    print(f"Runnable tasks: {len(tasks)} (skipped before running: {len(skipped)})")
+    print(
+        f"Runnable tasks: {len(tasks)} x {repeat} attempt(s) "
+        f"(skipped before running: {len(skipped)})"
+    )
     print(f"Batch folder: {batch_dir}")
     for entry in skipped:
         print(f"[skip] {entry['task_id']}: {entry['reason']}")
 
-    for index, task in enumerate(tasks, start=1):
-        prefix = f"[{index:03d}/{len(tasks):03d}] {task.task_id}"
+    for attempt, index, task in [
+        (attempt, index, task)
+        for attempt in range(1, repeat + 1)
+        for index, task in enumerate(tasks, start=1)
+    ]:
+        counter = f"[{index:03d}/{len(tasks):03d}]"
+        prefix = (
+            f"[attempt {attempt}/{repeat}]{counter} {task.task_id}"
+            if repeat > 1
+            else f"{counter} {task.task_id}"
+        )
         try:
             run_manifest, run_manifest_path = run_task(
                 task.task_path,
@@ -197,6 +218,7 @@ def run_benchmark_batch(
         results.append(
             {
                 "task_id": task.task_id,
+                "attempt": attempt,
                 "status": run_manifest.status.value,
                 "contaminated": bool(
                     run_manifest.integrity and run_manifest.integrity.contaminated
@@ -238,6 +260,7 @@ def run_benchmark_batch(
             "task contract the agent reads"
         ),
         "input_verification": "checksums verified" if verify_inputs else "not verified",
+        "repeat": repeat,
         "task_isolation": "staged" if isolate_task else "direct",
         "contaminated_count": sum(1 for item in results if item["contaminated"]),
         "agent_command": agent_command,
@@ -247,6 +270,7 @@ def run_benchmark_batch(
         "finished_at": finished.isoformat(),
         "duration_seconds": round(time.monotonic() - start_clock, 6),
         "task_count": total,
+        "distinct_task_count": len(tasks),
         "executed_count": len(results),
         "skipped_count": len(skipped),
         "completed_without_failures": not skipped and not failures and len(results) == total,
@@ -289,6 +313,13 @@ def run_benchmark_batch(
     rate = aggregate["strict_success_rate"]
     print("Batch complete")
     print(f"Executed: {len(results)}/{total}; skipped: {len(skipped)}")
+    if repeat > 1:
+        unstable = [
+            f"{task_id} {stats['passes']}/{stats['runs']}"
+            for task_id, stats in sorted(aggregate["by_task"].items())
+            if 0 < stats["pass_rate"] < 1
+        ]
+        print(f"Unstable tasks: {', '.join(unstable) if unstable else 'none'}")
     print(f"Statuses: {batch['status_counts']}")
     print(f"Strict success rate: {f'{rate:.1%}' if rate is not None else 'not available'}")
     if aggregate["usage"]["runs_with_usage"]:
@@ -355,6 +386,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--skip", action="append", default=[], help="Repeatable task ID to skip")
     parser.add_argument(
+        "--repeat",
+        type=int,
+        default=1,
+        help=(
+            "Run the whole suite this many times and report a pass rate per task. One pass "
+            "says whether an agent solved a task once, not how reliably it solves it."
+        ),
+    )
+    parser.add_argument(
         "--no-isolate-task",
         action="store_true",
         help=(
@@ -410,6 +450,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             # The bundled solver lives in the directory staging withholds, so the harness's own
             # smoke test is the one case that must see it.
             isolate_task=not (args.no_isolate_task or args.reference_solver),
+            repeat=args.repeat,
         )
     except (OSError, ValueError) as exc:
         parser.exit(2, f"error: {exc}\n")
