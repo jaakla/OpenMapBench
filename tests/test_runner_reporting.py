@@ -219,3 +219,34 @@ metadata:
     markdown = report_markdown(report)
     assert "## Strict success by tagged failure mode" in markdown
     assert "| crs_misalignment | 1 | 1 | 0 | 0.0% |" in markdown
+
+
+def test_agent_stdin_is_closed_so_a_prompt_read_cannot_hang(tmp_path: Path) -> None:
+    """An agent CLI that reads stdin must see EOF, not block until the run times out."""
+    task = tmp_path / "task.yaml"
+    task.write_text(
+        """
+id: stdin-demo
+title: Stdin demo
+category: scalar
+prompt: Write 42.
+output:
+  path: result.txt
+  kind: scalar
+""".strip(),
+        encoding="utf-8",
+    )
+    reference = tmp_path / "reference.txt"
+    reference.write_text("42\n", encoding="utf-8")
+    solver = tmp_path / "solver.py"
+    solver.write_text(
+        "import os, sys, pathlib\n"
+        "assert sys.stdin.read() == ''\n"
+        "pathlib.Path(os.environ['OPENMAPBENCH_OUTPUT_PATH']).write_text('42\\n')\n",
+        encoding="utf-8",
+    )
+    command = f"{shlex.quote(sys.executable)} {shlex.quote(str(solver))}"
+
+    manifest, _ = run_task(task, reference, command, tmp_path / "runs", timeout_seconds=30)
+
+    assert manifest.status == RunStatus.PASSED

@@ -215,6 +215,9 @@ def _run_streaming_process(
         command,
         cwd=cwd,
         env=environment,
+        # A benchmark run is non-interactive. Without this an agent CLI that reads stdin blocks
+        # on the harness's inherited handle and burns its whole timeout waiting for a prompt.
+        stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
@@ -392,6 +395,7 @@ def run_task(
                 command,
                 cwd=execution_cwd,
                 env=environment,
+                stdin=subprocess.DEVNULL,
                 capture_output=True,
                 text=True,
                 timeout=timeout_seconds,
