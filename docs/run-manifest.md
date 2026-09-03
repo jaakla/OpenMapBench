@@ -198,6 +198,13 @@ Failure evidence is expanded by default and success evidence is collapsed: a fai
 diagnostics, and any run that did not pass opens its stderr tail. The per-task cards can be
 filtered by status or searched by task ID, title, category, or failure mode.
 
+A `needs_review` run — a decodable image with no deterministic evaluator — carries an explicit
+notice saying it was neither passed nor failed and is excluded from both sides of the strict rate;
+its only check, `image_decodable`, asserts nothing more than that the file decodes. When the batch
+also built a visual review, each such card embeds that run's side-by-side sheet, generated output
+on the left and expected reference on the right, with the decision recorded in `review.csv` and a
+link to the review page. The report shows the comparison; it never scores it.
+
 ## Batch bundles
 
 Both batch runners — `scripts/run_benchmark_all.py` for the native suite and

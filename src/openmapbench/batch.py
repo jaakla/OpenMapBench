@@ -75,6 +75,7 @@ def write_batch_html(
     subtitle: str,
     extra_links: list[tuple[str, Path]] | None = None,
     notice: str | None = None,
+    visual_review_dir: Path | None = None,
 ) -> Path:
     """Write the detailed, self-contained HTML report for a finished batch."""
     output = batch_dir / "report.html"
@@ -92,6 +93,7 @@ def write_batch_html(
         batch=batch,
         aggregate=aggregate,
         extra_links=links,
+        visual_review_dir=visual_review_dir,
         **({"notice": notice} if notice else {}),
     )
     return output

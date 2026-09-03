@@ -128,3 +128,64 @@ def test_html_report_marks_a_run_that_never_reached_the_evaluator(tmp_path: Path
     assert 'data-status="agent_error"' in page
     assert "No evaluation was recorded" in page
     assert "boom" in page
+
+
+def _image_run(tmp_path: Path) -> Path:
+    """A file-kind image task: decodable, no strict evaluator, so it lands in needs_review."""
+    from PIL import Image
+
+    task = tmp_path / "task.yaml"
+    task.write_text(
+        "id: map-demo\n"
+        "title: Draw the service area map\n"
+        "category: cartography\n"
+        "prompt: Render the map to map.png.\n"
+        "output:\n"
+        "  path: map.png\n"
+        "  kind: file\n",
+        encoding="utf-8",
+    )
+    reference = tmp_path / "reference.png"
+    Image.new("RGB", (120, 80), "#f59e0b").save(reference)
+    solver = tmp_path / "solver.py"
+    solver.write_text(
+        "import os\n"
+        "from PIL import Image\n"
+        "Image.new('RGB', (120, 80), '#0ea5e9').save(os.environ['OPENMAPBENCH_OUTPUT_PATH'])\n",
+        encoding="utf-8",
+    )
+    command = f"{shlex.quote(sys.executable)} {shlex.quote(str(solver))}"
+    manifest, _ = run_task(task, reference, command, tmp_path / "runs")
+    assert manifest.status == RunStatus.NEEDS_REVIEW
+    return tmp_path / "runs"
+
+
+def test_needs_review_card_says_why_it_was_not_scored(tmp_path: Path) -> None:
+    run_root = _image_run(tmp_path)
+    output = tmp_path / "report.html"
+
+    write_html_report(run_root, output)
+
+    page = output.read_text(encoding="utf-8")
+    assert 'data-status="needs_review"' in page
+    assert "Manual review required" in page
+    assert "excluded from both sides of the strict success rate" in page
+    assert "needs review · 1" in page  # its own filter button
+
+
+def test_visual_comparison_is_embedded_when_a_review_folder_exists(tmp_path: Path) -> None:
+    from openmapbench.visual import visual_report_from_runs
+
+    run_root = _image_run(tmp_path)
+    visual_dir = tmp_path / "visual-review"
+    review = visual_report_from_runs(run_root, visual_dir)
+    assert review["comparison_count"] == 1
+    output = tmp_path / "report.html"
+
+    summary = write_html_report(run_root, output, visual_review_dir=visual_dir)
+
+    page = output.read_text(encoding="utf-8")
+    assert summary["visual_comparison_count"] == 1
+    assert 'class="comparison" src="visual-review/comparisons/' in page
+    assert "recorded decision: <strong>pending</strong>" in page
+    assert 'href="visual-review/index.html"' in page

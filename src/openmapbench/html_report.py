@@ -8,6 +8,8 @@ It reads only run manifests and the task contracts they point at.
 from __future__ import annotations
 
 import html
+import json
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -135,6 +137,51 @@ def _log_tail(path: Path) -> str | None:
     if len(content) > MAX_LOG_TAIL_CHARS:
         return "… earlier output truncated …\n" + content[-MAX_LOG_TAIL_CHARS:]
     return content
+
+
+def _visual_index(
+    visual_review_dir: Path | None, output: Path
+) -> dict[tuple[str, str], dict[str, str]]:
+    """Map (task_id, run_id) to the side-by-side sheet built for that run, if there is one."""
+    if visual_review_dir is None:
+        return {}
+    manifest_path = visual_review_dir / "manifest.json"
+    if not manifest_path.is_file():
+        return {}
+    try:
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    index: dict[tuple[str, str], dict[str, str]] = {}
+    for item in payload.get("comparisons") or []:
+        if not isinstance(item, dict):
+            continue
+        image = visual_review_dir / str(item.get("comparison_image") or "")
+        if not image.is_file():
+            continue
+        index[(str(item.get("task_id") or ""), str(item.get("run_id") or ""))] = {
+            "image": os.path.relpath(image, output.parent),
+            "index": os.path.relpath(visual_review_dir / "index.html", output.parent),
+            "result": str(item.get("manual_review_result") or "pending"),
+        }
+    return index
+
+
+def _visual_html(visual: dict[str, str] | None) -> str:
+    """Show the manual comparison inline; the verdict still belongs to a human."""
+    if not visual:
+        return ""
+    image = _attribute(visual["image"])
+    return f"""
+      <section>
+        <h3>Manual visual review — not a strict pass</h3>
+        <a href="{image}"><img class="comparison" src="{image}"
+           alt="generated output beside the expected reference"></a>
+        <p class="meta">Generated output on the left, expected reference on the right ·
+          recorded decision: <strong>{_escape(visual["result"])}</strong> ·
+          <a href="{_attribute(visual["index"])}">open the review page</a></p>
+      </section>
+    """
 
 
 def _chips(manifest: RunManifest) -> str:
@@ -265,6 +312,13 @@ def _diagnostics_html(manifest: RunManifest, *, expand: bool) -> str:
 def _failure_summary(manifest: RunManifest) -> str:
     if manifest.status == RunStatus.PASSED:
         return ""
+    if manifest.status == RunStatus.NEEDS_REVIEW:
+        return (
+            '<div class="review-note"><p><strong>Manual review required.</strong> This artifact '
+            "kind has no deterministic evaluator, so the run was neither passed nor failed. It "
+            "counts as attempted and is excluded from both sides of the strict success rate; "
+            "the checks below confirm only that the artifact decodes.</p></div>"
+        )
     parts: list[str] = []
     if manifest.error:
         parts.append(f"<p><strong>Error:</strong> {_escape(manifest.error)}</p>")
@@ -329,7 +383,9 @@ def _files_html(manifest: RunManifest, manifest_path: Path) -> str:
     return f'<p class="meta">{" · ".join(links)}</p>'
 
 
-def _run_card(manifest: RunManifest, manifest_path: Path) -> str:
+def _run_card(
+    manifest: RunManifest, manifest_path: Path, visual: dict[str, str] | None = None
+) -> str:
     spec = _task_spec(manifest.task_file.path)
     audit = audit_html(
         manifest.audit.model_dump(mode="json") if manifest.audit else None, str(manifest_path)
@@ -380,6 +436,7 @@ def _run_card(manifest: RunManifest, manifest_path: Path) -> str:
             <h3>Strict checks</h3>
             {_checks_html(manifest)}
           </section>
+          {_visual_html(visual)}
           {_diagnostics_html(manifest, expand=status == RunStatus.FAILED)}
           {_logs_html(manifest_path.parent, expand_stderr=status != RunStatus.PASSED)}
           {_files_html(manifest, manifest_path)}
@@ -677,6 +734,11 @@ REPORT_CSS = """
     .failure { background: #fef2f2; border: 1px solid #fecaca; border-radius: 9px;
                padding: 4px 14px; margin: 0 0 16px; color: #7f1d1d; }
     .failure p { margin: 10px 0; font-size: .9rem; }
+    .review-note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 9px;
+                   padding: 4px 14px; margin: 0 0 16px; color: #78350f; }
+    .review-note p { margin: 10px 0; font-size: .9rem; }
+    .comparison { display: block; width: 100%; height: auto; border: 1px solid #dbe2ea;
+                  border-radius: 8px; }
     .split { display: grid; gap: 18px; margin-bottom: 18px;
              grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
     .prompt-text { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 9px;
@@ -745,13 +807,18 @@ def render_html_report(
     invalid_manifests: list[dict[str, str]] | None = None,
     extra_links: list[tuple[str, Path]] | None = None,
     notice: str = DEFAULT_NOTICE,
+    visual: dict[tuple[str, str], dict[str, str]] | None = None,
 ) -> str:
     """Render the complete report page for a set of loaded run manifests."""
     created = datetime.now(UTC).isoformat(timespec="seconds")
     status_counts = aggregate["status_counts"]
     total = aggregate["attempted_tasks"]
     ordered = sorted(runs, key=lambda item: (item[1].task_id, item[1].run_id))
-    cards = "".join(_run_card(manifest, path) for path, manifest in ordered)
+    visual = visual or {}
+    cards = "".join(
+        _run_card(manifest, path, visual.get((manifest.task_id, manifest.run_id)))
+        for path, manifest in ordered
+    )
     links = "".join(
         f' · <a href="{_attribute(path.resolve().as_uri())}">{_escape(label)}</a>'
         for label, path in (extra_links or [])
@@ -816,11 +883,13 @@ def write_html_report(
     aggregate: dict[str, Any] | None = None,
     extra_links: list[tuple[str, Path]] | None = None,
     notice: str = DEFAULT_NOTICE,
+    visual_review_dir: Path | None = None,
 ) -> dict[str, Any]:
     """Write a detailed HTML report for every run manifest under ``run_root``."""
     run_root = run_root.resolve()
     runs, invalid = load_manifests(run_root)
     aggregate = aggregate if aggregate is not None else aggregate_manifests(run_root)
+    visual = _visual_index(visual_review_dir, output)
     page = render_html_report(
         runs,
         aggregate,
@@ -831,6 +900,7 @@ def write_html_report(
         invalid_manifests=invalid,
         extra_links=extra_links,
         notice=notice,
+        visual=visual,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(page, encoding="utf-8")
@@ -838,6 +908,7 @@ def write_html_report(
         "path": str(output.resolve()),
         "run_count": len(runs),
         "invalid_manifest_count": len(invalid),
+        "visual_comparison_count": len(visual),
     }
 
 

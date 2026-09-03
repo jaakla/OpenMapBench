@@ -116,6 +116,9 @@ sys.stderr.write("model: gpt-5.6-luna\\nreasoning effort: low\\ntokens used\\n1,
     page = (batch_dir / "report.html").read_text(encoding="utf-8")
     assert page.count('<article class="card"') == 2
     assert "visual review" in page
+    # the image task is not scored, and its side-by-side sheet rides on its own card
+    assert "Manual review required" in page
+    assert 'class="comparison" src="visual-review/comparisons/' in page
     assert batch["visual_review"]["comparison_count"] == 1
     report = json.loads((batch_dir / "report.json").read_text(encoding="utf-8"))
     assert report["strict_success_rate"] == 1.0

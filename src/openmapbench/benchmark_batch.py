@@ -276,6 +276,7 @@ def run_benchmark_batch(
             if visual["comparison_count"]
             else None
         ),
+        visual_review_dir=visual_dir if visual["comparison_count"] else None,
     )
 
     rate = aggregate["strict_success_rate"]

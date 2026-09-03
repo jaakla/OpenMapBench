@@ -229,6 +229,7 @@ def run_gabench_batch(
             if visual["comparison_count"]
             else None
         ),
+        visual_review_dir=visual_dir if visual["comparison_count"] else None,
         notice=(
             "Local batch metadata only. GABench content stays in the external checkout under "
             "its upstream terms. Manual image reviews are never strict passes, and raster and "
