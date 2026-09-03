@@ -12,7 +12,8 @@ from typing import Any
 from PIL import Image, ImageDraw, ImageFont, ImageOps, UnidentifiedImageError
 from pydantic import ValidationError
 
-from .models import RunManifest
+from .models import RunManifest, RunStatus
+from .preview import PreviewUnavailable, is_previewable, render_comparison
 from .taskio import load_task, sha256_file
 
 IMAGE_SUFFIXES = {".bmp", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp"}
@@ -78,6 +79,9 @@ class VisualPair:
     source_status: str | None = None
     audit: dict[str, Any] | None = None
     run_manifest_path: Path | None = None
+    artifact_kind: str = "image"
+    layer: str | None = None
+    manual_review_required: bool = True
 
 
 def is_supported_image_path(path: Path) -> bool:
@@ -677,16 +681,28 @@ def build_visual_report(
         filename = f"{index:03d}-{_slug(pair.task_id)}{suffix}.png"
         destination = comparisons_dir / filename
         try:
-            dimensions = compose_side_by_side(
-                pair.candidate,
-                pair.reference,
-                destination,
-                title=f"{pair.task_id} - {pair.title}",
-                expected_label=expected_label,
-                max_panel_width=max_panel_width,
-                max_panel_height=max_panel_height,
-            )
-        except (OSError, UnidentifiedImageError, ValueError) as exc:
+            if pair.artifact_kind == "image":
+                dimensions = compose_side_by_side(
+                    pair.candidate,
+                    pair.reference,
+                    destination,
+                    title=f"{pair.task_id} - {pair.title}",
+                    expected_label=expected_label,
+                    max_panel_width=max_panel_width,
+                    max_panel_height=max_panel_height,
+                )
+            else:
+                dimensions = render_comparison(
+                    pair.candidate,
+                    pair.reference,
+                    destination,
+                    kind=pair.artifact_kind,
+                    title=f"{pair.task_id} - {pair.title}",
+                    layer=pair.layer,
+                    max_panel_width=min(max_panel_width, 520),
+                    max_panel_height=min(max_panel_height, 460),
+                )
+        except (OSError, UnidentifiedImageError, ValueError, PreviewUnavailable) as exc:
             skipped.append({"task_id": pair.task_id, "reason": f"{type(exc).__name__}: {exc}"})
             continue
         previous = prior_reviews.get((pair.task_id, pair.run_id or ""), {})
@@ -702,7 +718,13 @@ def build_visual_report(
                 "reference_path": str(pair.reference.resolve()),
                 "reference_sha256": sha256_file(pair.reference),
                 "comparison_image": str(Path("comparisons") / filename),
-                "manual_review_result": previous.get("manual_result") or "pending",
+                "artifact_kind": pair.artifact_kind,
+                "manual_review_required": pair.manual_review_required,
+                "manual_review_result": (
+                    (previous.get("manual_result") or "pending")
+                    if pair.manual_review_required
+                    else f"not required · strictly scored: {pair.source_status or 'unknown'}"
+                ),
                 "notes": previous.get("notes") or "",
                 "image_metadata": dimensions,
                 "audit": pair.audit,
@@ -741,7 +763,7 @@ def build_visual_report(
         ]
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
-        for item in records:
+        for item in (record for record in records if record["manual_review_required"]):
             writer.writerow(
                 {
                     "task_id": item["task_id"],
@@ -768,6 +790,17 @@ def _task_prompt(task_path_value: str) -> str:
         return "Prompt unavailable because the original task contract could not be read."
 
 
+def _task_output_layer(task_path_value: str) -> str | None:
+    """The declared layer name, needed to open the right layer of a multi-layer container."""
+    task_path = Path(task_path_value)
+    if not task_path.is_file():
+        return None
+    try:
+        return load_task(task_path).output.layer
+    except Exception:  # noqa: BLE001 - a malformed old contract must not block review
+        return None
+
+
 def visual_report_from_runs(
     run_root: Path,
     output: Path,
@@ -792,10 +825,18 @@ def visual_report_from_runs(
             continue
         candidate = Path(manifest.candidate.path)
         reference = Path(manifest.reference.path)
-        if not is_supported_image_path(candidate) or not is_supported_image_path(reference):
+        kind = manifest.output_kind.value
+        if is_supported_image_path(candidate) and is_supported_image_path(reference):
+            artifact_kind = "image"
+        elif is_previewable(candidate, kind) and is_previewable(reference, kind):
+            artifact_kind = kind
+        else:
+            # Tables and scalars are reviewed as text; a picture of a CSV helps nobody.
             continue
         if not candidate.is_file() or not reference.is_file():
-            skipped.append({"task_id": manifest.task_id, "reason": "image file no longer exists"})
+            skipped.append(
+                {"task_id": manifest.task_id, "reason": "artifact file no longer exists"}
+            )
             continue
         pairs.append(
             VisualPair(
@@ -808,6 +849,11 @@ def visual_report_from_runs(
                 source_status=manifest.status.value,
                 audit=(manifest.audit.model_dump(mode="json") if manifest.audit else None),
                 run_manifest_path=manifest_path,
+                artifact_kind=artifact_kind,
+                layer=_task_output_layer(manifest.task_file.path),
+                # A strictly scored run already has its verdict; only an artifact kind with no
+                # deterministic evaluator still owes a human decision.
+                manual_review_required=manifest.status == RunStatus.NEEDS_REVIEW,
             )
         )
     return build_visual_report(
@@ -816,8 +862,9 @@ def visual_report_from_runs(
         source_type="openmapbench_runs",
         source_path=run_root,
         notice=(
-            "Manual visual review only. A side-by-side sheet is not an automated correctness "
-            "score and does not count as a strict benchmark pass."
+            "Rendered for review only. A sheet is never an automated correctness score: a "
+            "strictly scored run keeps the verdict from its checks, and an image artifact "
+            "awaiting manual review is not a strict pass either way."
         ),
         expected_label="EXPECTED (REFERENCE)",
         max_panel_width=max_panel_width,

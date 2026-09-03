@@ -86,6 +86,13 @@ manifests are reported separately and are not silently counted.
 Reports also group strict success by each tag in the task's `metadata.failure_modes`; a run
 tagged with two pitfalls counts in both groups, and untagged runs are listed as `untagged`.
 
+Every vector and raster run is also rendered as a three-panel sheet — reference, candidate, and
+the two overlaid — and every image run as a side-by-side sheet. These are review aids: they are
+produced after evaluation, from the artifacts alone, and carry no verdict. A sheet beside a
+`failed` card shows where the geometry went wrong; a sheet beside a `passed` card confirms the
+artifact looks like the reference. Neither changes the score, and only artifact kinds with no
+deterministic evaluator produce a row in `review.csv` awaiting a human decision.
+
 A task the suite runner refused to run — no reference artifact, a malformed contract, or inputs
 that no longer match their declared checksums — is neither a success nor a failure. It is listed
 as skipped with its reason and stays out of both sides of the fraction, so a broken checkout is

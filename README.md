@@ -152,11 +152,12 @@ defaults to `benchmark/tasks` and creates a timestamped directory under `runs/be
 
 ```text
 runs/benchmark/<batch-id>/
-├── batch.json    # batch provenance, per-task outcomes, and skipped-task reasons
-├── report.json   # aggregate score, token, model, and cost statistics
-├── report.md     # readable score, usage summary, and per-task table
-├── report.html   # detailed browsable report: evidence, logs, and audit per task
-└── task-runs/    # immutable artifact, log, and manifest folder for every task
+├── batch.json      # batch provenance, per-task outcomes, and skipped-task reasons
+├── report.json     # aggregate score, token, model, and cost statistics
+├── report.md       # readable score, usage summary, and per-task table
+├── report.html     # detailed browsable report: evidence, logs, previews, audit per task
+├── task-runs/      # immutable artifact, log, and manifest folder for every task
+└── visual-review/  # comparison sheets for every vector, raster, and image artifact
 ```
 
 Open `report.html` to review a batch. It is one self-contained page — no network requests, no
@@ -167,6 +168,16 @@ stdout and stderr, links to the artifact and reference, and the full execution a
 open their diagnostics and stderr by default; the cards filter by status and search by task ID,
 title, category, or failure mode. `openmapbench report <run-root> --output report.html` produces
 the same page for any directory of runs.
+
+Every vector and raster run is also drawn: expected reference, generated candidate, and the two
+overlaid in one shared extent, captioned with feature counts or raster size and the declared CRS.
+A missing reprojection, a dropped multipart, or a buffer measured in degrees is obvious in the
+picture long before it is obvious in a table of numbers. Rasters additionally get an
+absolute-difference panel when both grids align. Tables and scalars are reviewed as text.
+
+These sheets are review aids and never scores. They are rendered after evaluation from the
+artifacts alone, and only artifact kinds with no deterministic evaluator — images today — leave a
+row in `visual-review/review.csv` awaiting a human decision.
 
 Useful flags: `--task <id>` and `--skip <id>` are repeatable, `--reference-solver` runs each
 task's own `tools/solve.py` as the agent, and `--no-verify-inputs` runs tasks whose frozen inputs
@@ -335,10 +346,12 @@ inputs, such as "every point lies within the polygon with the same key", "exactl
 input feature", "the x/y fields equal the geometry", or "the area field equals the measured
 area". Attribute comparison is null-aware. See [docs/task-contract.md](docs/task-contract.md).
 
-## Manual visual review
+## Visual review and artifact previews
 
-Image outputs are validated as decodable images and assigned `needs_review`; they are not given an
-automated success score. Build a review folder from normal OpenMapBench runs:
+Every spatial artifact in a run root is drawn for review. Vector and raster artifacts become
+three-panel sheets — expected reference, generated candidate, and the two overlaid in one shared
+extent — and image artifacts become side-by-side sheets. Build a review folder from normal
+OpenMapBench runs:
 
 ```bash
 openmapbench visual-report runs/gabench \
@@ -356,12 +369,17 @@ visual-reviews/gabench-runs/
     └── 001-gabench-001-<run>.png
 ```
 
-Each comparison places the generated image on the left and the expected reference on the right,
-in equally sized panels without cropping. Each HTML card also shows the full task prompt so the
-reviewer can judge the images against the requested result. Images may be downscaled to the
-configured panel limit; the manifest retains the prompt, original dimensions, and checksums. This
-is a presentation artifact, not an image-similarity metric. Regenerating the same review folder
-preserves existing `manual_result` and `notes` values from `review.csv`.
+Image comparisons place the generated image on the left and the expected reference on the right,
+in equally sized panels without cropping. Vector and raster comparisons add the overlay panel and
+caption each side with its feature count or raster size and its declared CRS, so a CRS or units
+mistake is legible in the sheet itself. Each HTML card also shows the full task prompt so the
+reviewer can judge the artifact against the requested result. Images may be downscaled to the
+configured panel limit; the manifest retains the prompt, original dimensions, and checksums.
+
+None of this is an automated correctness metric. A strictly scored run keeps the verdict from its
+checks and its sheet merely illustrates it, which is why only artifact kinds with no deterministic
+evaluator — images, assigned `needs_review` — leave a row in `review.csv` awaiting a decision.
+Regenerating the same review folder preserves existing `manual_result` and `notes` values.
 
 ## Strict success score
 

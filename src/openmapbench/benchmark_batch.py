@@ -30,7 +30,7 @@ from .batch import (
 from .models import TaskSpec
 from .runner import run_task
 from .taskio import load_task, sha256_file, validate_task_files
-from .visual import is_supported_image_path, visual_report_from_runs
+from .visual import visual_report_from_runs
 
 REFERENCE_DIR_NAME = "reference"
 
@@ -212,14 +212,9 @@ def run_benchmark_batch(
 
     reports = write_aggregate_reports(batch_dir, task_runs_dir)
     aggregate = reports["aggregate"]
-    has_images = any(
-        is_supported_image_path(Path(task.spec.output.path)) for task in tasks
-    )
-    visual = (
-        visual_report_from_runs(task_runs_dir, visual_dir)
-        if has_images
-        else {"comparison_count": 0, "skipped_count": 0}
-    )
+    # Vector and raster runs get a rendered sheet as well, so every spatial artifact in the
+    # batch is reviewable by eye; tables and scalars produce none and are simply absent.
+    visual = visual_report_from_runs(task_runs_dir, visual_dir)
 
     finished = now()
     failures = failed_results(results)

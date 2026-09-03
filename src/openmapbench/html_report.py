@@ -167,18 +167,29 @@ def _visual_index(
     return index
 
 
-def _visual_html(visual: dict[str, str] | None) -> str:
-    """Show the manual comparison inline; the verdict still belongs to a human."""
+def _visual_html(visual: dict[str, str] | None, status: RunStatus) -> str:
+    """Show the rendered comparison inline. It illustrates the verdict; it never sets one."""
     if not visual:
         return ""
     image = _attribute(visual["image"])
+    if status == RunStatus.NEEDS_REVIEW:
+        heading = "Manual visual review — not a strict pass"
+        caption = (
+            "Generated output on the left, expected reference on the right · "
+            f"recorded decision: <strong>{_escape(visual['result'])}</strong>"
+        )
+    else:
+        heading = "Artifact preview — rendered for review, not scored"
+        caption = (
+            "Expected reference, generated output, and the two overlaid · the verdict above "
+            "comes from the strict checks, not from this image"
+        )
     return f"""
       <section>
-        <h3>Manual visual review — not a strict pass</h3>
+        <h3>{heading}</h3>
         <a href="{image}"><img class="comparison" src="{image}"
-           alt="generated output beside the expected reference"></a>
-        <p class="meta">Generated output on the left, expected reference on the right ·
-          recorded decision: <strong>{_escape(visual["result"])}</strong> ·
+           alt="generated artifact beside the expected reference"></a>
+        <p class="meta">{caption} ·
           <a href="{_attribute(visual["index"])}">open the review page</a></p>
       </section>
     """
@@ -436,7 +447,7 @@ def _run_card(
             <h3>Strict checks</h3>
             {_checks_html(manifest)}
           </section>
-          {_visual_html(visual)}
+          {_visual_html(visual, status)}
           {_diagnostics_html(manifest, expand=status == RunStatus.FAILED)}
           {_logs_html(manifest_path.parent, expand_stderr=status != RunStatus.PASSED)}
           {_files_html(manifest, manifest_path)}

@@ -198,6 +198,16 @@ Failure evidence is expanded by default and success evidence is collapsed: a fai
 diagnostics, and any run that did not pass opens its stderr tail. The per-task cards can be
 filtered by status or searched by task ID, title, category, or failure mode.
 
+Every vector and raster run carries a rendered preview on its card: expected reference, generated
+candidate, and the two overlaid in one shared extent, with each panel captioned by feature count
+or raster size and declared CRS. A missing reprojection, a dropped multipart, or a buffer measured
+in the wrong units is visible there long before it is obvious in a table of numbers. Rasters get an
+absolute-difference panel when both grids share a CRS, transform, and shape, and a panel naming
+both grids when they do not. Tables and scalars get no preview; their keyed row diff already names
+the offending rows. Rendering uses Pillow with GeoPandas or rasterio from the `geo` extra, happens
+after evaluation, and is best effort — an unreadable artifact is listed as skipped in the visual
+review manifest and changes nothing about the run.
+
 A `needs_review` run — a decodable image with no deterministic evaluator — carries an explicit
 notice saying it was neither passed nor failed and is excluded from both sides of the strict rate;
 its only check, `image_decodable`, asserts nothing more than that the file decodes. When the batch
@@ -217,7 +227,7 @@ Both batch runners — `scripts/run_benchmark_all.py` for the native suite and
 ├── report.md      # readable score, usage summary, and per-task table
 ├── report.html    # the detailed report described above
 ├── task-runs/     # immutable artifact, log, and manifest folder for every task
-└── visual-review/ # only when the batch produced image artifacts
+└── visual-review/ # comparison sheets, review.csv, and manifest for every spatial artifact
 ```
 
 `batch.json` for the native suite is schema `0.1`; the GABench batch manifest moved to `0.3` when

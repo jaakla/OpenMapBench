@@ -30,8 +30,9 @@ src/openmapbench/
   pricing.py       Dated, source-linked model price catalog; cost estimates
   reporting.py     Aggregate manifests into JSON/Markdown reports; load_manifests()
   html_report.py   Detailed self-contained HTML report over a directory of runs
-  visual.py        Side-by-side image sheets and HTML index for manual map review; AUDIT_CSS,
-                   audit_html() are shared with html_report.py
+  preview.py       Render vector/raster artifacts as reference|candidate|overlay sheets
+  visual.py        Review sheets and HTML index for map review; AUDIT_CSS, audit_html() are
+                   shared with html_report.py
   batch.py         Shared batch plumbing: batch IDs, report writing, status roll-ups
   benchmark_batch.py   Run every native benchmark task with one agent command
   gabench_batch.py Run every imported GABench task with one agent command
@@ -125,10 +126,14 @@ CI runs exactly `ruff check .` and `pytest -q`. Both must pass before a task is 
 11. **The evaluator reads only candidate, reference, and the task's evaluation block.** It must
     not inspect logs, trajectories, or the agent's environment.
 12. **Reports present, never decide.** `report.html` is a view over run manifests and
-    `report.json`; every number on it must already exist there. It may show logs, prompts, and
-    audit trails as evidence, but it must never compute a verdict of its own or turn a
-    diagnostic into a pass. The page stays self-contained: inline CSS and JS, no network
-    requests, no external assets.
+    `report.json`; every number on it must already exist there. It may show logs, prompts,
+    audit trails, and rendered artifact previews as evidence, but it must never compute a
+    verdict of its own or turn a diagnostic into a pass. The page stays self-contained:
+    inline CSS and JS, no network requests, no external assets.
+    Previews follow the same rule from the other side: `preview.py` runs after evaluation,
+    reads only the candidate and reference files, and is best effort — an artifact it cannot
+    draw is recorded as skipped, never raised. `review.csv` lists only decisions a human still
+    owes, so a strictly scored run never appears in it.
 13. **A task that cannot be scored fairly is skipped, not failed.** The suite runner skips a task
     with no reference artifact, a malformed contract, or inputs that no longer match their
     checksums, records the reason in `batch.json` and the reports, and keeps it out of both sides
