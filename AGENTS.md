@@ -109,7 +109,10 @@ CI runs exactly `ruff check .` and `pytest -q`. Both must pass before a task is 
    provenance notes measuring what each wrong approach gets wrong. `run_task` therefore stages
    the task by default — it copies the contract and only the files the contract declares into
    `<run_dir>/task/` and points the agent there, so the rest is not on disk anywhere it can
-   reach. Only `--reference-solver`, the harness validating itself, runs without staging.
+   reach. The staged contract is reduced too: `metadata` and input provenance are stripped,
+   because `tolerance_rationale`, `reference_method` and `skills` describe the traps, the solver
+   and the technique, and text inside the contract is not withheld by hiding files. Task authors
+   should still write those fields fully; they are for reviewers, and the harness removes them. Only `--reference-solver`, the harness validating itself, runs without staging.
    Prevention is not proof: `integrity.py` reads the audit afterwards and marks any run that
    touched withheld material as contaminated. Contaminated runs are reported loudly and left out
    of both sides of the strict rate, because a run that read the answer is not evidence of

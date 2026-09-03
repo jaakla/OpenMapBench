@@ -42,7 +42,18 @@ agent with a shell will find them.
 `run_task` therefore stages the task by default. It copies `task.yaml` and only the files the
 contract declares into `<run_dir>/task/`, rewrites `inputs[].path` only where an input lived
 outside the task directory, and points `{task_file}`, `{task_dir}` and the matching
-`OPENMAPBENCH_*` variables at that copy. Nothing else is present, so the reference, the solver
+`OPENMAPBENCH_*` variables at that copy.
+
+The staged contract is also reduced to what the agent needs to do the work: the prompt, the
+declared inputs as `path` and `role`, the required artifact, and the `evaluation` block holding
+the tolerances it will be held to. The `metadata` block is dropped and input provenance fields
+are left behind, because those are written for contributors and reviewers —
+`metadata.tolerance_rationale` names every trap and the measurement that discriminates it,
+`metadata.reference_method` names the solver and the libraries it used, `metadata.skills` names
+the technique, and an input's `source` prose has been observed pointing at the provenance notes
+beside it. Hiding files does not withhold text that travels inside the contract. Reporting is
+unaffected: `task_metadata` in the manifest comes from the original contract, so the failure-mode
+breakdown still works. Nothing else is present, so the reference, the solver
 and the provenance notes are unreachable rather than merely unmentioned. Evaluation always uses
 the original task and reference; the staged copies are byte-identical, and the audit maps each
 one back to the declared artifact it stands for. Pass `--no-isolate-task` to disable staging;

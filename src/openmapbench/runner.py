@@ -69,6 +69,17 @@ def _stage_task(
     run proceeds and fails honestly.
     """
     payload = spec.model_dump(mode="json")
+    # The contract the agent needs is the prompt, the inputs, the required artifact and the
+    # tolerances it will be held to. Everything else in a task file is written for contributors
+    # and reviewers: metadata.tolerance_rationale names every trap and the measurement that
+    # discriminates it, metadata.reference_method names the solver and the libraries it used,
+    # metadata.skills names the technique, and an input's provenance prose has been seen to
+    # point at the notes beside it. None of it is withheld by hiding files, so strip it here.
+    payload.pop("metadata", None)
+    payload["inputs"] = [
+        {key: value for key, value in declared.items() if key in {"path", "role"} and value}
+        for declared in payload.get("inputs", [])
+    ]
     notes: list[str] = []
     staged_inputs: list[Path] = []
     aliases: dict[str, str] = {}

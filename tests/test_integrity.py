@@ -19,9 +19,22 @@ prompt: Add the integers in inputs/values.txt and write the total.
 inputs:
   - path: inputs/values.txt
     role: values
+    source: "synthetic; see inputs/README.md for the probe values"
+    license: CC0-1.0
+    as_of: "2026-09-03"
 output:
   path: result.txt
   kind: scalar
+evaluation:
+  strict:
+    absolute_tolerance: 0
+metadata:
+  difficulty: easy
+  failure_modes: [null_semantics]
+  skills: [aggregation]
+  tolerance_rationale: >
+    A left join counts the empty case as 1 instead of 0, which changes 28 of the 443 rows.
+  reference_method: tools/solve.py sums with a NumPy reduction and cross-checks with Python.
 """
 
 
@@ -94,9 +107,26 @@ def test_staging_withholds_the_reference_and_the_solver(tmp_path: Path) -> None:
     assert not (staged_dir / "reference").exists()
     assert not (staged_dir / "tools").exists()
     assert not (staged_dir / "inputs" / "README.md").exists()
-    # the staged contract still declares the same input path
+    # the staged contract keeps what the agent needs to do the task
     staged = yaml.safe_load((staged_dir / "task.yaml").read_text(encoding="utf-8"))
-    assert staged["inputs"][0]["path"] == "inputs/values.txt"
+    assert staged["inputs"] == [{"path": "inputs/values.txt", "role": "values"}]
+    assert staged["prompt"].startswith("Add the integers")
+    assert staged["output"] == {
+        "path": "result.txt",
+        "kind": "scalar",
+        "layer": None,
+        "geometry_type": None,
+        "crs": None,
+        "required_fields": [],
+    }
+    assert staged["evaluation"]["strict"] == {"absolute_tolerance": 0}
+    # and none of what would give the answer away
+    assert "metadata" not in staged
+    text = (staged_dir / "task.yaml").read_text(encoding="utf-8")
+    for hint in ("tolerance_rationale", "reference_method", "solve.py", "README.md", "skills"):
+        assert hint not in text, hint
+    # reporting still groups by the tags, which come from the original contract
+    assert manifest.task_metadata["failure_modes"] == ["null_semantics"]
     assert manifest.integrity is not None
     assert manifest.integrity.contaminated is False
 

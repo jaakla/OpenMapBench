@@ -447,7 +447,13 @@ class ContentCapture:
             return False
 
     def _resolve(self, value: str) -> Path:
-        candidate = Path(value).expanduser()
+        # An agent may run without HOME — `codex exec --ephemeral` does — and expanduser()
+        # raises rather than returning the path unchanged. A path we cannot expand is still a
+        # path worth watching, so fall back to it instead of failing the capture.
+        try:
+            candidate = Path(value).expanduser()
+        except RuntimeError:
+            candidate = Path(value)
         return candidate if candidate.is_absolute() else self.execution_cwd / candidate
 
     # -- results ------------------------------------------------------------------

@@ -205,8 +205,11 @@ Two defences, and the benchmark uses both:
 
 **Withhold.** By default each run is staged: the runner copies `task.yaml` and only the files the
 contract declares into `<run_dir>/task/` and points the agent there. The reference, the solver and
-the provenance notes are not on disk anywhere the agent can reach. Evaluation still uses the
-original task and reference.
+the provenance notes are not on disk anywhere the agent can reach. The staged contract is reduced
+to the prompt, the declared inputs, the required artifact and the tolerances — `metadata` is
+dropped, because `tolerance_rationale` names every trap and its measurement and `reference_method`
+names the solver, and text inside the contract is not withheld by hiding files. Evaluation still
+uses the original task and reference, and reporting still groups by the original tags.
 
 **Detect.** Staging cannot stop an agent that goes looking on the host filesystem, so after each
 run `integrity.py` reads the execution audit for any contact with withheld material. A run with
