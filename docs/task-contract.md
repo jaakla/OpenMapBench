@@ -31,6 +31,12 @@ strict:
 JSON object key order is ignored. JSON list order is meaningful. Numeric tolerances apply
 recursively; other values compare exactly.
 
+The whole document is compared as a single required check named `value`, however many fields it
+holds. That check carries its own evidence — the tolerances that were applied, the number of
+mismatching paths, and the first ten of them as `{path, candidate, reference}` — so a multi-field
+artifact such as a three-number summary reports *which* number was wrong, not a bare `fail`. The
+complete mismatch list stays in `diagnostics`.
+
 Reference-independent JSON field predicates are also deterministic:
 
 ```yaml

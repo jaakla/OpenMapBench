@@ -13,6 +13,9 @@ from .vector_checks import run_vector_checks
 
 _NULL_STRINGS = {"", "null", "none", "nan"}
 
+# A check's details ride inside every run manifest; the full list stays in diagnostics.
+MAX_CHECK_MISMATCHES = 10
+
 
 @dataclass
 class EvaluationCheck:
@@ -195,10 +198,21 @@ def evaluate_scalar(candidate: Path, reference: Path, config: dict[str, Any]) ->
         rel_tol=rel_tol,
     )
     success = not mismatches
+    # The whole document is one check, so the check itself must say which fields differ;
+    # otherwise a multi-field scalar artifact reports a bare "fail" with no evidence.
+    details: dict[str, Any] = {
+        "mismatch_count": len(mismatches),
+        "absolute_tolerance": abs_tol,
+        "relative_tolerance": rel_tol,
+    }
+    if mismatches:
+        details["mismatches"] = mismatches[:MAX_CHECK_MISMATCHES]
+        if len(mismatches) > MAX_CHECK_MISMATCHES:
+            details["mismatches_truncated"] = True
     return EvaluationResult(
         success=success,
         score=1.0 if success else 0.0,
-        checks=[EvaluationCheck(id="value", passed=success)],
+        checks=[EvaluationCheck(id="value", passed=success, details=details)],
         diagnostics={
             "candidate": c_value,
             "reference": r_value,
