@@ -320,6 +320,33 @@ def _diagnostics_html(manifest: RunManifest, *, expand: bool) -> str:
     )
 
 
+def _integrity_html(manifest: RunManifest) -> str:
+    """Name the withheld material a run reached for, and say the result is inadmissible."""
+    integrity = manifest.integrity
+    if integrity is None or not integrity.contaminated:
+        return ""
+    items = "".join(
+        f"<li><code>{_escape(finding.path)}</code>"
+        f"<pre>{_escape(finding.detail)}</pre></li>"
+        for finding in integrity.findings[:8]
+    )
+    more = (
+        f"<p>and {len(integrity.findings) - 8} further contacts</p>"
+        if len(integrity.findings) > 8
+        else ""
+    )
+    return f"""
+      <div class="contaminated">
+        <p><strong>Contaminated — excluded from the score.</strong> The agent reached material
+          that was withheld from it, so this run is not evidence of capability whatever its
+          status says. The evaluation below is reported unchanged; only its admissibility
+          changed.</p>
+        <ul class="integrity">{items}</ul>
+        {more}
+      </div>
+    """
+
+
 def _failure_summary(manifest: RunManifest) -> str:
     if manifest.status == RunStatus.PASSED:
         return ""
@@ -398,6 +425,7 @@ def _run_card(
     manifest: RunManifest, manifest_path: Path, visual: dict[str, str] | None = None
 ) -> str:
     spec = _task_spec(manifest.task_file.path)
+    contaminated = bool(manifest.integrity and manifest.integrity.contaminated)
     audit = audit_html(
         manifest.audit.model_dump(mode="json") if manifest.audit else None, str(manifest_path)
     )
@@ -415,6 +443,7 @@ def _run_card(
             manifest.category,
             manifest.output_kind.value,
             " ".join(str(mode) for mode in (manifest.task_metadata.get("failure_modes") or [])),
+            "contaminated" if contaminated else "",
         ]
     ).lower()
     return f"""
@@ -428,10 +457,12 @@ def _run_card(
             </div>
             <div class="card-status">
               <span class="pill {_status_class(status.value)}">{STATUS_TEXT[status]}</span>
+              {'<span class="pill contaminated-pill">contaminated</span>' if contaminated else ''}
               <span class="run-id" title="run id">{_escape(manifest.run_id)}</span>
             </div>
           </div>
           <div class="metrics">{_metrics(manifest)}</div>
+          {_integrity_html(manifest)}
           {_failure_summary(manifest)}
           <div class="split">
             <section>
@@ -478,6 +509,11 @@ def _tiles(aggregate: dict[str, Any], batch: dict[str, Any] | None) -> str:
             "Needs manual review",
             str(aggregate["needs_manual_review"]),
             "outside both sides of the score",
+        ),
+        (
+            "Contaminated runs",
+            str(aggregate.get("contaminated_runs", 0)),
+            "reached withheld material · excluded",
         ),
         (
             "Total tokens",
@@ -604,6 +640,15 @@ def _run_context(batch: dict[str, Any] | None, run_root: Path, created: str) -> 
             ("Started", _escape(_timestamp(batch.get("started_at")))),
             ("Finished", _escape(_timestamp(batch.get("finished_at")))),
             ("Run root", f"<code>{_escape(run_root)}</code>"),
+            (
+                "Task isolation",
+                _escape(batch.get("task_isolation") or "unknown")
+                + (
+                    " — the agent saw only the contract and its declared inputs"
+                    if batch.get("task_isolation") == "staged"
+                    else " — the original task directory was reachable"
+                ),
+            ),
         ]
         skills = agent.get("skills") or []
         if skills:
@@ -747,6 +792,14 @@ REPORT_CSS = """
     .failure p { margin: 10px 0; font-size: .9rem; }
     .review-note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 9px;
                    padding: 4px 14px; margin: 0 0 16px; color: #78350f; }
+    .contaminated { background: #fdf2f8; border: 1px solid #f9a8d4; border-radius: 9px;
+                    padding: 4px 14px; margin: 0 0 16px; color: #831843; }
+    .contaminated p { margin: 10px 0; font-size: .9rem; }
+    .contaminated .integrity { margin: 0 0 10px; padding-left: 18px; font-size: .85rem; }
+    .contaminated pre { margin: 4px 0 8px; padding: 8px; overflow: auto; white-space: pre-wrap;
+                        overflow-wrap: anywhere; background: #0f172a; color: #e2e8f0;
+                        border-radius: 6px; font: .76rem/1.5 ui-monospace, monospace; }
+    .pill.contaminated-pill { color: #831843; background: #fce7f3; }
     .review-note p { margin: 10px 0; font-size: .9rem; }
     .comparison { display: block; width: 100%; height: auto; border: 1px solid #dbe2ea;
                   border-radius: 8px; }

@@ -33,6 +33,43 @@ Pricing is model-specific, dated, and includes the official source URL in every 
 an API-equivalent list-price estimate for comparisons—not a statement of actual ChatGPT billing.
 Unknown models retain token statistics without a cost estimate.
 
+## Task isolation and run integrity
+
+A benchmark task directory holds the answer next to the question: `reference/<artifact>`,
+`tools/solve.py`, and an `inputs/README.md` recording what each wrong approach gets wrong. An
+agent with a shell will find them.
+
+`run_task` therefore stages the task by default. It copies `task.yaml` and only the files the
+contract declares into `<run_dir>/task/`, rewrites `inputs[].path` only where an input lived
+outside the task directory, and points `{task_file}`, `{task_dir}` and the matching
+`OPENMAPBENCH_*` variables at that copy. Nothing else is present, so the reference, the solver
+and the provenance notes are unreachable rather than merely unmentioned. Evaluation always uses
+the original task and reference; the staged copies are byte-identical, and the audit maps each
+one back to the declared artifact it stands for. Pass `--no-isolate-task` to disable staging;
+`--reference-solver` implies it, because the bundled solver lives in the withheld directory.
+
+Staging cannot stop an agent that goes looking on the host filesystem, so the manifest also
+carries the result of a check made after the run:
+
+```json
+"isolation": {"mode": "staged", "task_file": "<run_dir>/task/task.yaml",
+              "staged_inputs": ["..."], "withheld_paths": ["..."], "notes": []},
+"integrity": {"checked": true, "contaminated": true, "withheld_paths": ["..."],
+              "findings": [{"path": "<task_dir>/reference/result.txt",
+                            "detail": "cat <task_dir>/reference/result.txt",
+                            "event_id": "codex:cmd-1", "sequence": 2}]}
+```
+
+`integrity.py` scans the audit's events — never the artifact — for any mention of a withheld
+path. In staged mode the whole original task directory is withheld, so naming it at all means the
+agent went looking. In direct mode only `tools/`, `reference/` and the reference artifact are.
+The harness's own invocation and the evaluation event are ignored, since the runner names those
+paths itself. Findings report the most specific withheld path that was touched, with the command
+that touched it.
+
+A contaminated run keeps its evaluated status and is reported with that evidence, but is excluded
+from both sides of the strict success rate. See `docs/scoring.md`.
+
 ## Execution audit
 
 Every new run contains `audit.events` in display order. The first event is always the exact agent
@@ -192,7 +229,10 @@ The page carries, in order:
   and cost, the task prompt, the declared artifact contract, every strict check with its
   evidence, diagnostics, the agent's own stdout and stderr tails, links to the run directory,
   manifest, candidate and reference, and the full execution audit from
-  [Execution audit](#execution-audit) above.
+  [Execution audit](#execution-audit) above;
+- a contamination banner on any run that reached withheld material, naming the paths and the
+  commands that touched them, plus a headline tile counting those runs. A contaminated run is
+  never silently dropped: the exclusion is stated where the result is read.
 
 Failure evidence is expanded by default and success evidence is collapsed: a failed run opens its
 diagnostics, and any run that did not pass opens its stderr tail. The per-task cards can be

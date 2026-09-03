@@ -337,6 +337,7 @@ def collect_audit_artifacts(
     *,
     task_file: Path,
     input_paths: list[Path],
+    staged_aliases: dict[str, str] | None = None,
     candidate: Path,
     reference: Path,
     output_dir: Path,
@@ -417,7 +418,8 @@ def collect_audit_artifacts(
     if agent_audit_path.is_file():
         add(agent_audit_path, "log", "log-agent-audit")
 
-    known_paths = set(drafts)
+    aliases = dict(staged_aliases or {})
+    known_paths = set(drafts) | set(aliases)
     content_store_dir = (run_dir / STORE_DIR_NAME).resolve()
     intermediate_index = 1
     for path in sorted(run_dir.rglob("*")):
@@ -491,7 +493,8 @@ def collect_audit_artifacts(
             for source in derived:
                 source_value = str(source)
                 resolved_source = _resolved(Path(source_value), execution_cwd)
-                target = drafts.get(str(resolved_source), {}).get("artifact_id", source_value)
+                source_key = aliases.get(str(resolved_source), str(resolved_source))
+                target = drafts.get(source_key, {}).get("artifact_id", source_value)
                 links.append(_lineage("derived_from", target, "agent_reported"))
         add(
             path,
@@ -586,6 +589,7 @@ def build_audit_trail(
     agent_audit_path: Path,
     task_file: Path,
     input_paths: list[Path],
+    staged_aliases: dict[str, str] | None = None,
     candidate: Path,
     reference: Path,
     output_dir: Path,
@@ -661,6 +665,7 @@ def build_audit_trail(
     artifacts = collect_audit_artifacts(
         task_file=task_file,
         input_paths=input_paths,
+        staged_aliases=staged_aliases,
         candidate=candidate,
         reference=reference,
         output_dir=output_dir,

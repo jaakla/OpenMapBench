@@ -132,6 +132,7 @@ def run_benchmark_batch(
     only_ids: Sequence[str] | None = None,
     skip_ids: Sequence[str] | None = None,
     verify_inputs: bool = True,
+    isolate_task: bool = True,
 ) -> tuple[dict[str, Any], Path]:
     """Run every discovered native task with one agent command and write a batch bundle."""
     task_root = task_root.resolve()
@@ -177,6 +178,7 @@ def run_benchmark_batch(
                 timeout_seconds=timeout_seconds,
                 agent=agent,
                 agent_cwd=agent_cwd,
+                isolate_task=isolate_task,
             )
         except Exception as exc:  # noqa: BLE001 - one bad task must not stop the batch
             reason = f"runner exception: {type(exc).__name__}: {exc}"
@@ -184,13 +186,21 @@ def run_benchmark_batch(
             skipped.append({"task_id": task.task_id, "reason": reason})
             continue
 
-        print(f"{prefix}: {run_manifest.status.value} ({run_manifest.duration_seconds:.2f}s)")
+        contaminated = bool(run_manifest.integrity and run_manifest.integrity.contaminated)
+        flag = " CONTAMINATED" if contaminated else ""
+        print(
+            f"{prefix}: {run_manifest.status.value}{flag} "
+            f"({run_manifest.duration_seconds:.2f}s)"
+        )
         cost = run_manifest.cost_estimate
         usage = run_manifest.token_usage
         results.append(
             {
                 "task_id": task.task_id,
                 "status": run_manifest.status.value,
+                "contaminated": bool(
+                    run_manifest.integrity and run_manifest.integrity.contaminated
+                ),
                 "category": run_manifest.category,
                 "output_kind": run_manifest.output_kind.value,
                 "failure_modes": run_manifest.task_metadata.get("failure_modes") or [],
@@ -228,6 +238,8 @@ def run_benchmark_batch(
             "task contract the agent reads"
         ),
         "input_verification": "checksums verified" if verify_inputs else "not verified",
+        "task_isolation": "staged" if isolate_task else "direct",
+        "contaminated_count": sum(1 for item in results if item["contaminated"]),
         "agent_command": agent_command,
         "agent": agent or {},
         "agent_cwd": str(agent_cwd.resolve()) if agent_cwd else None,
@@ -343,6 +355,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--skip", action="append", default=[], help="Repeatable task ID to skip")
     parser.add_argument(
+        "--no-isolate-task",
+        action="store_true",
+        help=(
+            "Point the agent at the original task directory instead of a staged copy. The "
+            "reference artifact and its solver become reachable, so runs are marked "
+            "contaminated if they are touched. Implied by --reference-solver."
+        ),
+    )
+    parser.add_argument(
         "--no-verify-inputs",
         action="store_true",
         help="Run tasks whose frozen inputs are missing or no longer match their checksums",
@@ -386,6 +407,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             only_ids=args.task,
             skip_ids=args.skip,
             verify_inputs=not args.no_verify_inputs,
+            # The bundled solver lives in the directory staging withholds, so the harness's own
+            # smoke test is the one case that must see it.
+            isolate_task=not (args.no_isolate_task or args.reference_solver),
         )
     except (OSError, ValueError) as exc:
         parser.exit(2, f"error: {exc}\n")

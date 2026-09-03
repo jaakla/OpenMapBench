@@ -93,6 +93,22 @@ produced after evaluation, from the artifacts alone, and carry no verdict. A she
 artifact looks like the reference. Neither changes the score, and only artifact kinds with no
 deterministic evaluator produce a row in `review.csv` awaiting a human decision.
 
+## Contaminated runs
+
+A native task directory contains the answer as well as the question: the reference artifact, the
+solver that built it, and provenance notes stating exactly what each wrong approach gets wrong.
+A run that read any of those is not evidence of capability, whatever its artifact says.
+
+The runner withholds them by staging (see `docs/run-manifest.md`), and `integrity.py` reads the
+execution audit afterwards to record any contact with what was withheld. A run with findings is
+`contaminated`: it stays in the attempted count, is reported with the evidence that condemns it,
+and is excluded from both the numerator and the denominator of the strict rate. It is not counted
+as a failure — the agent may also have solved the task honestly — it is simply inadmissible.
+
+The evaluator is unchanged by any of this. It still reads only the candidate, the reference, and
+the task's evaluation block, and it still reports the artifact comparison it made. Admissibility
+is decided by the runner from audit evidence, never by the evaluator from the artifact.
+
 A task the suite runner refused to run — no reference artifact, a malformed contract, or inputs
 that no longer match their declared checksums — is neither a success nor a failure. It is listed
 as skipped with its reason and stays out of both sides of the fraction, so a broken checkout is

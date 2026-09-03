@@ -180,8 +180,9 @@ artifacts alone, and only artifact kinds with no deterministic evaluator — ima
 row in `visual-review/review.csv` awaiting a human decision.
 
 Useful flags: `--task <id>` and `--skip <id>` are repeatable, `--reference-solver` runs each
-task's own `tools/solve.py` as the agent, and `--no-verify-inputs` runs tasks whose frozen inputs
-no longer match their checksums. The process returns nonzero if any task failed, errored, or
+task's own `tools/solve.py` as the agent, `--no-isolate-task` hands the agent the original task
+directory instead of a staged copy, and `--no-verify-inputs` runs tasks whose frozen inputs no
+longer match their checksums. The process returns nonzero if any task failed, errored, or
 could not be run. A task that cannot be scored fairly — no reference artifact, malformed contract,
 or altered inputs — is reported as skipped rather than counted as a failure.
 
@@ -191,6 +192,35 @@ contract when solved by its bundled solver.
 ```bash
 uv run --no-sync python scripts/run_benchmark_all.py --reference-solver
 ```
+
+## Keeping a run honest
+
+A task directory holds the answer as well as the question: `reference/<artifact>`,
+`tools/solve.py`, and an `inputs/README.md` that records what each wrong approach gets wrong. An
+agent with a shell will find them — we watched a mini model read `tools/solve.py` and run it,
+and on another task copy `reference/river_lengths.csv` straight to the output path. Three passes,
+no GIS.
+
+Two defences, and the benchmark uses both:
+
+**Withhold.** By default each run is staged: the runner copies `task.yaml` and only the files the
+contract declares into `<run_dir>/task/` and points the agent there. The reference, the solver and
+the provenance notes are not on disk anywhere the agent can reach. Evaluation still uses the
+original task and reference.
+
+**Detect.** Staging cannot stop an agent that goes looking on the host filesystem, so after each
+run `integrity.py` reads the execution audit for any contact with withheld material. A run with
+findings is marked contaminated, reported with the commands that condemn it, and excluded from
+both sides of the strict success rate. It is not counted as a failure — the agent may have solved
+it honestly as well — it is inadmissible as evidence.
+
+```text
+[001/003] gab-sjg-001: passed CONTAMINATED (53.78s)
+```
+
+A sandbox is a useful third layer and a different control: it bounds what a misbehaving agent can
+touch and pins GDAL and PROJ versions so results are reproducible. It does not replace staging —
+mount the repository into a container and the answer key is still one directory listing away.
 
 ## Generic task contract
 

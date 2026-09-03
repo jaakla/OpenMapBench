@@ -4,6 +4,7 @@ import json
 import os
 import platform
 import shlex
+import shutil
 import subprocess
 import sys
 import threading
@@ -13,11 +14,21 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from . import __version__
 from .audit import build_audit_trail
 from .capture import CaptureConfig, ContentCapture
 from .evaluator import evaluate
-from .models import FileRecord, OutputKind, RunManifest, RunStatus
+from .integrity import check_run, withheld_paths
+from .models import (
+    FileRecord,
+    OutputKind,
+    RunManifest,
+    RunStatus,
+    TaskIsolation,
+    TaskSpec,
+)
 from .pricing import estimate_cost
 from .taskio import load_task, sha256_file
 from .usage import parse_agent_usage
@@ -44,6 +55,51 @@ def _git_commit(path: Path) -> str | None:
         check=False,
     )
     return result.stdout.strip() if result.returncode == 0 else None
+
+
+def _stage_task(
+    spec: TaskSpec, task_file: Path, staged_dir: Path
+) -> tuple[Path, list[Path], list[str], dict[str, str]]:
+    """Copy the contract and only the files it declares into the run directory.
+
+    The agent is pointed at this copy, so the reference artifact, the solver that produced it,
+    and the provenance notes that describe every wrong approach are simply not present. Input
+    paths are rewritten to the copy, which also isolates tasks whose inputs live outside their
+    own directory. Staging never raises: a file it cannot copy is recorded as a note, and the
+    run proceeds and fails honestly.
+    """
+    payload = spec.model_dump(mode="json")
+    notes: list[str] = []
+    staged_inputs: list[Path] = []
+    aliases: dict[str, str] = {}
+    used: set[str] = set()
+    sources = spec.resolve_input_paths(task_file)
+    for index, (declared, source) in enumerate(zip(spec.inputs, sources, strict=True)):
+        relative = Path(declared.path)
+        # Keep the declared layout wherever it is safe, so the contract the agent reads is the
+        # contract that was written. Only inputs living outside the task directory are moved.
+        if relative.is_absolute() or ".." in relative.parts or not declared.path.strip():
+            name = relative.name or f"input-{index:02d}"
+            if name in used:
+                name = f"{index:02d}-{name}"
+            relative = Path("inputs") / name
+            payload["inputs"][index]["path"] = str(relative)
+        used.add(relative.name)
+        destination = staged_dir / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            shutil.copy2(source, destination)
+            staged_inputs.append(destination)
+            aliases[str(destination.resolve())] = str(source)
+        except OSError as exc:
+            notes.append(f"could not stage {source}: {type(exc).__name__}: {exc}")
+    staged_task_file = staged_dir / "task.yaml"
+    staged_dir.mkdir(parents=True, exist_ok=True)
+    staged_task_file.write_text(
+        yaml.safe_dump(payload, sort_keys=False, allow_unicode=True), encoding="utf-8"
+    )
+    aliases[str(staged_task_file.resolve())] = str(task_file)
+    return staged_task_file, staged_inputs, notes, aliases
 
 
 def _render_command(command: str, paths: dict[str, str]) -> list[str]:
@@ -235,10 +291,13 @@ def run_task(
     agent: dict[str, Any] | None = None,
     agent_cwd: Path | None = None,
     verbose: bool = False,
+    isolate_task: bool = True,
 ) -> tuple[RunManifest, Path]:
     """Execute an arbitrary agent command, evaluate its artifact, and always write a manifest.
 
-    The agent runs from ``<run_dir>/workspace`` unless ``agent_cwd`` is given.
+    The agent runs from ``<run_dir>/workspace`` unless ``agent_cwd`` is given, and is pointed at
+    a staged copy of the task holding only the contract and its declared inputs unless
+    ``isolate_task`` is disabled. Evaluation always uses the original task and reference.
     """
     task_file = task_file.resolve()
     reference = reference.resolve()
@@ -250,6 +309,14 @@ def run_task(
     output_dir.mkdir(parents=True, exist_ok=False)
     workspace_dir = run_dir / "workspace"
     workspace_dir.mkdir()
+    # What the agent sees. Staging withholds the reference, the reference solver, and the
+    # provenance notes that would otherwise sit one directory listing away from the contract.
+    if isolate_task:
+        agent_task_file, staged_inputs, staging_notes, staged_aliases = _stage_task(
+            spec, task_file, run_dir / "task"
+        )
+    else:
+        agent_task_file, staged_inputs, staging_notes, staged_aliases = task_file, [], [], {}
     candidate = spec.resolve_output_path(output_dir)
     candidate.parent.mkdir(parents=True, exist_ok=True)
     stdout_path = run_dir / "agent.stdout.log"
@@ -257,8 +324,8 @@ def run_task(
     agent_audit_path = run_dir / "agent.audit.jsonl"
 
     paths = {
-        "task_file": str(task_file),
-        "task_dir": str(task_file.parent),
+        "task_file": str(agent_task_file),
+        "task_dir": str(agent_task_file.parent),
         "output_dir": str(output_dir),
         "output_path": str(candidate),
         "run_dir": str(run_dir),
@@ -461,6 +528,7 @@ def run_task(
         agent_audit_path=agent_audit_path,
         task_file=task_file,
         input_paths=spec.resolve_input_paths(task_file),
+        staged_aliases=staged_aliases,
         candidate=candidate,
         reference=reference,
         output_dir=output_dir,
@@ -475,6 +543,25 @@ def run_task(
             evaluation_finished.isoformat() if evaluation_finished else None
         ),
     )
+    isolation = TaskIsolation(
+        mode="staged" if isolate_task else "direct",
+        task_file=str(agent_task_file),
+        staged_inputs=[str(path) for path in staged_inputs],
+        withheld_paths=[
+            str(path) for path in withheld_paths(task_file, reference, staged=isolate_task)
+        ],
+        notes=staging_notes,
+    )
+    # Detection is the second defence: prevention can be defeated by an agent that goes looking
+    # on the host filesystem, so a run that touched withheld material is marked, not counted.
+    integrity = check_run(
+        audit, withheld_paths(task_file, reference, staged=isolate_task)
+    )
+    if integrity.contaminated and verbose:
+        _verbose_message(
+            f"[openmapbench] contaminated run: {len(integrity.findings)} contacts with "
+            "withheld material"
+        )
     manifest = RunManifest(
         run_id=run_id,
         status=status,
@@ -507,6 +594,8 @@ def run_task(
         token_usage=token_usage,
         cost_estimate=cost_estimate,
         audit=audit,
+        isolation=isolation,
+        integrity=integrity,
         evaluation=evaluation_payload,
         error=error,
     )

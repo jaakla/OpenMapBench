@@ -23,7 +23,10 @@ import os
 import sys
 from pathlib import Path
 
-mode = Path(os.environ["OPENMAPBENCH_TASK_DIR"]).name.rsplit("-", 1)[-1]
+import yaml
+
+task = yaml.safe_load(Path(os.environ["OPENMAPBENCH_TASK_FILE"]).read_text())
+mode = str(task["id"]).rsplit("-", 1)[-1]
 if mode == "crash":
     sys.stderr.write("solver could not open the input\\n")
     raise SystemExit(3)
@@ -196,10 +199,31 @@ def test_reference_solver_mode_scores_each_task_with_its_own_solver(tmp_path: Pa
         tmp_path / "runs",
         batch_id="reference-solver",
         agent={"name": "reference-solver"},
+        # The bundled solver lives in the directory staging withholds.
+        isolate_task=False,
     )
 
     assert batch["status_counts"] == {"passed": 1}
+    assert batch["task_isolation"] == "direct"
     assert batch["completed_without_failures"] is True
+
+
+def test_staging_puts_the_bundled_solver_out_of_reach(tmp_path: Path) -> None:
+    """The same command that passes in direct mode cannot even find the solver when staged."""
+    task_root = tmp_path / "tasks"
+    _task(task_root, "bundled-pass", with_solver=True)
+
+    batch, _ = run_benchmark_batch(
+        task_root,
+        reference_solver_command(),
+        tmp_path / "runs",
+        batch_id="staged",
+        isolate_task=True,
+    )
+
+    assert batch["task_isolation"] == "staged"
+    assert batch["status_counts"] == {"agent_error": 1}
+    assert batch["contaminated_count"] == 0
 
 
 def test_cli_run_suite_exits_nonzero_when_a_task_fails(tmp_path: Path) -> None:

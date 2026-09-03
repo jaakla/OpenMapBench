@@ -82,6 +82,15 @@ def run(
             help="Show runner stages and live agent command/tool progress.",
         ),
     ] = False,
+    isolate_task: Annotated[
+        bool,
+        typer.Option(
+            help=(
+                "Give the agent a staged copy holding only the contract and declared inputs, "
+                "so the reference and its solver are unreachable."
+            )
+        ),
+    ] = True,
 ) -> None:
     """Run one task end to end and write artifact, logs, and a run manifest."""
     manifest, manifest_path = run_task(
@@ -102,6 +111,7 @@ def run(
         },
         agent_cwd=agent_cwd,
         verbose=verbose,
+        isolate_task=isolate_task,
     )
     typer.echo(str(manifest_path))
     typer.echo(f"status: {manifest.status.value}")
@@ -188,6 +198,16 @@ def run_suite(
     verify_inputs: Annotated[
         bool, typer.Option(help="Skip tasks whose frozen inputs no longer match their checksums.")
     ] = True,
+    isolate_task: Annotated[
+        bool,
+        typer.Option(
+            help=(
+                "Give the agent a staged copy holding only the contract and declared inputs, "
+                "so the reference and its solver are unreachable. --reference-solver needs the "
+                "original directory and turns this off."
+            )
+        ),
+    ] = True,
 ) -> None:
     """Run a whole task suite with one agent and write JSON, Markdown, and HTML reports."""
     if reference_solver and agent_command:
@@ -215,6 +235,7 @@ def run_suite(
         only_ids=task or [],
         skip_ids=skip or [],
         verify_inputs=verify_inputs,
+        isolate_task=isolate_task and not reference_solver,
     )
     typer.echo(str(batch_manifest_path))
     raise typer.Exit(code=0 if batch["completed_without_failures"] else 1)

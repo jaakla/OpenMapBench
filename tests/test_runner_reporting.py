@@ -195,7 +195,7 @@ metadata:
 
     manifest, _ = run_task(task, reference, command, tmp_path / "runs")
 
-    assert manifest.schema_version == "0.4"
+    assert manifest.schema_version == "0.5"
     assert manifest.task_metadata["failure_modes"] == ["crs_misalignment", "nodata"]
     report = aggregate_manifests(tmp_path / "runs")
     assert report["by_failure_mode"] == {
@@ -205,6 +205,7 @@ metadata:
             "strict_successes": 0,
             "strict_success_rate": 0.0,
             "needs_manual_review": 0,
+            "contaminated": 0,
         },
         "nodata": {
             "attempted": 1,
@@ -212,6 +213,7 @@ metadata:
             "strict_successes": 0,
             "strict_success_rate": 0.0,
             "needs_manual_review": 0,
+            "contaminated": 0,
         },
     }
     markdown = report_markdown(report)

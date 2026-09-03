@@ -218,8 +218,36 @@ class CostEstimate(BaseModel):
     note: str
 
 
+class TaskIsolation(BaseModel):
+    """What the agent was actually pointed at, and what was withheld from it."""
+
+    mode: Literal["staged", "direct"]
+    task_file: str
+    staged_inputs: list[str] = Field(default_factory=list)
+    withheld_paths: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
+
+
+class IntegrityFinding(BaseModel):
+    """One recorded contact between the agent and material it was not meant to see."""
+
+    path: str
+    detail: str
+    event_id: str | None = None
+    sequence: int | None = None
+
+
+class IntegrityReport(BaseModel):
+    """Whether the run is admissible as evidence of capability."""
+
+    checked: bool
+    contaminated: bool
+    withheld_paths: list[str] = Field(default_factory=list)
+    findings: list[IntegrityFinding] = Field(default_factory=list)
+
+
 class RunManifest(BaseModel):
-    schema_version: Literal["0.1", "0.2", "0.3", "0.4"] = "0.4"
+    schema_version: Literal["0.1", "0.2", "0.3", "0.4", "0.5"] = "0.5"
     run_id: str
     status: RunStatus
     task_id: str
@@ -242,5 +270,7 @@ class RunManifest(BaseModel):
     token_usage: TokenUsage | None = None
     cost_estimate: CostEstimate | None = None
     audit: AuditTrail | None = None
+    isolation: TaskIsolation | None = None
+    integrity: IntegrityReport | None = None
     evaluation: dict[str, Any] | None = None
     error: str | None = None

@@ -28,6 +28,7 @@ src/openmapbench/
   capture.py       Live content capture of transient agent files into <run_dir>/captured-files/
   usage.py         Token usage parsing and backfill
   pricing.py       Dated, source-linked model price catalog; cost estimates
+  integrity.py     Post-run check: did the agent reach material withheld from it?
   reporting.py     Aggregate manifests into JSON/Markdown reports; load_manifests()
   html_report.py   Detailed self-contained HTML report over a directory of runs
   preview.py       Render vector/raster artifacts as reference|candidate|overlay sheets
@@ -84,10 +85,11 @@ CI runs exactly `ruff check .` and `pytest -q`. Both must pass before a task is 
 - **Type everything.** Pydantic models for anything serialized; modules start with
   `from __future__ import annotations` and use 3.11 union syntax (`X | None`).
 - **Schema versions are contracts.** `TaskSpec.schema_version` is `"0.1"`; `RunManifest` accepts
-  `"0.1"` through `"0.4"` and writes `0.4`. Adding a manifest field means bumping the version,
+  `"0.1"` through `"0.5"` and writes `0.5`. Adding a manifest field means bumping the version,
   keeping older versions loadable, and noting the change in `docs/run-manifest.md`. Adding a task
   field must stay backward compatible within `0.1` or bump it. Batch manifests carry their own
-  versions: `0.1` for the native suite bundle, `0.3` for the GABench bundle.
+  versions: `0.1` for the native suite bundle, `0.3` for the GABench bundle; the aggregate
+  report is `0.4`.
 - No scratch files in the project root. Use the session scratchpad or a run's `workspace/`
   folder.
 
@@ -101,8 +103,17 @@ CI runs exactly `ruff check .` and `pytest -q`. Both must pass before a task is 
    evaluator exists and is documented in `docs/scoring.md`.
 3. **Tolerances are declared by the task, never tuned after seeing agent output.** When adding a
    tolerance option, document the mechanism it compensates for in `docs/task-contract.md`.
-4. **References are isolated.** Reference paths come from the CLI or a batch manifest, never
-   from the task YAML the agent sees.
+4. **References are isolated, and so is everything else that gives the answer away.** Reference
+   paths come from the CLI or a batch manifest, never from the task YAML the agent sees. That is
+   not enough on its own: a task directory also holds `reference/`, `tools/solve.py`, and
+   provenance notes measuring what each wrong approach gets wrong. `run_task` therefore stages
+   the task by default — it copies the contract and only the files the contract declares into
+   `<run_dir>/task/` and points the agent there, so the rest is not on disk anywhere it can
+   reach. Only `--reference-solver`, the harness validating itself, runs without staging.
+   Prevention is not proof: `integrity.py` reads the audit afterwards and marks any run that
+   touched withheld material as contaminated. Contaminated runs are reported loudly and left out
+   of both sides of the strict rate, because a run that read the answer is not evidence of
+   capability. Never weaken staging or detection to make a batch look better.
 5. **No vendoring of GABench.** GeoX-Lab/GABench has no license. The adapter reads an external
    checkout and writes only to a user-chosen local directory. Never copy its CSV, prompts, data,
    or reference images into this repository, and never commit `.openmapbench/` or
@@ -170,7 +181,10 @@ the reference file must be named exactly like the declared `output.path`, and
 If you are invoked through `openmapbench run`, `openmapbench run-suite`, or either batch
 runner:
 
-- Read the task YAML at `OPENMAPBENCH_TASK_FILE`; its `inputs` are the only data you may rely on.
+- Read the task YAML at `OPENMAPBENCH_TASK_FILE`; its `inputs` are the only data you may rely
+  on. It is normally a staged copy holding just the contract and those inputs. Do not go looking
+  for the original task directory, the reference artifact, or a reference solver: the audit
+  records it, and the run is marked contaminated and dropped from the score.
 - Write the artifact exactly to `OPENMAPBENCH_OUTPUT_PATH`, in the declared kind, geometry type,
   CRS, and required fields. Producing an explanation without the file is a failure.
 - Your working directory is the run's `workspace/`; put helper scripts and intermediates there.

@@ -9,16 +9,26 @@ from pydantic import ValidationError
 from .models import RunManifest, RunStatus
 
 
+def is_contaminated(manifest: RunManifest) -> bool:
+    """Whether the run touched material that was withheld from it."""
+    return bool(manifest.integrity and manifest.integrity.contaminated)
+
+
 def _group_statistics(items: list[RunManifest]) -> dict[str, Any]:
-    passed = sum(item.status == RunStatus.PASSED for item in items)
-    needs_review = sum(item.status == RunStatus.NEEDS_REVIEW for item in items)
-    strictly_scored = len(items) - needs_review
+    # A run that read the reference or its solver proves nothing about capability, so it is
+    # reported separately and left out of both sides of the rate, the way needs_review is.
+    contaminated = [item for item in items if is_contaminated(item)]
+    admissible = [item for item in items if not is_contaminated(item)]
+    passed = sum(item.status == RunStatus.PASSED for item in admissible)
+    needs_review = sum(item.status == RunStatus.NEEDS_REVIEW for item in admissible)
+    strictly_scored = len(admissible) - needs_review
     return {
         "attempted": len(items),
         "strictly_scored": strictly_scored,
         "strict_successes": passed,
         "strict_success_rate": passed / strictly_scored if strictly_scored else None,
         "needs_manual_review": needs_review,
+        "contaminated": len(contaminated),
     }
 
 
@@ -158,17 +168,21 @@ def load_manifests(run_root: Path) -> tuple[list[tuple[Path, RunManifest]], list
 def aggregate_manifests(run_root: Path) -> dict[str, Any]:
     loaded, invalid = load_manifests(run_root)
     manifests = [manifest for _, manifest in loaded]
-    passed = sum(manifest.status == RunStatus.PASSED for manifest in manifests)
+    contaminated = [manifest for manifest in manifests if is_contaminated(manifest)]
+    admissible = [manifest for manifest in manifests if not is_contaminated(manifest)]
+    passed = sum(manifest.status == RunStatus.PASSED for manifest in admissible)
     attempted = len(manifests)
-    needs_review = sum(manifest.status == RunStatus.NEEDS_REVIEW for manifest in manifests)
-    strictly_scored = attempted - needs_review
+    needs_review = sum(manifest.status == RunStatus.NEEDS_REVIEW for manifest in admissible)
+    strictly_scored = len(admissible) - needs_review
     return {
-        "schema_version": "0.3",
+        "schema_version": "0.4",
         "attempted_tasks": attempted,
         "strictly_scored_tasks": strictly_scored,
         "strict_successes": passed,
         "strict_success_rate": passed / strictly_scored if strictly_scored else None,
         "needs_manual_review": needs_review,
+        "contaminated_runs": len(contaminated),
+        "contaminated_task_ids": sorted({manifest.task_id for manifest in contaminated}),
         "status_counts": dict(
             sorted(Counter(manifest.status.value for manifest in manifests).items())
         ),
@@ -181,8 +195,13 @@ def aggregate_manifests(run_root: Path) -> dict[str, Any]:
                 "run_id": manifest.run_id,
                 "task_id": manifest.task_id,
                 "status": manifest.status.value,
-                "strictly_scored": manifest.status != RunStatus.NEEDS_REVIEW,
-                "strict_success": manifest.status == RunStatus.PASSED,
+                "contaminated": is_contaminated(manifest),
+                "strictly_scored": (
+                    manifest.status != RunStatus.NEEDS_REVIEW and not is_contaminated(manifest)
+                ),
+                "strict_success": (
+                    manifest.status == RunStatus.PASSED and not is_contaminated(manifest)
+                ),
                 "duration_seconds": manifest.duration_seconds,
                 "model": (
                     manifest.token_usage.model
@@ -237,6 +256,7 @@ def report_markdown(report: dict[str, Any]) -> str:
         f"- Strict successes: {report['strict_successes']}",
         f"- Strict success rate: {rate_text}",
         f"- Needs manual review: {report['needs_manual_review']}",
+        f"- Contaminated runs (excluded from the rate): {report['contaminated_runs']}",
         "",
         "## Token usage and cost",
         "",
@@ -300,9 +320,12 @@ def report_markdown(report: dict[str, Any]) -> str:
     )
     for run in report["runs"]:
         token_text = f"{run['total_tokens']:,}" if run["total_tokens"] is not None else "—"
+        success_text = "contaminated" if run["contaminated"] else (
+            "yes" if run["strict_success"] else "no"
+        )
         lines.append(
             f"| {run['task_id']} | {run['status']} | {run['model'] or '—'} | "
             f"{token_text} | {_run_cost_text(run)} | "
-            f"{'yes' if run['strict_success'] else 'no'} | {run['duration_seconds']:.3f} |"
+            f"{success_text} | {run['duration_seconds']:.3f} |"
         )
     return "\n".join(lines) + "\n"
